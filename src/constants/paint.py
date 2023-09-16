@@ -1,12 +1,36 @@
+from dataclasses import dataclass
 from decimal import Decimal
+from enum import Enum, auto
 from typing import NamedTuple
 
 
-class PaintCoefficients(NamedTuple):
-    color_name: str
+class PaintCondition(Enum):
+    NEW = auto()
+    AVERAGE = auto()
+    AGED = auto()
+
+
+@dataclass
+class SolarAbsorptanceCoefficients:
     new: Decimal
     average: Decimal
     aged: Decimal
+
+    def get_absorption_for_condition(self, condition: PaintCondition) -> Decimal:
+        match condition:
+            case PaintCondition.NEW:
+                return self.new
+            case PaintCondition.AVERAGE:
+                return self.average
+            case PaintCondition.AGED:
+                return self.aged
+
+
+@dataclass
+class Paint:
+    color_name: str
+    solar_absorption: SolarAbsorptanceCoefficients
+
 
 
 ALL_COLORS = [
