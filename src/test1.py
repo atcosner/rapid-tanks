@@ -1,7 +1,5 @@
-import pandas as pd
+from components.site import Site
+from components.tank import Tank
 
-cities = ['Birmingham, AL', 'Huntsville, AL', 'Mobile, AL']
-symbols = ['T~AN', 'T~AX', 'V', 'I', 'P~A']
-
-index = pd.MultiIndex.from_product([cities, symbols], names=['cities', 'symbols'])
-print(index)
+test_site = Site('test1')
+test_tank = test_site.add_vertical_tank('Tank 1')

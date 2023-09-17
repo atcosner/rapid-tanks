@@ -1,12 +1,15 @@
+from decimal import Decimal
 from enum import Enum, auto
 
+from ..constants.paint import ALL_COLORS, PaintColor, PaintCondition
 
-class TankOrientation(Enum):
+
+class Orientation(Enum):
     VERTICAL = auto()
     HORIZONTAL = auto()
 
 
-class TankRoof(Enum):
+class RoofType(Enum):
     DOME = auto()
     CONE = auto()
 
@@ -19,10 +22,17 @@ class Tank:
     cleanings during the year this class also needs to handle that.
     """
 
-    def __init__(self, orientation: TankOrientation) -> None:
+    def __init__(self, name: str, orientation: Orientation) -> None:
         self._orientation = orientation
 
-        self._shell_paint: | None = None
-        self._roof_paint: | None = None
+        self.name: str = name
+        self.shell_solar_absorption: Decimal | None = None
+        self.roof_solar_absorption: Decimal | None = None
 
-    def set_shell_color(self, paint_):
+    def set_shell_color(self, color: PaintColor, condition: PaintCondition) -> None:
+        paint_coefficients = ALL_COLORS[color]
+        self.shell_solar_absorption = paint_coefficients.get_absorption_for_condition(condition)
+
+    def set_roof_color(self, color: PaintColor, condition: PaintCondition) -> None:
+        paint_coefficients = ALL_COLORS[color]
+        self.roof_solar_absorption = paint_coefficients.get_absorption_for_condition(condition)
