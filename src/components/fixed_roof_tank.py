@@ -3,6 +3,7 @@ from decimal import Decimal
 from enum import Enum, auto
 from pint import Quantity
 
+from src.components.mixture import Mixture
 from src.constants.paint import ALL_COLORS, PaintColor, PaintCondition
 
 
@@ -25,6 +26,8 @@ class FixedRoofTank:
         self.diameter: Quantity | None = None
         self.height: Quantity | None = None
 
+        self.mixture: Mixture | None = None
+
         self.shell_solar_absorption: Decimal | None = None
         self.roof_solar_absorption: Decimal | None = None
 
@@ -34,6 +37,8 @@ class FixedRoofTank:
     def set_roof_color(self, color: PaintColor, condition: PaintCondition) -> None:
         self.roof_solar_absorption = ALL_COLORS[color].get_absorption_for_condition(condition)
 
+    def add_mixture(self, mixture: Mixture) -> None:
+        self.mixture = mixture
 
 class VerticalFixedRoofTank(FixedRoofTank):
     def __init__(self, name: str) -> None:
