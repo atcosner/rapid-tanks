@@ -4,9 +4,15 @@ from pint import Quantity
 
 
 @dataclass
-class OrganicLiquid:
-    molecular_weight: Decimal
-    vapor_constant_a: Decimal
+class Material:
+    name: str
+    cas_number: str | None
+
+
+@dataclass
+class OrganicLiquid(Material):
+    molecular_weight: Quantity
+    vapor_constant_a: Quantity
     vapor_constant_b: Quantity
     vapor_constant_c: Quantity
     min_valid_temperature: Quantity

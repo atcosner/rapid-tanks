@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 
 
-class PaintColor(Enum):
+class PaintColor(StrEnum):
     WHITE = 'White'
     ALUMINUM_SPECULAR = 'Aluminum - Specular'
     ALUMINUM_DIFFUSE = 'Aluminum - Diffuse'

@@ -1,6 +1,6 @@
 from datetime import date
 
-from .tank import Tank, Orientation
+from .fixed_roof_tank import FixedRoofTank, VerticalFixedRoofTank, HorizontalFixedRoofTank
 
 
 class Site:
@@ -16,17 +16,15 @@ class Site:
         self.site_name: str = name
 
         self._operational_period: tuple[date, date] | None = None
-        self._tanks: list[Tank] = []
+        self._tanks: dict[str, HorizontalFixedRoofTank | VerticalFixedRoofTank] = {}
 
     def set_operational_period(self, start_date: date, end_date: date) -> None:
         self._operational_period = start_date,end_date
 
-    def add_horizontal_tank(self, name: str) -> Tank:
-        tank = Tank(name=name, orientation=Orientation.HORIZONTAL)
-        self._tanks.append(tank)
-        return tank
+    def add_horizontal_tank(self, name: str) -> HorizontalFixedRoofTank:
+        self._tanks[name] = HorizontalFixedRoofTank(name)
+        return self._tanks[name]
 
-    def add_vertical_tank(self, name: str) -> Tank:
-        tank = Tank(name=name, orientation=Orientation.VERTICAL)
-        self._tanks.append(tank)
-        return tank
+    def add_vertical_tank(self, name: str) -> VerticalFixedRoofTank:
+        self._tanks[name] = VerticalFixedRoofTank(name)
+        return self._tanks[name]
