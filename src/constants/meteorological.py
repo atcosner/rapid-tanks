@@ -3,14 +3,16 @@ This file will load the meteorological data that we save with the program. This 
 that is shipped with the program as well as custom location data that the client has input into the program.
 """
 
-from enum import StrEnum
+from dataclasses import dataclass
+from pint import Quantity
 
 
-class Variables(StrEnum):
-    AVERAGE_DAILY_MAX_TEMP = 'T~AX'
-    AVERAGE_DAILY_MIN_TEMP = 'T~AN'
-    SOLAR_INSOLATION = 'I'
-    ATMOSPHERIC_PRESSURE = 'P~A'
+@dataclass
+class MeteorologicalData:
+    average_daily_max_temp: Quantity
+    average_daily_min_temp: Quantity
+    solar_insolation: Quantity
+    atmospheric_pressure: Quantity
 
 
 class MeteorologicalLoader:

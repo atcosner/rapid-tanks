@@ -40,6 +40,7 @@ class FixedRoofTank:
     def add_mixture(self, mixture: Mixture) -> None:
         self.mixture = mixture
 
+
 class VerticalFixedRoofTank(FixedRoofTank):
     def __init__(self, name: str) -> None:
         super().__init__(name)

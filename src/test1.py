@@ -5,6 +5,7 @@ from pint import UnitRegistry, Quantity
 from components.mixture import Mixture
 from components.site import Site
 from constants.material import OrganicLiquid
+from constants.meteorological import MeteorologicalData
 from constants.paint import PaintColor, PaintCondition
 
 logging.basicConfig(level=logging.INFO)
@@ -12,6 +13,16 @@ logging.basicConfig(level=logging.INFO)
 ureg = UnitRegistry()
 
 test_site = Site('test1')
+
+# Setup the meteorological data
+weather_data = MeteorologicalData(
+    average_daily_max_temp=Quantity('63.5', 'degF'),
+    average_daily_min_temp=Quantity('37.9', 'degF'),
+    solar_insolation=Quantity('1491', 'dimensionless'),
+    atmospheric_pressure=Quantity('12.08', 'lb/inch**2'),
+)
+test_site.set_meteorological_data(weather_data)
+
 test_tank = test_site.add_vertical_tank('Tank 1')
 
 # Setup dimensions on the tank
@@ -60,6 +71,7 @@ mixture.add_material(toluene, percent=Decimal(0.0814))
 mixture.add_material(cyclohexane, percent=Decimal(0.0318))
 if not mixture.check():
     raise Exception('Mixture did not equal 100%')
-
 test_tank.add_mixture(mixture)
 
+# Calculate site emissions
+test_site.calculate_emissions()
