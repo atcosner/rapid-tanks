@@ -2,17 +2,19 @@ import logging
 from decimal import Decimal
 from pint import UnitRegistry, Quantity
 
-from components.mixture import Mixture
-from components.site import Site
-from constants.material import OrganicLiquid
-from constants.meteorological import MeteorologicalData
-from constants.paint import PaintColor, PaintCondition
+from src.calculations.fixed_roof import FixedRoofLosses
+from src.components.mixture import Mixture
+from src.components.site import Site
+from src.components.fixed_roof_tank import VerticalRoofType
+from src.constants.material import OrganicLiquid
+from src.constants.meteorological import MeteorologicalData
+from src.constants.paint import PaintColor, PaintCondition
 
 logging.basicConfig(level=logging.INFO)
 
 ureg = UnitRegistry()
 
-test_site = Site('test1')
+test_site = Site('test1', ureg)
 
 # Setup the meteorological data
 weather_data = MeteorologicalData(
@@ -23,14 +25,14 @@ weather_data = MeteorologicalData(
 )
 test_site.set_meteorological_data(weather_data)
 
-test_tank = test_site.add_vertical_tank('Tank 1')
-
-# Setup dimensions on the tank
+test_tank = test_site.add_fixed_roof_tank('Tank 1')
 test_tank.set_dimensions(height=12 * ureg.foot, diameter=6 * ureg.foot)
+test_tank.set_roof_type(VerticalRoofType.CONE)
+test_tank.set_roof_color(color=PaintColor.WHITE, condition=PaintCondition.AVERAGE)
+test_tank.set_roof_color(color=PaintColor.WHITE, condition=PaintCondition.AVERAGE)
 
-# Set the colors
-test_tank.set_roof_color(color=PaintColor.WHITE, condition=PaintCondition.AVERAGE)
-test_tank.set_roof_color(color=PaintColor.WHITE, condition=PaintCondition.AVERAGE)
+test_tank.set_liquid_height(8 * ureg.foot)
+test_tank.set_throughput((8450 * ureg.gallons) / ureg.year)
 
 # Create the materials we need
 benzene = OrganicLiquid(
@@ -74,4 +76,5 @@ if not mixture.check():
 test_tank.add_mixture(mixture)
 
 # Calculate site emissions
-test_site.calculate_emissions()
+calculator = FixedRoofLosses(test_site)
+calculator.calculate_total_losses(test_tank)
