@@ -1,7 +1,9 @@
 import math
+from decimal import Decimal
 from enum import Enum, auto
 from pint import Quantity
 
+from src import unit_registry
 from src.components.tank import Tank
 from src.util.errors import MissingData
 
@@ -52,7 +54,7 @@ class VerticalFixedRoofTank(FixedRoofTank):
         if self.roof_type is VerticalRoofType.CONE:
             self.logger.info('Calculating vapor space outage for a cone roof')
 
-            roof_slope = (0.0625 * self.unit_registry.foot) / self.unit_registry.foot
+            roof_slope = (Decimal(0.0625) * unit_registry.foot) / unit_registry.foot
             roof_height = roof_slope * (self.diameter / 2)
             roof_outage = roof_height / 3
         elif self.roof_type is VerticalRoofType.DOME:

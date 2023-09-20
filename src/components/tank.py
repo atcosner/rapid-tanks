@@ -21,16 +21,11 @@ class Tank:
         self.name: str = name
         self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
-        self.unit_registry: UnitRegistry | None = None
-
         self.mixture: Mixture | None = None
         self.throughput: Quantity | None = None
         self.shell_solar_absorption: Decimal | None = None
         self.roof_solar_absorption: Decimal | None = None
         self.operational_period: tuple[date, date] | None = None
-
-    def set_unit_registry(self, registry: UnitRegistry) -> None:
-        self.unit_registry = registry
 
     def set_shell_color(self, color: PaintColor, condition: PaintCondition) -> None:
         self.shell_solar_absorption = ALL_COLORS[color].get_absorption_for_condition(condition)

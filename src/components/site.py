@@ -19,23 +19,20 @@ class Site:
     a custom location.
     """
 
-    def __init__(self, name: str, unit_registry: UnitRegistry) -> None:
+    def __init__(self, name: str) -> None:
         self.name: str = name
         self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
-        self._unit_registry: UnitRegistry | None = unit_registry
-
-        self._meteorological_data: MeteorologicalData | None = None
-        self._operational_period: tuple[date, date] | None = None
-        self._tanks: dict[str, Tank] = {}
+        self.meteorological_data: MeteorologicalData | None = None
+        self.operational_period: tuple[date, date] | None = None
+        self.tanks: dict[str, Tank] = {}
 
     def set_operational_period(self, start_date: date, end_date: date) -> None:
-        self._operational_period = start_date, end_date
+        self.operational_period = start_date, end_date
 
     def set_meteorological_data(self, data: MeteorologicalData) -> None:
-        self._meteorological_data = data
+        self.meteorological_data = data
 
     def add_fixed_roof_tank(self, name: str, vertical: bool = True) -> VerticalFixedRoofTank | HorizontalFixedRoofTank:
-        self._tanks[name] = VerticalFixedRoofTank(name) if vertical else HorizontalFixedRoofTank(name)
-        self._tanks[name].set_unit_registry(self._unit_registry)
-        return self._tanks[name]
+        self.tanks[name] = VerticalFixedRoofTank(name) if vertical else HorizontalFixedRoofTank(name)
+        return self.tanks[name]
