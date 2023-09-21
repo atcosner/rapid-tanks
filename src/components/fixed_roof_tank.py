@@ -32,6 +32,9 @@ class FixedRoofTank(Tank):
     def set_liquid_height(self, height: Quantity) -> None:
         self.liquid_height = height
 
+    def calculate_vapor_space_outage(self) -> Quantity:
+        raise NotImplementedError()
+
 
 class VerticalFixedRoofTank(FixedRoofTank):
     def __init__(self, name: str) -> None:
@@ -48,13 +51,13 @@ class VerticalFixedRoofTank(FixedRoofTank):
 
     def calculate_vapor_space_outage(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-16
-        # H_VO= H_S − H_L+ H_RO
+        # H_VO = H_S − H_L+ H_RO
 
         # Calculate the roof outage based on the roof type
         if self.roof_type is VerticalRoofType.CONE:
             self.logger.info('Calculating vapor space outage for a cone roof')
 
-            roof_slope = (Decimal(0.0625) * unit_registry.foot) / unit_registry.foot
+            roof_slope = (Decimal('0.0625') * unit_registry.foot) / unit_registry.foot
             roof_height = roof_slope * (self.diameter / 2)
             roof_outage = roof_height / 3
         elif self.roof_type is VerticalRoofType.DOME:
@@ -83,3 +86,11 @@ class HorizontalFixedRoofTank(FixedRoofTank):
 
         self.height = (math.pi / 4) * diameter.to('feet')
         self.diameter = math.sqrt((diameter.to('feet') * length.to('feet')) / (math.pi / 4))
+
+    def calculate_vapor_space_outage(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-16
+        # H_VO = H_E / 2
+        vapor_space_outage = self.height / 2
+
+        self.logger.info(f'Vapor space outage: {vapor_space_outage}')
+        return vapor_space_outage

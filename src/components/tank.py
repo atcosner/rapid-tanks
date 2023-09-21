@@ -1,7 +1,8 @@
 import logging
 from datetime import date
 from decimal import Decimal
-from pint import Quantity, UnitRegistry
+from enum import Enum, auto
+from pint import Quantity
 
 from src.components.mixture import Mixture
 from src.constants.paint import ALL_COLORS, PaintColor, PaintCondition
@@ -11,11 +12,17 @@ from src.util.logging import NamedLoggerAdapter
 logger = logging.getLogger(__name__)
 
 
+class Insulation(Enum):
+    NONE = auto()
+    PARTIAL = auto()  # TODO: Per AP 42 Chapter 7, this means the shell is insulated. Can it ever be only the roof?
+    FULL = auto()
+
+
 class Tank:
     """
     This is the base class for all tanks.
 
-    All components of a tank that are similar between the roof types should live in here.
+    All components of a tank that are similar between the both fixed and floating roof tanks should live here.
     """
     def __init__(self, name: str) -> None:
         self.name: str = name
@@ -25,6 +32,8 @@ class Tank:
         self.throughput: Quantity | None = None
         self.shell_solar_absorption: Decimal | None = None
         self.roof_solar_absorption: Decimal | None = None
+        self.insulation: Insulation = Insulation.NONE  # Assume no insulation
+
         self.operational_period: tuple[date, date] | None = None
 
     def set_shell_color(self, color: PaintColor, condition: PaintCondition) -> None:
@@ -42,7 +51,5 @@ class Tank:
     def set_throughput(self, throughput: Quantity) -> None:
         self.throughput = throughput
 
-    def check_setup(self) -> None:
-        """Check if we have the required components to calculate emissions"""
-        if self.mixture is None:
-            raise MissingData(f'Tank "{self.name}" did not have a mixture set!')
+    def get_average_solar_absorption(self) -> Decimal:
+        return (self.roof_solar_absorption + self.shell_solar_absorption) / 2
