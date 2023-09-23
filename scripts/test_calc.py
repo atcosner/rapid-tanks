@@ -41,7 +41,7 @@ test_tank.set_throughput((8450 * registry.gallons) / registry.year)
 benzene = OrganicLiquid(
     name='Benzene',
     cas_number='00071-43-2',
-    molecular_weight=registry.Quantity(Decimal('78.11'), 'dimensionless'),
+    molecular_weight=registry.Quantity(Decimal('78.11'), 'lb/mole'),
     vapor_constant_a=registry.Quantity(Decimal('6.906'), 'dimensionless'),
     vapor_constant_b=registry.Quantity(Decimal('1211.0'), 'degC'),
     vapor_constant_c=registry.Quantity(Decimal('220.79'), 'degC'),
@@ -61,7 +61,7 @@ toluene = OrganicLiquid(
 cyclohexane = OrganicLiquid(
     name='Cyclohexane',
     cas_number='00110-82-7',
-    molecular_weight=registry.Quantity(Decimal('84.16'), 'dimensionless'),
+    molecular_weight=registry.Quantity(Decimal('84.16'), 'lb/mole'),
     vapor_constant_a=registry.Quantity(Decimal('6.845'), 'dimensionless'),
     vapor_constant_b=registry.Quantity(Decimal('1203.5'), 'degC'),
     vapor_constant_c=registry.Quantity(Decimal('222.86'), 'degC'),
@@ -71,9 +71,9 @@ cyclohexane = OrganicLiquid(
 
 # Add the materials into a mixture
 mixture = Mixture('Sample 1')
-mixture.add_material(benzene, percent=Decimal('0.8868'))
-mixture.add_material(toluene, percent=Decimal('0.0814'))
-mixture.add_material(cyclohexane, percent=Decimal('0.0318'))
+mixture.add_material(benzene, percent=Decimal('0.887'))
+mixture.add_material(toluene, percent=Decimal('0.081'))
+mixture.add_material(cyclohexane, percent=Decimal('0.032'))
 if not mixture.check():
     raise Exception('Mixture did not equal 100%')
 test_tank.add_mixture(mixture)

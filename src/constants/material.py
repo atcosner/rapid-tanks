@@ -28,8 +28,18 @@ class OrganicLiquid(Material):
         # AP 42 Chapter 7 Equation 1-26
         # log(P_VA) = A - (B / (T_LA + C))
 
-        term1 = self.vapor_constant_a.magnitude - (self.vapor_constant_b.to('degC').magnitude / (average_liquid_surface_temperature.to('degC').magnitude + self.vapor_constant_c.to('degC').magnitude))
-        return unit_registry.Quantity(10**term1, 'mm Hg').to('psia')
+        # Convert each quantity to the correct units
+        a_degC = self.vapor_constant_a.magnitude
+        b_degC = self.vapor_constant_b.to('degC').magnitude
+        tla_degC = average_liquid_surface_temperature.to('degC').magnitude
+        c_degC = self.vapor_constant_c.to('degC').magnitude
+
+        # log(P_VA) = term1
+        term1 = a_degC - (b_degC / (tla_degC + c_degC))
+        p_va = unit_registry.Quantity(10**term1, 'mm Hg')
+
+        # Result expected in psia
+        return p_va.to('psia')
 
 
 @dataclass

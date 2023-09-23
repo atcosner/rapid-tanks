@@ -5,6 +5,9 @@ import pint
 # - We want to use decimals everywhere and this will make it loud if a Python float is used somewhere
 decimal.getcontext().traps[decimal.FloatOperation] = True
 
+# Use only 12 decimals of precision
+decimal.getcontext().prec = 12
+
 # Create the unit registry for everything in this package
 unit_registry = pint.UnitRegistry(non_int_type=decimal.Decimal)
 
