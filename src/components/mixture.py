@@ -44,11 +44,11 @@ class Mixture:
             # Calculate mole fraction
             moles = (100 * part.weight_fraction * unit_registry.lb) / part.material.molecular_weight
             part.mole_fraction = moles / total_moles
-            logger.info(f'{part.material.name} | Mole Fraction: {part.mole_fraction}')
+            logger.debug(f'{part.material.name} | Mole Fraction: {part.mole_fraction}')
 
             # Calculate the pure vapor pressure of the part
             part.vapor_pressure[temperature] = part.material.calculate_vapor_pressure(temperature)
-            logger.info(f'{part.material.name} | Vapor Pressure: {part.vapor_pressure[temperature]} @ {temperature}')
+            logger.debug(f'{part.material.name} | Vapor Pressure: {part.vapor_pressure[temperature]} @ {temperature}')
 
             # Calculate the partial pressure
             part.partial_pressure = part.mole_fraction * part.vapor_pressure[temperature]
@@ -67,10 +67,10 @@ class Mixture:
         for part in self.parts:
             # Vapor percent
             vapor_percent = part.partial_pressure / mixture_vapor_pressure
-            logger.info(f'{part.material.name} | Vapor Percent: {vapor_percent} @ {temperature}')
+            logger.debug(f'{part.material.name} | Vapor Percent: {vapor_percent} @ {temperature}')
 
             part_molecular_weight = vapor_percent * part.material.molecular_weight
-            logger.info(f'{part.material.name} | Partial vapor molecular weight: {part_molecular_weight}')
+            logger.debug(f'{part.material.name} | Partial vapor molecular weight: {part_molecular_weight}')
 
             total_vapor_molecular_weight += part_molecular_weight
 

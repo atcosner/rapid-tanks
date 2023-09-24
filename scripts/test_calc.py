@@ -24,7 +24,7 @@ weather_data = MeteorologicalData(
     average_daily_max_temp=registry.Quantity(Decimal('63.5'), 'degF'),
     average_daily_min_temp=registry.Quantity(Decimal('37.9'), 'degF'),
     solar_insolation=registry.Quantity(Decimal('1491'), 'dimensionless'),  # The unit is actually: btu/(ft^2 day)
-    atmospheric_pressure=registry.Quantity(Decimal('12.08'), 'lb/inch**2'),
+    atmospheric_pressure=registry.Quantity(Decimal('12.08'), 'psia'),
 )
 test_site.set_meteorological_data(weather_data)
 
