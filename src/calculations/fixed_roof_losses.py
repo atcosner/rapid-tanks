@@ -6,6 +6,7 @@ from src import unit_registry
 from src.components.fixed_roof_tank import FixedRoofTank
 from src.components.site import Site
 from src.components.tank import Insulation
+from src.util.logging import log_block
 from src.util.errors import CalculationError
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,9 @@ class FixedRoofLosses:
         self.vapor_space_volume: Quantity | None = None
         self.stock_vapor_density: Quantity | None = None
         self.vapor_space_expansion_factor: Quantity | None = None
+
+        # Working loss components
+        self.net_working_loss_throughput: Quantity | None = None
 
         # Store intermediate calculations here
         self.vapor_space_outage: Quantity | None = None
@@ -299,20 +303,24 @@ class FixedRoofLosses:
         days = 365  # TODO: Actually do this
 
         # Calculate the vapor space volume
-        self.vapor_space_volume = self._calculate_vapor_space_volume()
-        logger.info(f'Vapor space volume: {self.vapor_space_volume}')
+        with log_block(logger, 'Vapor Space Volume'):
+            self.vapor_space_volume = self._calculate_vapor_space_volume()
+            logger.info(f'Vapor space volume: {self.vapor_space_volume}')
 
         # Calculate the stock vapor density
-        self.stock_vapor_density = self._calculate_stock_density()
-        logger.info(f'Vapor stock density: {self.stock_vapor_density}')
+        with log_block(logger, 'Vapor Stock Density'):
+            self.stock_vapor_density = self._calculate_stock_density()
+            logger.info(f'Vapor stock density: {self.stock_vapor_density}')
 
         # Calculate the vapor space expansion factor
-        self.vapor_space_expansion_factor = self._calculate_vapor_space_expansion_factor()
-        logger.info(f'Vapor space expansion factor: {self.vapor_space_expansion_factor}')
+        with log_block(logger, 'Vapor Space Expansion Factor'):
+            self.vapor_space_expansion_factor = self._calculate_vapor_space_expansion_factor()
+            logger.info(f'Vapor space expansion factor: {self.vapor_space_expansion_factor}')
 
         # Calculate the vented vapor saturation factor
-        self.vented_vapor_saturation_factor = self._calculate_vented_vapor_saturation_factor()
-        logger.info(f'Vented vapor saturation factor: {self.vented_vapor_saturation_factor}')
+        with log_block(logger, 'Vented Vapor Saturation Factor'):
+            self.vented_vapor_saturation_factor = self._calculate_vented_vapor_saturation_factor()
+            logger.info(f'Vented vapor saturation factor: {self.vented_vapor_saturation_factor}')
 
         # Finish the calculation
         # L~S = 365 * V~V * W~V * K~E * K~S
@@ -324,9 +332,39 @@ class FixedRoofLosses:
 
         return l_s * unit_registry.lb / unit_registry.year
 
+    def _calculate_net_working_loss_throughput(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-38
+
+        # TODO: Handle if we know the net increase in liquid level
+
+        # Use Equation 1-39 to estimate this from tank throughput
+        # TODO: This needs to be aware of the date range we are calculating emissions for
+
+
+    def _calculate_working_losses(self) -> Quantity:
+        logger.info(f'Calculating working losses for "{self.tank.name}" at "{self.site.name}"')
+
+        # AP 42 Chapter 7 Equation 1-35
+        # L_W = V_Q ∗ K_N ∗ K_P ∗ W_V ∗ K_B
+
+        # Calculate the net working loss throughput
+        with log_block(logger, 'Net Working Loss Throughput'):
+            self.net_working_loss_throughput = self._calculate_net_working_loss_throughput()
+            logger.info(f'Net Working Loss Throughput: {self.net_working_loss_throughput}')
+
+
     def calculate_total_losses(self):
         logger.info(f'Calculating total losses for "{self.tank.name}" at "{self.site.name}"')
 
-        # Start with standing losses
+        # Calculate standing losses
         standing_losses = self._calculate_standing_losses()
         logger.info(f'Standing losses: {standing_losses}')
+
+        # Calculate working losses
+        working_losses = self._calculate_working_losses()
+        logger.info(f'Working losses: {working_losses}')
+
+        # AP 42 Chapter 7 Equation 1-1
+        # L_T = L_S + L_W
+        total_losses = standing_losses + working_losses
+        logger.info(f'Total losses: {total_losses}')
