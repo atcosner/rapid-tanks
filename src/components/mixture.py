@@ -16,7 +16,9 @@ class MixtureComponent:
 
     # These can be calculated once we have all materials added to the mixture
     mole_fraction: Decimal | None = None
+    weight_fraction: Decimal | None = None
     partial_pressure: Quantity | None = None
+    vapor_molecular_weight: Quantity | None = None
     vapor_pressure: dict = field(default_factory=dict)
 
 
@@ -69,10 +71,14 @@ class Mixture:
             vapor_percent = part.partial_pressure / mixture_vapor_pressure
             logger.debug(f'{part.material.name} | Vapor Percent: {vapor_percent} @ {temperature}')
 
-            part_molecular_weight = vapor_percent * part.material.molecular_weight
-            logger.debug(f'{part.material.name} | Partial vapor molecular weight: {part_molecular_weight}')
+            part.vapor_molecular_weight = vapor_percent * part.material.molecular_weight
+            logger.debug(f'{part.material.name} | Partial vapor molecular weight: {part.vapor_molecular_weight}')
 
-            total_vapor_molecular_weight += part_molecular_weight
+            total_vapor_molecular_weight += part.vapor_molecular_weight
+
+        # Now that we have the total vapor molecular weight, calculate the weight fraction
+        for part in self.parts:
+            part.weight_fraction = part.vapor_molecular_weight / total_vapor_molecular_weight
 
         return total_vapor_molecular_weight
 

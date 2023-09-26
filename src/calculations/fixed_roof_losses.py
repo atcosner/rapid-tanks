@@ -17,6 +17,8 @@ class FixedRoofLosses:
         self.site = site
         self.tank = tank
 
+        self.total_losses: Quantity | None = None
+
         # Standing loss components
         self.vapor_space_volume: Quantity | None = None
         self.stock_vapor_density: Quantity | None = None
@@ -24,6 +26,7 @@ class FixedRoofLosses:
 
         # Working loss components
         self.net_working_loss_throughput: Quantity | None = None
+        self.working_loss_turnover_factor: Quantity | None = None
 
         # Store intermediate calculations here
         self.vapor_space_outage: Quantity | None = None
@@ -179,7 +182,7 @@ class FixedRoofLosses:
         # W_V = (M_V * P_VA) / (R * T_V)
         term1 = self.mixture_molecular_weight.magnitude * self.mixture_vapor_pressure.magnitude
         term2 = Decimal('10.731') * self.average_vapor_temperature.magnitude
-        return term1 / term2
+        return unit_registry.Quantity(term1 / term2, 'dimensionless')
 
     def _calculate_average_daily_vapor_temperature_range(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-6, 1-7, and 1-7
@@ -326,7 +329,7 @@ class FixedRoofLosses:
         # L~S = 365 * V~V * W~V * K~E * K~S
         l_s = (days
                * self.vapor_space_volume.magnitude
-               * self.stock_vapor_density
+               * self.stock_vapor_density.magnitude
                * self.vapor_space_expansion_factor.magnitude
                * self.vented_vapor_saturation_factor.magnitude)
 
@@ -337,9 +340,30 @@ class FixedRoofLosses:
 
         # TODO: Handle if we know the net increase in liquid level
 
-        # Use Equation 1-39 to estimate this from tank throughput
+        # Use Equation 1-39 to estimate this from tank throughput if we dont
         # TODO: This needs to be aware of the date range we are calculating emissions for
+        conversion_factor = Decimal('5.614') * (unit_registry.ft**3) / unit_registry.oil_bbl
+        return conversion_factor * self.tank.throughput.to('oil_bbl/year')
 
+    def _calculate_working_loss_turnover_factor(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-38
+
+        # TODO: Handle > 36 turnovers in the date range
+        # For turnovers <= 36, this is 1
+        return unit_registry.Quantity(Decimal(1), 'dimensionless')
+
+    def _calculate_working_loss_product_factor(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-35
+        # This quantity lives with the material so just use one of them
+        return self.tank.mixture.parts[0].material.working_loss_product_factor
+
+    def _calculate_vent_setting_correction_factor(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-40 and 1-41
+
+        # TODO: Calculate this using the equation for non-standard breather vent settings
+
+        # If the breather vent is set between +- 0.03 psig, K_B = 1
+        return unit_registry.Quantity(Decimal(1), 'dimensionless')
 
     def _calculate_working_losses(self) -> Quantity:
         logger.info(f'Calculating working losses for "{self.tank.name}" at "{self.site.name}"')
@@ -347,13 +371,37 @@ class FixedRoofLosses:
         # AP 42 Chapter 7 Equation 1-35
         # L_W = V_Q ∗ K_N ∗ K_P ∗ W_V ∗ K_B
 
-        # Calculate the net working loss throughput
+        # Calculate the net working loss throughput (V_Q)
         with log_block(logger, 'Net Working Loss Throughput'):
             self.net_working_loss_throughput = self._calculate_net_working_loss_throughput()
             logger.info(f'Net Working Loss Throughput: {self.net_working_loss_throughput}')
 
+        # Calculate the working loss turnover factor (K_N)
+        with log_block(logger, 'Working Loss Turnover Factor'):
+            self.working_loss_turnover_factor = self._calculate_working_loss_turnover_factor()
+            logger.info(f'Working loss turnover factor: {self.working_loss_turnover_factor}')
 
-    def calculate_total_losses(self):
+        # Calculate the working loss product factor (K_P)
+        with log_block(logger, 'Working Loss Product Factor'):
+            self.working_loss_product_factor = self._calculate_working_loss_product_factor()
+            logger.info(f'Working loss product factor: {self.working_loss_product_factor}')
+
+        # Calculate the vent setting correction factor (K_B)
+        with log_block(logger, 'Vent Setting Correction Factor'):
+            self.vent_setting_correction_factor = self._calculate_vent_setting_correction_factor()
+            logger.info(f'Vent setting correction factor: {self.vent_setting_correction_factor}')
+
+        # Finish the calculation
+        # L_W = V_Q ∗ K_N ∗ K_P ∗ W_V ∗ K_B
+        l_w = (self.net_working_loss_throughput.magnitude
+               * self.working_loss_turnover_factor.magnitude
+               * self.working_loss_product_factor.magnitude
+               * self.stock_vapor_density.magnitude
+               * self.vent_setting_correction_factor.magnitude)
+
+        return l_w * unit_registry.lb / unit_registry.year
+
+    def calculate_total_losses(self) -> dict[str, Quantity]:
         logger.info(f'Calculating total losses for "{self.tank.name}" at "{self.site.name}"')
 
         # Calculate standing losses
@@ -366,5 +414,8 @@ class FixedRoofLosses:
 
         # AP 42 Chapter 7 Equation 1-1
         # L_T = L_S + L_W
-        total_losses = standing_losses + working_losses
-        logger.info(f'Total losses: {total_losses}')
+        self.total_losses = standing_losses + working_losses
+        logger.info(f'Total losses: {self.total_losses}')
+
+        # Calculate the emissions per part of the mixture
+        return {part.material.name: part.weight_fraction * self.total_losses for part in self.tank.mixture.parts}

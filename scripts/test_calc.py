@@ -16,6 +16,8 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 
+logger = logging.getLogger(__name__)
+
 
 test_site = Site('test1')
 
@@ -80,4 +82,6 @@ test_tank.add_mixture(mixture)
 
 # Calculate site emissions
 calculator = FixedRoofLosses(test_site, test_tank)
-calculator.calculate_total_losses()
+losses_per_material = calculator.calculate_total_losses()
+for material_name, emissions in losses_per_material.items():
+    logger.info(f'{material_name}: {emissions}')

@@ -22,7 +22,7 @@ class OrganicLiquid(Material):
     vapor_constant_c: Quantity
     min_valid_temperature: Quantity
     max_valid_temperature: Quantity
-    working_loss_product_factor: Decimal = field(default_factory=lambda: Decimal(1))
+    working_loss_product_factor: Quantity = field(default_factory=lambda: unit_registry.Quantity(Decimal(1), 'dimensionless'))
 
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
         # AP 42 Chapter 7 Equation 1-26
@@ -48,4 +48,4 @@ class PetroleumLiquid(Material):
     liquid_molecular_weight: Quantity
     vapor_constant_a: Quantity
     vapor_constant_b: Quantity
-    working_loss_product_factor: Decimal = field(default_factory=lambda: Decimal(0.75))
+    working_loss_product_factor: Decimal = field(default_factory=lambda: unit_registry.Quantity(Decimal('0.75'), 'dimensionless'))
