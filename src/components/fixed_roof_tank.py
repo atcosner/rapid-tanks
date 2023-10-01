@@ -41,7 +41,7 @@ class FixedRoofTank(Tank):
         # Get the vapor space volume
         vapor_space_outage = self.calculate_vapor_space_outage()
 
-        return (Decimal('3.14') / 4 * self.diameter**2) * vapor_space_outage
+        return (Decimal('3.141592653589793') / 4 * self.diameter**2) * vapor_space_outage
 
 
 class VerticalFixedRoofTank(FixedRoofTank):

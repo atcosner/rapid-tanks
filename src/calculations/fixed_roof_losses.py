@@ -90,19 +90,19 @@ class FixedRoofLosses:
             return (term1.magnitude + term2.magnitude + term3.magnitude) * unit_registry.degR
 
         elif self.tank.insulation is Insulation.PARTIAL:
-            # Equation 1-28
-            return (Decimal('0.4') * self.average_ambient_temperature.to('degR')) \
-                   + (Decimal('0.06') * self.liquid_bulk_temperature.to('degR')) \
+            # Equation 1-29
+            return (Decimal('0.3') * self.average_ambient_temperature.to('degR')) \
+                   + (Decimal('0.7') * self.liquid_bulk_temperature.to('degR')) \
                    + (Decimal('0.005')
                       * self.tank.get_average_solar_absorption()
                       * self.site.meteorological_data.solar_insolation)
 
         elif self.tank.insulation is Insulation.FULL:
-            # Equation 1-29
+            # Assume average liquid surface temperature equal to average liquid bulk temperature
             return self.liquid_bulk_temperature.to('degR')
 
         else:
-            # What?
+            # TODO What?
             raise CalculationError(f'Unknown insulation: {self.tank.insulation}')
 
     def _calculate_average_vapor_temperature(self) -> Quantity:
@@ -149,7 +149,7 @@ class FixedRoofLosses:
             return t_b_degR
 
         else:
-            # What?
+            # TODO What?
             raise CalculationError(f'Unknown insulation: {self.tank.insulation}')
 
     def _calculate_stock_density(self) -> Quantity:
@@ -228,10 +228,11 @@ class FixedRoofLosses:
             return unit_registry.Quantity(Decimal(0), 'degR')
 
         else:
-            # What?
+            # TODO What?
             raise CalculationError(f'Unknown insulation: {self.tank.insulation}')
 
     def _average_daily_vapor_pressure_range(self) -> Quantity:
+        # TODO average daily vapor pressure range is 0 for fully insulated tanks
         # AP 42 Chapter 7 Equation 1-9
         # ∆P_V = P_VX - P_VN
 
@@ -346,7 +347,7 @@ class FixedRoofLosses:
         return conversion_factor * self.tank.throughput.to('oil_bbl/year')
 
     def _calculate_working_loss_turnover_factor(self) -> Quantity:
-        # AP 42 Chapter 7 Equation 1-38
+        # AP 42 Chapter 7 Equation 1-35
 
         # TODO: Handle > 36 turnovers in the date range
         # For turnovers <= 36, this is 1
