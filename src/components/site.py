@@ -1,6 +1,5 @@
 import logging
 from datetime import date
-from pint import UnitRegistry
 
 from src.components.fixed_roof_tank import HorizontalFixedRoofTank, VerticalFixedRoofTank
 from src.components.tank import Tank

@@ -6,7 +6,6 @@ from pint import Quantity
 
 from src.components.mixture import Mixture
 from src.constants.paint import ALL_COLORS, PaintColor, PaintCondition
-from src.util.errors import MissingData
 from src.util.logging import NamedLoggerAdapter
 
 logger = logging.getLogger(__name__)

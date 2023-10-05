@@ -1,4 +1,3 @@
-import math
 from decimal import Decimal
 from enum import Enum, auto
 from pint import Quantity
@@ -6,6 +5,7 @@ from pint import Quantity
 from src import unit_registry
 from src.components.tank import Tank
 from src.util.errors import MissingData
+from src.util.quantities import PI
 
 
 class VerticalRoofType(Enum):
@@ -41,7 +41,7 @@ class FixedRoofTank(Tank):
         # Get the vapor space volume
         vapor_space_outage = self.calculate_vapor_space_outage()
 
-        return (Decimal('3.141592653589793') / 4 * self.diameter**2) * vapor_space_outage
+        return (PI / 4 * self.diameter**2) * vapor_space_outage
 
 
 class VerticalFixedRoofTank(FixedRoofTank):
@@ -92,8 +92,15 @@ class HorizontalFixedRoofTank(FixedRoofTank):
         # We need to calculate the effective height and diameter
         # Using Equation 1-14 and 1-15
 
-        self.height = (math.pi / 4) * diameter.to('feet')
-        self.diameter = math.sqrt((diameter.to('feet') * length.to('feet')) / (math.pi / 4))
+        diameter_ft = diameter.to('feet')
+        length_ft = length.to('feet')
+
+        self.height = (PI / 4) * diameter_ft
+        self.logger.debug(f'Effective Height: {self.height}')
+
+        effective_diameter = ((diameter_ft.magnitude * length_ft.magnitude) / (PI / 4)).sqrt()
+        self.diameter = effective_diameter * unit_registry.feet
+        self.logger.debug(f'Effective Diameter: {self.diameter}')
 
     def calculate_vapor_space_outage(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-16
