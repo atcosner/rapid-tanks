@@ -1,3 +1,4 @@
+from collections import namedtuple
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pint import Quantity
@@ -23,6 +24,19 @@ class OrganicLiquid(Material):
     min_valid_temperature: Quantity
     max_valid_temperature: Quantity
     working_loss_product_factor: Quantity = field(default_factory=lambda: unit_registry.Quantity(Decimal(1), 'dimensionless'))
+
+    @classmethod
+    def from_namedtuple(cls, data: namedtuple):
+        return cls(
+            name=data.name,
+            cas_number=data.cas_number,
+            molecular_weight=unit_registry.Quantity(Decimal(data.molecular_weight), 'lb/mole'),
+            vapor_constant_a=unit_registry.Quantity(Decimal(data.antoine_a), 'dimensionless'),
+            vapor_constant_b=unit_registry.Quantity(Decimal(data.antoine_b), 'degC'),
+            vapor_constant_c=unit_registry.Quantity(Decimal(data.antoine_c), 'degC'),
+            min_valid_temperature=unit_registry.Quantity(Decimal(data.antoine_min_temp), 'degF'),
+            max_valid_temperature=unit_registry.Quantity(Decimal(data.antoine_max_temp), 'degF'),
+        )
 
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
         # AP 42 Chapter 7 Equation 1-26

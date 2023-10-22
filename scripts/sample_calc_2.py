@@ -4,9 +4,9 @@ from decimal import Decimal
 from src.calculations.fixed_roof_losses import FixedRoofLosses
 from src.components.mixture import Mixture
 from src.components.site import Site
-from src.constants.material import OrganicLiquid
 from src.constants.meteorological import MeteorologicalData
 from src.constants.paint import PaintColor, PaintCondition
+from src.data.material_library import MaterialLibrary
 
 from src import unit_registry as registry
 
@@ -37,37 +37,11 @@ test_tank.set_shell_color(color=PaintColor.WHITE, condition=PaintCondition.AVERA
 test_tank.set_liquid_height(8 * registry.foot)
 test_tank.set_throughput((8450 * registry.gallons) / registry.year)
 
-# Create the materials we need
-benzene = OrganicLiquid(
-    name='Benzene',
-    cas_number='00071-43-2',
-    molecular_weight=registry.Quantity(Decimal('78.11'), 'lb/mole'),
-    vapor_constant_a=registry.Quantity(Decimal('6.906'), 'dimensionless'),
-    vapor_constant_b=registry.Quantity(Decimal('1211.0'), 'degC'),
-    vapor_constant_c=registry.Quantity(Decimal('220.79'), 'degC'),
-    min_valid_temperature=registry.Quantity(Decimal('46'), 'degF'),
-    max_valid_temperature=registry.Quantity(Decimal('217'), 'degF'),
-)
-toluene = OrganicLiquid(
-    name='Toluene',
-    cas_number='00108-88-3',
-    molecular_weight=registry.Quantity(Decimal('92.14'), 'lb/mole'),
-    vapor_constant_a=registry.Quantity(Decimal('7.017'), 'dimensionless'),
-    vapor_constant_b=registry.Quantity(Decimal('1377.6'), 'degC'),
-    vapor_constant_c=registry.Quantity(Decimal('222.64'), 'degC'),
-    min_valid_temperature=registry.Quantity(Decimal('32'), 'degF'),
-    max_valid_temperature=registry.Quantity(Decimal('122'), 'degF'),
-)
-cyclohexane = OrganicLiquid(
-    name='Cyclohexane',
-    cas_number='00110-82-7',
-    molecular_weight=registry.Quantity(Decimal('84.16'), 'lb/mole'),
-    vapor_constant_a=registry.Quantity(Decimal('6.845'), 'dimensionless'),
-    vapor_constant_b=registry.Quantity(Decimal('1203.5'), 'degC'),
-    vapor_constant_c=registry.Quantity(Decimal('222.86'), 'degC'),
-    min_valid_temperature=registry.Quantity(Decimal('68'), 'degF'),
-    max_valid_temperature=registry.Quantity(Decimal('179'), 'degF'),
-)
+# Load the materials we need
+material_library = MaterialLibrary()
+benzene = material_library.get_material('Benzene')
+toluene = material_library.get_material('Toluene')
+cyclohexane = material_library.get_material('Cyclohexane')
 
 # Add the materials into a mixture
 mixture = Mixture('Sample 1')
