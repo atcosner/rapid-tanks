@@ -1,13 +1,14 @@
 import sqlite3
 
-from . import BaseSchemaDelta, SchemaUpdate
+from .util import BaseSchemaDelta
 
 
-@SchemaUpdate(version=1)
 class Delta0001(BaseSchemaDelta):
-    def upgrade(self, cxn: sqlite3.Cursor) -> None:
+    VERSION = 1
+
+    def upgrade(self, cursor: sqlite3.Cursor) -> None:
         # Add the version table
-        cxn.execute("""
+        cursor.execute("""
             CREATE TABLE version(
                 id INTEGER,
                 update_ts TEXT

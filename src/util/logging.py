@@ -18,3 +18,10 @@ def log_block(logger: logging.Logger, name: str):
     finally:
         logger.info('-' * LOG_WIDTH)
         logger.info('')
+
+
+def configure_root_logger() -> None:
+    logging.basicConfig(
+        format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
+        level=logging.DEBUG,
+    )
