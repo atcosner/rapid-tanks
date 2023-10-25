@@ -61,7 +61,7 @@ Chloroform
 7.083
 1,233.1
 232.20
-–73
+-73
 142
 142
 Chloroprene {2-chloro-1,3-butadiene}
@@ -215,7 +215,7 @@ Decane (-n)
 3.085
 440.6
 116.25
-–21
+-21
 99
 345
 Dibromopropane (1,2)
@@ -248,7 +248,7 @@ Dichloroethane (1,1)
 7.097
 1,229.2
 233.95
-–77
+-77
 135
 135
 Dichloroethane (1,2)
@@ -259,7 +259,7 @@ Dichloroethane (1,2)
 7.460
 1,521.8
 248.48
-–23
+-23
 211
 182
 Dichloroethylene (1,2) {1,2 dichloroethene}
@@ -281,7 +281,7 @@ Dichloroethylene (trans-1,2)
 6.965
 1,141.9
 231.90
-–36
+-36
 185
 118
 Dichlorotoluene (3,4)
@@ -303,7 +303,7 @@ Diethoxyethane (1,1)
 7.625
 1,574.0
 229.47
-–10
+-10
 216
 212
 Diethoxymethane
@@ -317,7 +317,7 @@ Diethoxymethane
 32
 167
 191
-Diethyl (n,n) aniline {N,N–diethylbenzenamine}
+Diethyl (n,n) aniline {N,N-diethylbenzenamine}
 00091-66-7
 149.23
 7.77

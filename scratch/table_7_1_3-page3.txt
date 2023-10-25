@@ -6,7 +6,7 @@ Diethyl sulfide
 7.541
 1,560.5
 246.59
-–39
+-39
 190
 197
 Diethylamine {N-ethyl ethanamine}
@@ -72,7 +72,7 @@ Dimethoxyethane (1,2)
 6.713
 1,260.5
 235.83
-–55
+-55
 199
 185
 Dimethyl formamide (n,n)
@@ -94,7 +94,7 @@ Dimethyl hydrazine (1,1)
 7.588
 1,388.5
 232.54
-–32
+-32
 68
 146
 Dimethyl phthalate
@@ -221,13 +221,14 @@ Epichlorohydrin {chloromethyl oxirane}
 Ethane
 00074-84-0
 30.07
+
 472
 6.813
 659.7
 256.431
-–215
-–100
-–127
+-215
+-100
+-127
 Ethanolamine (mono)
 00141-43-5
 61.08
@@ -258,7 +259,7 @@ Ethyl acrylate {ethyl ester 2-propenoic acid}
 7.150
 1,366.1
 220.47
-–21
+-21
 211
 211
 Ethyl alcohol {ethanol}
@@ -280,7 +281,7 @@ Ethyl chloride
 7.037
 1,052.8
 241.07
-–69
+-69
 55
 61
 Ethyl ether {diethyl ether}
@@ -291,7 +292,7 @@ Ethyl ether {diethyl ether}
 6.897
 1,062.6
 228.22
-–10
+-10
 132
 94
 Ethylamine
@@ -327,8 +328,7 @@ Ethylcyclopentane
 84
 220
 218
-Ethylene
-{ethene}
+Ethylene {ethene}
 00074-85-1
 28.05
 4.74
@@ -336,9 +336,9 @@ Ethylene
 6.748
 584.1
 254.84
-–191
-–120
-–155
+-191
+-120
+-155
 Ethyleneoxide
 00075-21-8
 44.05

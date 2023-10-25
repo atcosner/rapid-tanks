@@ -50,9 +50,9 @@ Propane
 6.858
 819.3
 248.73
-–45
+-45
 117
-–44
+-44
 Propanethiol (1)
 00107-03-9
 76.16
@@ -116,9 +116,9 @@ Propylene {propene}
 6.850
 795.8
 248.27
-–161
-–53
-–54
+-161
+-53
+-54
 Propylene glycol (1,2) {1,2 propanediol}
 00057-55-6
 76.09
@@ -138,7 +138,7 @@ Propylene oxide
 6.970
 1,065.3
 226.28
-–100
+-100
 94
 95
 Pyridine
@@ -292,7 +292,7 @@ Trifluoroethane (1,1,2-trichloro-1,2,2)
 6.880
 1,099.9
 227.50
-–13
+-13
 181
 118
 Trimethylbenzene (1,2,4)

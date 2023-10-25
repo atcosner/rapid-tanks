@@ -160,7 +160,7 @@ Isobutane {methylpropane (2)}
 6.819
 912.1
 243.34
-–121
+-121
 11
 12
 Isobutene {methylpropene (2)}
@@ -171,7 +171,7 @@ Isobutene {methylpropene (2)}
 6.522
 799.1
 226.54
-–70
+-70
 32
 20
 Isobutyl alcohol {2-methyl 1-propanol}
@@ -270,6 +270,6 @@ Methacrylonitrile {2-methyl 2-propenenitrile}
 6.999
 1,353.6
 238.03
-–48
+-48
 194
 194

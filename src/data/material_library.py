@@ -2,13 +2,13 @@ import sqlite3
 from pathlib import Path
 
 from src.constants.material import Material, OrganicLiquid
-from src.data.database import DB_FILE_PATH
+from src.data.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory
 
 
 class MaterialLibrary:
     def __init__(self, db_path: Path | None = None, autoload: bool = True):
-        self._db_path = db_path if db_path is not None else DB_FILE_PATH
+        self._db_path = db_path if db_path is not None else DEV_DB_FILE_PATH
 
         self.builtin_materials: dict[str, Material] = {}
         self.custom_materials: dict[str, Material] = {}
@@ -27,7 +27,7 @@ class MaterialLibrary:
         cursor = cxn.cursor()
 
         # Query the DB for materials to load
-        for row in cursor.execute('SELECT * FROM builtin_material_properties'):
+        for row in cursor.execute('SELECT * FROM builtin_organic_liquids'):
             self.builtin_materials[row.name] = OrganicLiquid.from_namedtuple(row)
 
         for row in cursor.execute('SELECT * FROM custom_organic_liquids'):
