@@ -9,7 +9,7 @@ class Delta0002(BaseSchemaDelta):
     def upgrade(self, cursor: sqlite3.Cursor) -> None:
         # Add the builtin materials table
         cursor.execute("""
-            CREATE TABLE builtin_organic_liquids(
+            CREATE TABLE builtin_petrochemicals(
                 id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
                 name TEXT,
                 cas_number TEXT,
@@ -21,11 +21,11 @@ class Delta0002(BaseSchemaDelta):
                 antoine_c TEXT,
                 antoine_min_temp TEXT,
                 antoine_max_temp TEXT,
-                normal_boiling_point TEXTs
+                normal_boiling_point TEXT
             );
         """)
 
         # Create the custom materials table with the same schema
-        row = cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='builtin_organic_liquids'")
-        create_sql = row.fetchone()[0].replace('builtin_organic_liquids', 'custom_organic_liquids')
+        row = cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='builtin_petrochemicals'")
+        create_sql = row.fetchone()[0].replace('builtin_petrochemicals', 'custom_petrochemicals')
         cursor.execute(create_sql)

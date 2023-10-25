@@ -200,7 +200,7 @@ class Delta0003(BaseSchemaDelta):
         # Insert each chemical into the DB
         cursor.executemany(
             """
-                INSERT INTO builtin_organic_liquids VALUES
+                INSERT INTO builtin_petrochemicals VALUES
                 (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             chemicals,

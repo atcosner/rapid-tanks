@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 
-from src.constants.material import Material, OrganicLiquid
+from src.constants.material import Material, Petrochemical, PetroleumLiquid
 from src.data.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory
 
@@ -26,12 +26,17 @@ class MaterialLibrary:
 
         cursor = cxn.cursor()
 
-        # Query the DB for materials to load
-        for row in cursor.execute('SELECT * FROM builtin_organic_liquids'):
-            self.builtin_materials[row.name] = OrganicLiquid.from_namedtuple(row)
+        # Load the organic materials
+        for row in cursor.execute('SELECT * FROM builtin_petrochemicals'):
+            self.builtin_materials[row.name] = Petrochemical.from_namedtuple(row)
+        for row in cursor.execute('SELECT * FROM custom_petrochemicals'):
+            self.custom_materials[row.name] = Petrochemical.from_namedtuple(row)
 
-        for row in cursor.execute('SELECT * FROM custom_organic_liquids'):
-            self.custom_materials[row.name] = OrganicLiquid.from_namedtuple(row)
+        # Load the petroleum materials
+        for row in cursor.execute('SELECT * FROM builtin_petroleum_liquids'):
+            self.builtin_materials[row.name] = PetroleumLiquid.from_namedtuple(row)
+        for row in cursor.execute('SELECT * FROM custom_petroleum_liquids'):
+            self.custom_materials[row.name] = PetroleumLiquid.from_namedtuple(row)
 
     def get_material(self, name: str) -> Material | None:
         # TODO: What should we do if a name exists in both?
@@ -45,6 +50,6 @@ class MaterialLibrary:
 
         return None
 
-    def get_material_keys(self, custom: bool = False) -> list[tuple[str, str]]:
+    def get_material_keys(self, organic: bool = True, custom: bool = False) -> list[tuple[str, str]]:
         data = self.custom_materials if custom else self.builtin_materials
         return [(name, material.cas_number) for name, material in data.items()]

@@ -10,14 +10,14 @@ from src.util.quantities import to_quantity
 @dataclass
 class Material:
     name: str
-    cas_number: str | None
 
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
         raise NotImplementedError()
 
 
 @dataclass
-class OrganicLiquid(Material):
+class Petrochemical(Material):
+    cas_number: str | None
     molecular_weight: Quantity
     vapor_constant_a: Quantity
     vapor_constant_b: Quantity
@@ -64,3 +64,13 @@ class PetroleumLiquid(Material):
     vapor_constant_a: Quantity
     vapor_constant_b: Quantity
     working_loss_product_factor: Decimal = field(default_factory=lambda: unit_registry.Quantity(Decimal('0.75'), 'dimensionless'))
+
+    @classmethod
+    def from_namedtuple(cls, data: namedtuple):
+        return cls(
+            name=data.name,
+            vapor_molecular_weight=unit_registry.Quantity(Decimal(data.vapor_molecular_weight), 'lb/mole'),
+            liquid_molecular_weight=unit_registry.Quantity(Decimal(data.liquid_molecular_weight), 'lb/mole'),
+            vapor_constant_a=unit_registry.Quantity(Decimal(data.vapor_pressure_eq_a), 'dimensionless'),
+            vapor_constant_b=unit_registry.Quantity(Decimal(data.vapor_pressure_eq_b), 'degR'),
+        )
