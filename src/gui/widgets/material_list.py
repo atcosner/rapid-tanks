@@ -1,13 +1,23 @@
-from PyQt5.QtWidgets import QWidget, QTreeWidget, QTreeWidgetItem
+from PyQt5 import QtCore
+from PyQt5.Qt import pyqtSlot
+from PyQt5.QtWidgets import (
+    QTreeWidget, QTreeWidgetItem,
+)
+
+from src.data.material_library import MaterialLibrary
 
 
 class MaterialList(QTreeWidget):
-    def __init__(self, parent: QWidget):
-        super().__init__(parent)
+    def __init__(self, custom: bool):
+        super().__init__(None)
 
-        # We only need a column for name
-        self.setColumnCount(1)
-        self.setHeaderLabels(['Name'])
+        self.custom = custom
+        self.library = MaterialLibrary()
+
+        self.setColumnCount(2)
+        self.setHeaderLabels(['Name', 'CAS Number'])
+        self.setSortingEnabled(True)
+        self.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         self.load()
 
@@ -16,19 +26,21 @@ class MaterialList(QTreeWidget):
         self.clear()
 
         # Load all available materials and populate ourselves
-        # TODO
-        custom_materials = QTreeWidgetItem()
-        custom_materials.setText(0, 'Custom')
-        self.addTopLevelItem(custom_materials)
+        for name, cas_number in self.library.get_material_keys(self.custom):
+            tree_item = QTreeWidgetItem()
+            tree_item.setText(0, name)
+            tree_item.setText(1, cas_number)
+            self.addTopLevelItem(tree_item)
 
-        builtin_materials = QTreeWidgetItem()
-        builtin_materials.setText(0, 'Builtin')
-        self._load_builtin_materials(builtin_materials)
-        self.addTopLevelItem(builtin_materials)
+        self.resizeColumnToContents(0)
 
-    def _load_builtin_materials(self, parent: QTreeWidgetItem) -> None:
-        # TODO: Load from the local DB?
-        for material in ['Test1', 'Test2', 'Test3']:
-            test = QTreeWidgetItem(parent)
-            test.setText(0, material)
-            parent.addChild(test)
+    @pyqtSlot(str)
+    def handle_search(self, search_text: str) -> None:
+        # TODO: Don't do this super dumb
+        self.clear()
+        for name, cas_number in self.library.get_material_keys(self.custom):
+            if search_text in name or search_text in cas_number:
+                tree_item = QTreeWidgetItem()
+                tree_item.setText(0, name)
+                tree_item.setText(1, cas_number)
+                self.addTopLevelItem(tree_item)

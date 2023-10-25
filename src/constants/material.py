@@ -28,7 +28,6 @@ class OrganicLiquid(Material):
 
     @classmethod
     def from_namedtuple(cls, data: namedtuple):
-        print(data)
         return cls(
             name=data.name,
             cas_number=data.cas_number,

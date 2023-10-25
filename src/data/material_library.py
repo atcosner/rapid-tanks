@@ -44,3 +44,7 @@ class MaterialLibrary:
             return self.custom_materials[name]
 
         return None
+
+    def get_material_keys(self, custom: bool = False) -> list[tuple[str, str]]:
+        data = self.custom_materials if custom else self.builtin_materials
+        return [(name, material.cas_number) for name, material in data.items()]
