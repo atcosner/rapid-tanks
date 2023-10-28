@@ -1,17 +1,23 @@
 import sqlite3
 from pathlib import Path
+from typing import NamedTuple
 
 from src.constants.material import Material, Petrochemical, PetroleumLiquid
 from src.data.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory
 
 
+class MaterialKey(NamedTuple):
+    name: str
+    is_custom: bool
+
+
 class MaterialLibrary:
     def __init__(self, db_path: Path | None = None, autoload: bool = True):
         self._db_path = db_path if db_path is not None else DEV_DB_FILE_PATH
 
-        self.builtin_materials: dict[str, Material] = {}
-        self.custom_materials: dict[str, Material] = {}
+        self.petrochemicals: dict[MaterialKey, Material] = {}
+        self.petroleum_liquids: dict[MaterialKey, Material] = {}
 
         if not self._db_path.exists():
             raise Exception(f'DB does not exist! ({self._db_path})')
@@ -26,30 +32,28 @@ class MaterialLibrary:
 
         cursor = cxn.cursor()
 
-        # Load the organic materials
+        # Load the petrochemicals
         for row in cursor.execute('SELECT * FROM builtin_petrochemicals'):
-            self.builtin_materials[row.name] = Petrochemical.from_namedtuple(row)
+            self.petrochemicals[MaterialKey(row.name, False)] = Petrochemical.from_namedtuple(row)
         for row in cursor.execute('SELECT * FROM custom_petrochemicals'):
-            self.custom_materials[row.name] = Petrochemical.from_namedtuple(row)
+            self.petrochemicals[MaterialKey(row.name, True)] = Petrochemical.from_namedtuple(row)
 
-        # Load the petroleum materials
+        # Load the petroleum liquids
         for row in cursor.execute('SELECT * FROM builtin_petroleum_liquids'):
-            self.builtin_materials[row.name] = PetroleumLiquid.from_namedtuple(row)
+            self.petroleum_liquids[MaterialKey(row.name, False)] = PetroleumLiquid.from_namedtuple(row)
         for row in cursor.execute('SELECT * FROM custom_petroleum_liquids'):
-            self.custom_materials[row.name] = PetroleumLiquid.from_namedtuple(row)
+            self.petroleum_liquids[MaterialKey(row.name, True)] = PetroleumLiquid.from_namedtuple(row)
 
     def get_material(self, name: str) -> Material | None:
         # TODO: What should we do if a name exists in both?
         # TODO: Differences in cases?
 
-        if name in self.builtin_materials:
-            return self.builtin_materials[name]
+        for key, material in self.petrochemicals.items():
+            if key.name == name:
+                return material
 
-        if name in self.custom_materials:
-            return self.custom_materials[name]
+        for key, material in self.petroleum_liquids.items():
+            if key.name == name:
+                return material
 
         return None
-
-    def get_material_keys(self, organic: bool = True, custom: bool = False) -> list[tuple[str, str]]:
-        data = self.custom_materials if custom else self.builtin_materials
-        return [(name, material.cas_number) for name, material in data.items()]

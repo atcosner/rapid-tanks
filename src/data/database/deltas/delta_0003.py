@@ -205,4 +205,3 @@ class Delta0003(BaseSchemaDelta):
             """,
             chemicals,
         )
-

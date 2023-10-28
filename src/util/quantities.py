@@ -16,4 +16,4 @@ def to_quantity(registry: UnitRegistry, value: str | None, unit: str) -> Quantit
     if value is None:
         return None
     else:
-        return registry.Quantity(value, unit)
+        return registry.Quantity(Decimal(value), unit)

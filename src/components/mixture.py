@@ -4,7 +4,7 @@ from decimal import Decimal
 from pint import Quantity
 
 from src import unit_registry
-from src.constants.material import Material
+from src.constants.material import Material, Petrochemical, PetroleumLiquid
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,18 @@ class MixtureComponent:
     partial_pressure: Quantity | None = None
     vapor_molecular_weight: Quantity | None = None
     vapor_pressure: dict = field(default_factory=dict)
+
+    def get_liquid_molecular_weight(self) -> Quantity:
+        if isinstance(self.material, Petrochemical):
+            return self.material.molecular_weight
+        else:
+            return self.material.liquid_molecular_weight
+
+    def get_vapor_molecular_weight(self) -> Quantity:
+        if isinstance(self.material, Petrochemical):
+            return self.material.molecular_weight
+        else:
+            return self.material.vapor_molecular_weight
 
 
 class Mixture:
@@ -38,13 +50,15 @@ class Mixture:
         total_moles = Decimal('0') * unit_registry.mole
         for part in self.parts:
             # Use a standard mixture weight of 100 lbs
-            total_moles += (100 * part.weight_fraction * unit_registry.lb) / part.material.molecular_weight
+            part_mixture_weight = 100 * part.weight_fraction * unit_registry.lb
+            temp_moles = part_mixture_weight / part.get_liquid_molecular_weight()
+            total_moles += temp_moles
 
         # Calculate the partial pressure of each part of the mixture
         mixture_vapor_pressure = Decimal('0') * unit_registry.psia
         for part in self.parts:
             # Calculate mole fraction
-            moles = (100 * part.weight_fraction * unit_registry.lb) / part.material.molecular_weight
+            moles = (100 * part.weight_fraction * unit_registry.lb) / part.get_liquid_molecular_weight()
             part.mole_fraction = moles / total_moles
             logger.debug(f'{part.material.name} | Mole Fraction: {part.mole_fraction}')
 
@@ -71,7 +85,7 @@ class Mixture:
             vapor_percent = part.partial_pressure / mixture_vapor_pressure
             logger.debug(f'{part.material.name} | Vapor Percent: {vapor_percent} @ {temperature}')
 
-            part.vapor_molecular_weight = vapor_percent * part.material.molecular_weight
+            part.vapor_molecular_weight = vapor_percent * part.get_vapor_molecular_weight()
             logger.debug(f'{part.material.name} | Partial vapor molecular weight: {part.vapor_molecular_weight}')
 
             total_vapor_molecular_weight += part.vapor_molecular_weight

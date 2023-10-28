@@ -59,18 +59,37 @@ class Petrochemical(Material):
 
 @dataclass
 class PetroleumLiquid(Material):
-    vapor_molecular_weight: Quantity
-    liquid_molecular_weight: Quantity
-    vapor_constant_a: Quantity
-    vapor_constant_b: Quantity
+    vapor_molecular_weight: Quantity | None
+    liquid_molecular_weight: Quantity | None
+    vapor_constant_a: Quantity | None
+    vapor_constant_b: Quantity | None
     working_loss_product_factor: Decimal = field(default_factory=lambda: unit_registry.Quantity(Decimal('0.75'), 'dimensionless'))
 
     @classmethod
     def from_namedtuple(cls, data: namedtuple):
         return cls(
             name=data.name,
-            vapor_molecular_weight=unit_registry.Quantity(Decimal(data.vapor_molecular_weight), 'lb/mole'),
-            liquid_molecular_weight=unit_registry.Quantity(Decimal(data.liquid_molecular_weight), 'lb/mole'),
-            vapor_constant_a=unit_registry.Quantity(Decimal(data.vapor_pressure_eq_a), 'dimensionless'),
-            vapor_constant_b=unit_registry.Quantity(Decimal(data.vapor_pressure_eq_b), 'degR'),
+            vapor_molecular_weight=to_quantity(unit_registry, data.vapor_molecular_weight, 'lb/mole'),
+            liquid_molecular_weight=to_quantity(unit_registry, data.liquid_molecular_weight, 'lb/mole'),
+            vapor_constant_a=to_quantity(unit_registry, data.vapor_pressure_eq_a, 'dimensionless'),
+            vapor_constant_b=to_quantity(unit_registry, data.vapor_pressure_eq_b, 'degR'),
         )
+
+    def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
+        # This needs to be calculated multiple ways based on what information we have
+
+        if self.vapor_constant_a is not None and self.vapor_constant_b is not None:
+            # AP 42 Chapter 7 Equation 1-25
+            # P_VA = exp[A - (B / T_LA)]
+
+            # Convert each quantity to the correct units
+            b_degR = self.vapor_constant_b.to('degR').magnitude
+            tla_degR = average_liquid_surface_temperature.to('degR').magnitude
+
+            # Calculate the inner portion
+            temp1 = self.vapor_constant_a.magnitude - (b_degR / tla_degR)
+
+            return unit_registry.Quantity(temp1.exp(), 'psia')
+        else:
+            # TODO: Implement other ways to calculate this
+            raise RuntimeError()
