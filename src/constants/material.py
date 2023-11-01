@@ -27,16 +27,16 @@ class Petrochemical(Material):
     working_loss_product_factor: Quantity = field(default_factory=lambda: unit_registry.Quantity(Decimal(1), 'dimensionless'))
 
     @classmethod
-    def from_namedtuple(cls, data: namedtuple):
+    def from_db_row(cls, row: namedtuple):
         return cls(
-            name=data.name,
-            cas_number=data.cas_number,
-            molecular_weight=unit_registry.Quantity(Decimal(data.molecular_weight), 'lb/mole'),
-            vapor_constant_a=unit_registry.Quantity(Decimal(data.antoine_a), 'dimensionless'),
-            vapor_constant_b=unit_registry.Quantity(Decimal(data.antoine_b), 'degC'),
-            vapor_constant_c=unit_registry.Quantity(Decimal(data.antoine_c), 'degC'),
-            min_valid_temperature=to_quantity(unit_registry, data.antoine_min_temp, 'degF'),
-            max_valid_temperature=to_quantity(unit_registry, data.antoine_max_temp, 'degF'),
+            name=row.name,
+            cas_number=row.cas_number,
+            molecular_weight=unit_registry.Quantity(Decimal(row.molecular_weight), 'lb/mole'),
+            vapor_constant_a=unit_registry.Quantity(Decimal(row.antoine_a), 'dimensionless'),
+            vapor_constant_b=unit_registry.Quantity(Decimal(row.antoine_b), 'degC'),
+            vapor_constant_c=unit_registry.Quantity(Decimal(row.antoine_c), 'degC'),
+            min_valid_temperature=to_quantity(unit_registry, row.antoine_min_temp, 'degF'),
+            max_valid_temperature=to_quantity(unit_registry, row.antoine_max_temp, 'degF'),
         )
 
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
@@ -66,13 +66,13 @@ class PetroleumLiquid(Material):
     working_loss_product_factor: Decimal = field(default_factory=lambda: unit_registry.Quantity(Decimal('0.75'), 'dimensionless'))
 
     @classmethod
-    def from_namedtuple(cls, data: namedtuple):
+    def from_db_row(cls, row: namedtuple):
         return cls(
-            name=data.name,
-            vapor_molecular_weight=to_quantity(unit_registry, data.vapor_molecular_weight, 'lb/mole'),
-            liquid_molecular_weight=to_quantity(unit_registry, data.liquid_molecular_weight, 'lb/mole'),
-            vapor_constant_a=to_quantity(unit_registry, data.vapor_pressure_eq_a, 'dimensionless'),
-            vapor_constant_b=to_quantity(unit_registry, data.vapor_pressure_eq_b, 'degR'),
+            name=row.name,
+            vapor_molecular_weight=to_quantity(unit_registry, row.vapor_molecular_weight, 'lb/mole'),
+            liquid_molecular_weight=to_quantity(unit_registry, row.liquid_molecular_weight, 'lb/mole'),
+            vapor_constant_a=to_quantity(unit_registry, row.vapor_pressure_eq_a, 'dimensionless'),
+            vapor_constant_b=to_quantity(unit_registry, row.vapor_pressure_eq_b, 'degR'),
         )
 
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:

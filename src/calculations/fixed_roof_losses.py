@@ -45,8 +45,8 @@ class FixedRoofLosses:
 
         # Use the meteorological data from the site
         # TODO: This needs to be adjusted for the time period we are calculating over
-        avg_max_temp_degR = self.site.meteorological_data.average_daily_max_temp.to('degR')
-        avg_min_temp_degR = self.site.meteorological_data.average_daily_min_temp.to('degR')
+        avg_max_temp_degR = self.site.meteorological_data.annual_data.average_daily_max_temp.to('degR')
+        avg_min_temp_degR = self.site.meteorological_data.annual_data.average_daily_min_temp.to('degR')
 
         return (avg_max_temp_degR + avg_min_temp_degR) / 2
 
@@ -55,8 +55,8 @@ class FixedRoofLosses:
 
         # Use the meteorological data from the site
         # TODO: This needs to be adjusted for the time period we are calculating over
-        avg_max_temp_degR = self.site.meteorological_data.average_daily_max_temp.to('degR')
-        avg_min_temp_degR = self.site.meteorological_data.average_daily_min_temp.to('degR')
+        avg_max_temp_degR = self.site.meteorological_data.annual_data.average_daily_max_temp.to('degR')
+        avg_min_temp_degR = self.site.meteorological_data.annual_data.average_daily_min_temp.to('degR')
         return avg_max_temp_degR - avg_min_temp_degR
 
     def _calculate_liquid_bulk_temperature(self) -> Quantity:
@@ -64,7 +64,7 @@ class FixedRoofLosses:
         bulk_temp = self.average_ambient_temperature.to('degR').magnitude \
                     + (Decimal('0.003')
                        * self.tank.shell_solar_absorption
-                       * self.site.meteorological_data.solar_insolation)
+                       * self.site.meteorological_data.annual_data.average_solar_insolation)
 
         return bulk_temp.magnitude * unit_registry.degR
 
@@ -81,8 +81,8 @@ class FixedRoofLosses:
                     * (Decimal('0.5') + (Decimal('0.8') / (Decimal('4.4') * (self.tank.height / self.tank.diameter) + Decimal('3.8'))))
 
             term3 = (
-                        (Decimal('0.021') * self.tank.roof_solar_absorption * self.site.meteorological_data.solar_insolation)
-                        + (Decimal('0.013') * (self.tank.height / self.tank.diameter) * self.tank.shell_solar_absorption * self.site.meteorological_data.solar_insolation)
+                        (Decimal('0.021') * self.tank.roof_solar_absorption * self.site.meteorological_data.annual_data.average_solar_insolation)
+                        + (Decimal('0.013') * (self.tank.height / self.tank.diameter) * self.tank.shell_solar_absorption * self.site.meteorological_data.annual_data.average_solar_insolation)
                     ) / (
                         Decimal('4.4') * (self.tank.height / self.tank.diameter) + Decimal('3.8')
                     )
@@ -95,7 +95,7 @@ class FixedRoofLosses:
                    + (Decimal('0.7') * self.liquid_bulk_temperature.to('degR')) \
                    + (Decimal('0.005')
                       * self.tank.get_average_solar_absorption()
-                      * self.site.meteorological_data.solar_insolation)
+                      * self.site.meteorological_data.annual_data.average_solar_insolation)
 
         elif self.tank.insulation is Insulation.FULL:
             # Assume average liquid surface temperature equal to average liquid bulk temperature
@@ -114,7 +114,7 @@ class FixedRoofLosses:
         t_b_degR = self.liquid_bulk_temperature.to('degR')
         alpha_r = self.tank.roof_solar_absorption
         alpha_s = self.tank.shell_solar_absorption
-        solar_i = self.site.meteorological_data.solar_insolation
+        solar_i = self.site.meteorological_data.annual_data.average_solar_insolation
 
         # This is based on which type of insulation the tank has
         if self.tank.insulation is Insulation.NONE:
@@ -196,7 +196,7 @@ class FixedRoofLosses:
         delta_t_aa_degR = self.average_ambient_temperature_range.to('degR')
         alpha_r = self.tank.roof_solar_absorption
         alpha_s = self.tank.shell_solar_absorption
-        solar_i = self.site.meteorological_data.solar_insolation
+        solar_i = self.site.meteorological_data.annual_data.average_solar_insolation
 
         # This is based on which type of insulation the tank has
         if self.tank.insulation is Insulation.NONE:

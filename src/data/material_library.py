@@ -34,15 +34,15 @@ class MaterialLibrary:
 
         # Load the petrochemicals
         for row in cursor.execute('SELECT * FROM builtin_petrochemicals'):
-            self.petrochemicals[MaterialKey(row.name, False)] = Petrochemical.from_namedtuple(row)
+            self.petrochemicals[MaterialKey(row.name, False)] = Petrochemical.from_db_row(row)
         for row in cursor.execute('SELECT * FROM custom_petrochemicals'):
-            self.petrochemicals[MaterialKey(row.name, True)] = Petrochemical.from_namedtuple(row)
+            self.petrochemicals[MaterialKey(row.name, True)] = Petrochemical.from_db_row(row)
 
         # Load the petroleum liquids
         for row in cursor.execute('SELECT * FROM builtin_petroleum_liquids'):
-            self.petroleum_liquids[MaterialKey(row.name, False)] = PetroleumLiquid.from_namedtuple(row)
+            self.petroleum_liquids[MaterialKey(row.name, False)] = PetroleumLiquid.from_db_row(row)
         for row in cursor.execute('SELECT * FROM custom_petroleum_liquids'):
-            self.petroleum_liquids[MaterialKey(row.name, True)] = PetroleumLiquid.from_namedtuple(row)
+            self.petroleum_liquids[MaterialKey(row.name, True)] = PetroleumLiquid.from_db_row(row)
 
     def get_material(self, name: str) -> Material | None:
         # TODO: What should we do if a name exists in both?

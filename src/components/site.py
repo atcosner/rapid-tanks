@@ -3,7 +3,7 @@ from datetime import date
 
 from src.components.fixed_roof_tank import HorizontalFixedRoofTank, VerticalFixedRoofTank
 from src.components.tank import Tank
-from src.constants.meteorological import MeteorologicalData
+from src.constants.meteorological import MeteorologicalSite
 from src.util.logging import NamedLoggerAdapter
 
 logger = logging.getLogger(__name__)
@@ -22,14 +22,14 @@ class Site:
         self.name: str = name
         self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
-        self.meteorological_data: MeteorologicalData | None = None
+        self.meteorological_data: MeteorologicalSite | None = None
         self.operational_period: tuple[date, date] | None = None
         self.tanks: dict[str, Tank] = {}
 
     def set_operational_period(self, start_date: date, end_date: date) -> None:
         self.operational_period = start_date, end_date
 
-    def set_meteorological_data(self, data: MeteorologicalData) -> None:
+    def set_meteorological_data(self, data: MeteorologicalSite) -> None:
         self.meteorological_data = data
 
     def add_fixed_roof_tank(self, name: str, vertical: bool = True) -> VerticalFixedRoofTank | HorizontalFixedRoofTank:

@@ -5,9 +5,9 @@ from src.calculations.fixed_roof_losses import FixedRoofLosses
 from src.components.mixture import Mixture
 from src.components.site import Site
 from src.components.fixed_roof_tank import VerticalRoofType
-from src.constants.meteorological import MeteorologicalData
 from src.constants.paint import PaintColor, PaintCondition
 from src.data.material_library import MaterialLibrary
+from src.data.meteorological_library import MeteorologicalLibrary
 from src.util.logging import configure_root_logger
 
 from src import unit_registry as registry
@@ -19,14 +19,10 @@ logger = logging.getLogger(__name__)
 
 test_site = Site('test1')
 
-# Setup the meteorological data
-weather_data = MeteorologicalData(
-    average_daily_max_temp=registry.Quantity(Decimal('63.5'), 'degF'),
-    average_daily_min_temp=registry.Quantity(Decimal('37.9'), 'degF'),
-    solar_insolation=registry.Quantity(Decimal('1491'), 'dimensionless'),  # The unit is actually: btu/(ft^2 day)
-    atmospheric_pressure=registry.Quantity(Decimal('12.08'), 'psia'),
-)
-test_site.set_meteorological_data(weather_data)
+# Load the meteorological data
+meteorological_library = MeteorologicalLibrary()
+site_weather_data = meteorological_library.get_site('Denver, Colorado')
+test_site.set_meteorological_data(site_weather_data)
 
 test_tank = test_site.add_fixed_roof_tank('Tank 1')
 test_tank.set_dimensions(height=Decimal(12) * registry.foot, diameter=Decimal(6) * registry.foot)
