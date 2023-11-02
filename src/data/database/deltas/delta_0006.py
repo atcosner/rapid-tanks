@@ -9,7 +9,7 @@ class Delta0006(BaseSchemaDelta):
     def upgrade(self, cursor: sqlite3.Cursor) -> None:
         # Add in the master table for meteorological data
         cursor.execute("""
-            CREATE TABLE meteorological_sites(
+            CREATE TABLE meteorological_location(
                 id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
                 name TEXT,
                 gps_latitude TEXT,
@@ -20,7 +20,7 @@ class Delta0006(BaseSchemaDelta):
 
         # Add in the detail table for meteorological data
         cursor.execute("""
-            CREATE TABLE meteorological_sites_detail(
+            CREATE TABLE meteorological_location_detail(
                 id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
                 site_id INTEGER,
                 month_id INTEGER,
@@ -29,6 +29,6 @@ class Delta0006(BaseSchemaDelta):
                 average_wind_speed TEXT,
                 average_daily_insolation TEXT,
                 
-                FOREIGN KEY(site_id) REFERENCES meteorological_sites(id)
+                FOREIGN KEY(site_id) REFERENCES meteorological_location(id)
             );
         """)

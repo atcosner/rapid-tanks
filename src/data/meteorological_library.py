@@ -24,14 +24,14 @@ class MeteorologicalLibrary:
         cxn.row_factory = namedtuple_factory
 
         # Load the sites
-        for site_row in cxn.cursor().execute('SELECT * FROM meteorological_sites'):
-            site = MeteorologicalSite.from_db_row(site_row)
+        for location_row in cxn.cursor().execute('SELECT * FROM meteorological_location'):
+            site = MeteorologicalSite.from_db_row(location_row)
 
             # Select all detailed data for this site
             data_points = [
                 MeteorologicalMonthData.from_db_row(detail_row)
                 for detail_row in
-                cxn.cursor().execute(f'SELECT * FROM meteorological_sites_detail WHERE site_id = {site.id}')
+                cxn.cursor().execute(f'SELECT * FROM meteorological_location_detail WHERE site_id = {site.id}')
             ]
             for data_point in data_points:
                 if data_point.month_num == 13:

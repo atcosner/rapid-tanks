@@ -54,7 +54,7 @@ with cxn:
     site_records = [record[:4] for record in data]
     cxn.executemany(
         """
-            INSERT INTO meteorological_sites VALUES
+            INSERT INTO meteorological_location VALUES
             (NULL, ?, ?, ?, ?)
         """,
         site_records
@@ -63,12 +63,12 @@ with cxn:
     # Iterate over tha data to add the detailed records
     for record in data:
         # Get the ID of the master row for this data
-        site_id = cxn.execute(f"SELECT id from meteorological_sites where name = '{record[0]}'").fetchone()[0]
+        site_id = cxn.execute(f"SELECT id from meteorological_location where name = '{record[0]}'").fetchone()[0]
 
         # Add the detailed records
         cxn.executemany(
             f"""
-                INSERT INTO meteorological_sites_detail VALUES
+                INSERT INTO meteorological_location_detail VALUES
                 (NULL, {site_id}, ?, ?, ?, ?, ?)
             """,
             record[4]
