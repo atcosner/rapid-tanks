@@ -39,6 +39,12 @@ class Petrochemical(Material):
             max_valid_temperature=to_quantity(unit_registry, row.antoine_max_temp, 'degF'),
         )
 
+    def to_db_row(self) -> str:
+        # TODO: Add the rest of the DB columns to this class
+        return f"""(NULL, '{self.name}', '{self.cas_number}', '{self.molecular_weight}', NULL, NULL,
+                   '{self.vapor_constant_a}', '{self.vapor_constant_b}', '{self.vapor_constant_c}',
+                   '{self.min_valid_temperature}', '{self.max_valid_temperature}', NULL)"""
+
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
         # AP 42 Chapter 7 Equation 1-26
         # log(P_VA) = A - (B / (T_LA + C))
@@ -74,6 +80,11 @@ class PetroleumLiquid(Material):
             vapor_constant_a=to_quantity(unit_registry, row.vapor_pressure_eq_a, 'dimensionless'),
             vapor_constant_b=to_quantity(unit_registry, row.vapor_pressure_eq_b, 'degR'),
         )
+
+    def to_db_row(self) -> str:
+        # TODO: Add the rest of the DB columns to this class
+        return f"""(NULL, '{self.name}', '{self.vapor_molecular_weight}', '{self.liquid_molecular_weight}',
+                   NULL, NULL, '{self.vapor_constant_a}', '{self.vapor_constant_b}', NULL)"""
 
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
         # This needs to be calculated multiple ways based on what information we have

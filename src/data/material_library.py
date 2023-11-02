@@ -26,10 +26,8 @@ class MaterialLibrary:
             self.load_from_db()
 
     def load_from_db(self) -> None:
-        # Connect to the DB
         cxn = sqlite3.connect(self._db_path)
         cxn.row_factory = namedtuple_factory
-
         cursor = cxn.cursor()
 
         # Load the petrochemicals
@@ -44,6 +42,24 @@ class MaterialLibrary:
         for row in cursor.execute('SELECT * FROM custom_petroleum_liquids'):
             self.petroleum_liquids[MaterialKey(row.name, True)] = PetroleumLiquid.from_db_row(row)
 
+        cxn.close()
+
+    def store_material(self, material: Material) -> None:
+        cxn = sqlite3.connect(self._db_path)
+
+        # Handle the material depending on what it is
+        with cxn:
+            if isinstance(material, Petrochemical):
+                self.petrochemicals[MaterialKey(material.name, True)] = material
+                cxn.execute(f'INSERT INTO custom_petrochemicals VALUES {material.to_db_row()}')
+            elif isinstance(material, PetroleumLiquid):
+                self.petroleum_liquids[MaterialKey(material.name, True)] = material
+                cxn.execute(f'INSERT INTO custom_petroleum_liquids VALUES {material.to_db_row()}')
+            else:
+                raise Exception(f'Unknown material type! {type(material)}')
+
+        cxn.close()
+
     def get_material(self, name: str) -> Material | None:
         # TODO: What should we do if a name exists in both?
         # TODO: Differences in cases?
@@ -57,3 +73,5 @@ class MaterialLibrary:
                 return material
 
         return None
+
+
