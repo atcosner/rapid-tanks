@@ -24,6 +24,7 @@ class Petrochemical(Material):
     vapor_constant_c: Quantity
     min_valid_temperature: Quantity | None
     max_valid_temperature: Quantity | None
+    normal_boiling_point: Quantity | None
     working_loss_product_factor: Quantity = field(default_factory=lambda: unit_registry.Quantity(Decimal(1), 'dimensionless'))
 
     @classmethod
@@ -37,13 +38,24 @@ class Petrochemical(Material):
             vapor_constant_c=unit_registry.Quantity(Decimal(row.antoine_c), 'degC'),
             min_valid_temperature=to_quantity(unit_registry, row.antoine_min_temp, 'degF'),
             max_valid_temperature=to_quantity(unit_registry, row.antoine_max_temp, 'degF'),
+            normal_boiling_point=to_quantity(unit_registry, row.normal_boiling_point, 'degF'),
         )
 
     def to_db_row(self) -> str:
         # TODO: Add the rest of the DB columns to this class
-        return f"""(NULL, '{self.name}', '{self.cas_number}', '{self.molecular_weight}', NULL, NULL,
-                   '{self.vapor_constant_a}', '{self.vapor_constant_b}', '{self.vapor_constant_c}',
-                   '{self.min_valid_temperature}', '{self.max_valid_temperature}', NULL)"""
+
+        # Convert the internal quantities to the right units
+        molecular_weight_str = self.molecular_weight.to('lb/mole').magnitude
+        vapor_constant_a_str = self.vapor_constant_a.to('dimensionless').magnitude
+        vapor_constant_b_str = self.vapor_constant_b.to('degC').magnitude
+        vapor_constant_c_str = self.vapor_constant_c.to('degC').magnitude
+        min_valid_temperature_str = self.min_valid_temperature.to('degF').magnitude
+        max_valid_temperature_str = self.max_valid_temperature.to('degF').magnitude
+        normal_boiling_point_str = self.normal_boiling_point.to('degF').magnitude
+
+        return f"""(NULL, '{self.name}', '{self.cas_number}', '{molecular_weight_str}', NULL, NULL,
+                   '{vapor_constant_a_str}', '{vapor_constant_b_str}', '{vapor_constant_c_str}',
+                   '{min_valid_temperature_str}', '{max_valid_temperature_str}', {normal_boiling_point_str})"""
 
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
         # AP 42 Chapter 7 Equation 1-26
@@ -83,8 +95,15 @@ class PetroleumLiquid(Material):
 
     def to_db_row(self) -> str:
         # TODO: Add the rest of the DB columns to this class
-        return f"""(NULL, '{self.name}', '{self.vapor_molecular_weight}', '{self.liquid_molecular_weight}',
-                   NULL, NULL, '{self.vapor_constant_a}', '{self.vapor_constant_b}', NULL)"""
+
+        # Convert the internal quantities to the right units
+        vapor_molecular_weight_str = self.vapor_molecular_weight.to('lb/mole').magnitude
+        liquid_molecular_weight_str = self.liquid_molecular_weight.to('lb/mole').magnitude
+        vapor_constant_a_str = self.vapor_constant_a.to('dimensionless').magnitude
+        vapor_constant_b_str = self.vapor_constant_b.to('degR').magnitude
+
+        return f"""(NULL, '{self.name}', '{vapor_molecular_weight_str}', '{liquid_molecular_weight_str}',
+                   NULL, NULL, '{vapor_constant_a_str}', '{vapor_constant_b_str}', NULL)"""
 
     def calculate_vapor_pressure(self, average_liquid_surface_temperature: Quantity) -> Quantity:
         # This needs to be calculated multiple ways based on what information we have

@@ -13,22 +13,28 @@ class MaterialKey(NamedTuple):
 
 
 class MaterialLibrary:
-    def __init__(self, db_path: Path | None = None, autoload: bool = True):
-        self._db_path = db_path if db_path is not None else DEV_DB_FILE_PATH
+    def __init__(self, db_location: Path | sqlite3.Connection | None = None, autoload: bool = True):
+        # Figure out where the DB is
+        if db_location is None:
+            self.cxn = sqlite3.connect(DEV_DB_FILE_PATH)
+        elif isinstance(db_location, Path):
+            self.cxn = sqlite3.connect(db_location)
+        elif isinstance(db_location, sqlite3.Connection):
+            self.cxn = db_location
+        else:
+            raise RuntimeError(f'Unknown DB location type! {type(db_location)}')
+
+        # Use our namedtuple row factory
+        self.cxn.row_factory = namedtuple_factory
 
         self.petrochemicals: dict[MaterialKey, Material] = {}
         self.petroleum_liquids: dict[MaterialKey, Material] = {}
-
-        if not self._db_path.exists():
-            raise Exception(f'DB does not exist! ({self._db_path})')
 
         if autoload:
             self.load_from_db()
 
     def load_from_db(self) -> None:
-        cxn = sqlite3.connect(self._db_path)
-        cxn.row_factory = namedtuple_factory
-        cursor = cxn.cursor()
+        cursor = self.cxn.cursor()
 
         # Load the petrochemicals
         for row in cursor.execute('SELECT * FROM builtin_petrochemicals'):
@@ -42,23 +48,19 @@ class MaterialLibrary:
         for row in cursor.execute('SELECT * FROM custom_petroleum_liquids'):
             self.petroleum_liquids[MaterialKey(row.name, True)] = PetroleumLiquid.from_db_row(row)
 
-        cxn.close()
-
     def store_material(self, material: Material) -> None:
-        cxn = sqlite3.connect(self._db_path)
-
         # Handle the material depending on what it is
-        with cxn:
+        with self.cxn:
+            material_row = material.to_db_row()
+
             if isinstance(material, Petrochemical):
                 self.petrochemicals[MaterialKey(material.name, True)] = material
-                cxn.execute(f'INSERT INTO custom_petrochemicals VALUES {material.to_db_row()}')
+                self.cxn.execute(f'INSERT INTO custom_petrochemicals VALUES {material_row}')
             elif isinstance(material, PetroleumLiquid):
                 self.petroleum_liquids[MaterialKey(material.name, True)] = material
-                cxn.execute(f'INSERT INTO custom_petroleum_liquids VALUES {material.to_db_row()}')
+                self.cxn.execute(f'INSERT INTO custom_petroleum_liquids VALUES {material_row}')
             else:
                 raise Exception(f'Unknown material type! {type(material)}')
-
-        cxn.close()
 
     def get_material(self, name: str) -> Material | None:
         # TODO: What should we do if a name exists in both?
