@@ -4,6 +4,7 @@ import unittest
 from ..material_library import MaterialLibrary
 from ..database.deltas.delta_0002 import Delta0002
 from ..database.deltas.delta_0004 import Delta0004
+from ...constants.material import Petrochemical
 
 
 class TestMaterialLibrary(unittest.TestCase):
@@ -50,3 +51,18 @@ class TestMaterialLibrary(unittest.TestCase):
 
         # Ensure we can reload from the DB
         library.load_from_db()
+
+    def test_material_read_back(self) -> None:
+        library = MaterialLibrary(self.cxn)
+
+        # Store the test material in the custom table
+        material1 = library.get_material('Test - Petro')
+        library.store_material(material1)  # Should store in the custom DB table
+
+        # Ensure it gets recreated as equal to the original material
+        material2 = Petrochemical.from_db_row(
+            self.cxn.execute(
+                "SELECT * FROM custom_petrochemicals WHERE name = 'Test - Petro'"
+            ).fetchone()
+        )
+        self.assertEqual(material1, material2)
