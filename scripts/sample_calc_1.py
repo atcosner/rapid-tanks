@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from src.calculations.fixed_roof_losses import FixedRoofLosses
 from src.components.mixture import Mixture
-from src.components.site import Site
+from src.components.facility import Facility
 from src.components.fixed_roof_tank import VerticalRoofType
 from src.constants.paint import PaintColor, PaintCondition
 from src.data.material_library import MaterialLibrary
@@ -17,7 +17,7 @@ configure_root_logger()
 logger = logging.getLogger(__name__)
 
 
-test_site = Site('test1')
+test_site = Facility('test1')
 
 # Load the meteorological data
 meteorological_library = MeteorologicalLibrary()

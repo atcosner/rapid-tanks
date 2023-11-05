@@ -4,7 +4,7 @@ from pint import Quantity
 
 from src import unit_registry
 from src.components.fixed_roof_tank import FixedRoofTank
-from src.components.site import Site
+from src.components.facility import Facility
 from src.components.tank import Insulation
 from src.util.logging import log_block
 from src.util.errors import CalculationError
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class FixedRoofLosses:
-    def __init__(self, site: Site, tank: FixedRoofTank) -> None:
+    def __init__(self, site: Facility, tank: FixedRoofTank) -> None:
         self.site = site
         self.tank = tank
 

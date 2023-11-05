@@ -9,7 +9,7 @@ from src.util.logging import NamedLoggerAdapter
 logger = logging.getLogger(__name__)
 
 
-class Site:
+class Facility:
     """
     The class holds all the properties/variables that are specific to the site that the tanks are located at.
 
