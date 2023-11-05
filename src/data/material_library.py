@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 from src.constants.material import Material, Petrochemical, PetroleumLiquid
 from src.data.database import DEV_DB_FILE_PATH
-from src.util.database import namedtuple_factory
+from src.util.database import namedtuple_factory, get_db_connection
 
 
 class MaterialKey(NamedTuple):
@@ -14,17 +14,8 @@ class MaterialKey(NamedTuple):
 
 class MaterialLibrary:
     def __init__(self, db_location: Path | sqlite3.Connection | None = None, autoload: bool = True):
-        # Figure out where the DB is
-        if db_location is None:
-            self.cxn = sqlite3.connect(DEV_DB_FILE_PATH)
-        elif isinstance(db_location, Path):
-            self.cxn = sqlite3.connect(db_location)
-        elif isinstance(db_location, sqlite3.Connection):
-            self.cxn = db_location
-        else:
-            raise RuntimeError(f'Unknown DB location type! {type(db_location)}')
-
-        # Use our namedtuple row factory
+        # Establish a connection to the DB
+        self.cxn = get_db_connection(db_location if db_location is not None else DEV_DB_FILE_PATH)
         self.cxn.row_factory = namedtuple_factory
 
         self.petrochemicals: dict[MaterialKey, Material] = {}
@@ -47,6 +38,14 @@ class MaterialLibrary:
             self.petroleum_liquids[MaterialKey(row.name, False)] = PetroleumLiquid.from_db_row(row)
         for row in cursor.execute('SELECT * FROM custom_petroleum_liquids'):
             self.petroleum_liquids[MaterialKey(row.name, True)] = PetroleumLiquid.from_db_row(row)
+
+    def reload(self) -> None:
+        # Remove all existing entries
+        self.petrochemicals.clear()
+        self.petroleum_liquids.clear()
+
+        # Load from the DB
+        self.load_from_db()
 
     def store_material(self, material: Material) -> None:
         # Handle the material depending on what it is
