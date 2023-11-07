@@ -1,4 +1,6 @@
 import logging
+from collections import namedtuple
+from dataclasses import dataclass, field
 from datetime import date
 
 from src.components.fixed_roof_tank import HorizontalFixedRoofTank, VerticalFixedRoofTank
@@ -9,6 +11,7 @@ from src.util.logging import NamedLoggerAdapter
 logger = logging.getLogger(__name__)
 
 
+@dataclass
 class Facility:
     """
     The class holds all the properties/variables that are specific to the site that the tanks are located at.
@@ -17,14 +20,25 @@ class Facility:
     meteorological data can either come from the location data we ship or it can be manually input by the user into
     a custom location.
     """
+    id: int
+    name: str
+    description: str = ''
+    company: str = ''
+    meteorological_data: MeteorologicalSite | None = None
+    operational_period: tuple[date, date] | None = None
+    tanks: dict[str, Tank] = field(default_factory=dict)
 
-    def __init__(self, name: str) -> None:
-        self.name: str = name
+    def __post_init__(self) -> None:
         self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
-        self.meteorological_data: MeteorologicalSite | None = None
-        self.operational_period: tuple[date, date] | None = None
-        self.tanks: dict[str, Tank] = {}
+    @classmethod
+    def from_db_row(cls, row: namedtuple):
+        return cls(
+            id=row.id,
+            name=row.name,
+            description=row.description,
+            company=row.company,
+        )
 
     def set_operational_period(self, start_date: date, end_date: date) -> None:
         self.operational_period = start_date, end_date

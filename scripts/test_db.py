@@ -78,3 +78,9 @@ with cxn:
 library = MeteorologicalLibrary()
 print(library.get_site('Denver, Colorado'))
 print(library.get_site('Colorado Springs, Colorado'))
+
+# Add a test facility
+with cxn:
+    cxn.execute(
+        f"INSERT INTO facility_master VALUES (NULL, 'TEST - FACILITY', 'TEST', 'LABCORP', 1)"
+    )
