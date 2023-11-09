@@ -31,3 +31,12 @@ class FacilityLibrary:
 
         # Load from the DB
         self.load_from_db()
+
+    def get_facility_by_name(self, name: str) -> Facility | None:
+        return self.facilities.get(name, None)
+
+    def get_facility_by_id(self, facility_id: int) -> Facility | None:
+        for facility in self.facilities.values():
+            if facility.id == facility_id:
+                return facility
+        return None

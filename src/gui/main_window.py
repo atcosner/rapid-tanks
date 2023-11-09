@@ -1,21 +1,17 @@
-from PyQt5.QtWidgets import QMainWindow, QDialog
+from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
-from src.gui.modals.facility_selector import FacilitySelector
-from src.gui.modals.material_library import MaterialLibrary
+from src.data.facility_library import FacilityLibrary
+from src.gui.modals.facility_dialogs import FacilitySelector
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__(None)
 
-        # Child windows/dialogs
-        self.facility_selector = FacilitySelector(self)
-        #self.material_library = MaterialLibrary(self)
-
         self._initial_setup()
         self.show()
 
-        self.select_facility()
+        self.select_facility(allow_new=True)
 
     def _initial_setup(self) -> None:
         self.setWindowTitle('Rapid Tanks | Version 0.1')
@@ -27,6 +23,9 @@ class MainWindow(QMainWindow):
 
     def _create_menubar(self) -> None:
         file_menu = self.menuBar().addMenu('File')
+        file_menu.addAction('New Site')
+        file_menu.addAction('Open Site').triggered.connect(lambda: self.select_facility(allow_new=False))
+        file_menu.addAction('Save')
         file_menu.addSeparator()
         file_menu.addAction('Exit').triggered.connect(self.close)
 
@@ -38,11 +37,10 @@ class MainWindow(QMainWindow):
         materials_menu = self.menuBar().addMenu('Materials')
         materials_menu.addAction('Create Custom Material')
         materials_menu.addSeparator()
-       # materials_menu.addAction('Materials Library').triggered.connect(self.material_library.show)
 
-    def select_facility(self) -> None:
-        # Show the facility selection dialog
-        result = self.facility_selector.exec()
+    def select_facility(self, allow_new: bool) -> None:
+        # Show the startup facility selection dialog
+        result = FacilitySelector.select_facility(self, allow_new=allow_new)
         if result == -1:
             # New Facility
             # TODO: Show site creation dialog
@@ -52,4 +50,16 @@ class MainWindow(QMainWindow):
             self.load_facility(result)
 
     def load_facility(self, facility_id: int) -> None:
-        pass
+        # Get the facility from the library
+        facility = FacilityLibrary().get_facility_by_id(facility_id)
+        if facility is None:
+            return QMessageBox.critical(
+                self,
+                'Load Facility Error',
+                f'Could not load facility!\nID {facility_id} did not exist.',
+            )
+
+        # Change our title
+        self.setWindowTitle(f'Rapid Tanks | {facility.name}')
+
+        # TODO: Load something?
