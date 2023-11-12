@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
 from src.data.facility_library import FacilityLibrary
-from src.gui.modals.facility_dialogs import FacilitySelector
+from src.gui.modals.facility_selector import FacilitySelector
 
 
 class MainWindow(QMainWindow):
