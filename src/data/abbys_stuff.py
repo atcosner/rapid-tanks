@@ -5,9 +5,11 @@ import pandas as pd
 from pathlib import Path
 
 DIRECTORY = Path('C:/Users/Abby/PycharmProjects/rapid-tanks')
-name = pd.read_csv(DIRECTORY / 'met/NSRDB_DailyStatistics_19910101_20101231_722900.txt')
-data = pd.read_csv(DIRECTORY / 'met/NSRDB_DailyStatistics_19910101_20101231_722900.txt',
-                   skiprows=[0, 1], delim_whitespace=True)
+met_data = (DIRECTORY / 'met')
+
+#for file in met_data.glob('*'):
+name = pd.read_csv(met_data / 'NSRDB_DailyStatistics_19910101_20101231_700260.txt')
+data = pd.read_csv(met_data / 'NSRDB_DailyStatistics_19910101_20101231_700260.txt', skiprows=[0, 1], delim_whitespace=True)
 
 data = data.loc[0:12, ['MIN_T', 'MAX_T', 'AVWS', 'AVGLO']]
 data.loc[:, 'MIN_T'] = data.loc[:, 'MIN_T'] * 9/5 + 32
@@ -26,5 +28,8 @@ state = name[-6]
 name = name[1:]
 name = name[:-6]
 name = ' '.join(name)
+print(data)
+for index, row in data.iterrows():
+    print(f"'{row[0]}', '{row[1]}', '{row[2]}', '{row[3]}'")
 
-print(f'{name}, {state}, {loc_code}, {lat}, {long}')
+print(f"'{name}', '{state}', '{loc_code}', '{lat}', '{long}'")
