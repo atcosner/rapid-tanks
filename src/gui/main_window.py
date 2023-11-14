@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
 from src.data.facility_library import FacilityLibrary
+from src.gui.modals.facility_creator import FacilityCreator
 from src.gui.modals.facility_selector import FacilitySelector
 
 
@@ -23,7 +24,7 @@ class MainWindow(QMainWindow):
 
     def _create_menubar(self) -> None:
         file_menu = self.menuBar().addMenu('File')
-        file_menu.addAction('New Site')
+        file_menu.addAction('New Site').triggered.connect(self.create_facility)
         file_menu.addAction('Open Site').triggered.connect(lambda: self.select_facility(allow_new=False))
         file_menu.addAction('Save')
         file_menu.addSeparator()
@@ -38,13 +39,15 @@ class MainWindow(QMainWindow):
         materials_menu.addAction('Create Custom Material')
         materials_menu.addSeparator()
 
+    def create_facility(self) -> None:
+        result = FacilityCreator.create_facility(self)
+
     def select_facility(self, allow_new: bool) -> None:
         # Show the startup facility selection dialog
         result = FacilitySelector.select_facility(self, allow_new=allow_new)
         if result == -1:
             # New Facility
-            # TODO: Show site creation dialog
-            pass
+            self.create_facility()
         elif result > 0:
             # Existing Facility - Result is the ID
             self.load_facility(result)
