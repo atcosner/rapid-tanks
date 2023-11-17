@@ -40,3 +40,10 @@ class FacilityLibrary:
             if facility.id == facility_id:
                 return facility
         return None
+
+    def store(self, facility: Facility) -> int | None:
+        with self.cxn:
+            cursor = self.cxn.cursor()
+            facility_row = facility.to_db_row()
+            cursor.execute(f'INSERT INTO facility_master VALUES {facility_row}')
+            return cursor.lastrowid

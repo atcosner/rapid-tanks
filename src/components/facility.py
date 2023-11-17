@@ -31,6 +31,13 @@ class Facility:
     def __post_init__(self) -> None:
         self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
+    def to_db_row(self) -> str:
+        # Some values cannot be null in the DB
+        if self.meteorological_data is None:
+            raise Exception('Meteorological data cannot be NULL in the DB!')
+
+        return f"""(NULL, '{self.name}', '{self.description}', '{self.company}', {self.meteorological_data.id})"""
+
     @classmethod
     def from_db_row(cls, row: namedtuple):
         return cls(
