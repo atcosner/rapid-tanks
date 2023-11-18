@@ -18,7 +18,7 @@ repository.upgrade_db(cxn)
 
 # TEMP: Add in a test meteorological site
 data = [
-    ('Denver, Colorado', '0', '0', '12.08', [
+    ('Denver', 'Colorado', '0', '0', '12.08', [
         ('1', '19.2', '42.9', '9.2', '764'),
         ('2', '21.7', '45.7', '9.2', '1052'),
         ('3', '28.2', '53.7', '10.3', '1463'),
@@ -33,7 +33,7 @@ data = [
         ('12', '19.6', '43.0', '9.2', '664'),
         ('13', '37.9', '63.5', '9.4', '1491'),
     ]),
-    ('Colorado Springs, Colorado', '0', '0', '12.09', [
+    ('Colorado Springs', 'Colorado', '0', '0', '12.09', [
         ('1', '19.2', '42.9', '9.2', '764'),
         ('2', '21.7', '45.7', '9.2', '1052'),
         ('3', '28.2', '53.7', '10.3', '1463'),
@@ -51,11 +51,11 @@ data = [
 ]
 with cxn:
     # Insert all the initial site records
-    site_records = [record[:4] for record in data]
+    site_records = [record[:5] for record in data]
     cxn.executemany(
         """
             INSERT INTO meteorological_location VALUES
-            (NULL, ?, ?, ?, ?)
+            (NULL, ?, ?, ?, ?, ?)
         """,
         site_records
     )
@@ -71,13 +71,13 @@ with cxn:
                 INSERT INTO meteorological_location_detail VALUES
                 (NULL, {site_id}, ?, ?, ?, ?, ?)
             """,
-            record[4]
+            record[5]
         )
 
 # Test if the library can load
 library = MeteorologicalLibrary()
-print(library.get_site('Denver, Colorado'))
-print(library.get_site('Colorado Springs, Colorado'))
+print(library.get_site(1))
+print(library.get_site(2))
 
 # Add a test facility
 with cxn:

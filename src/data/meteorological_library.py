@@ -12,10 +12,14 @@ class MeteorologicalLibrary:
         self.cxn = get_db_connection(db_location if db_location is not None else DEV_DB_FILE_PATH)
         self.cxn.row_factory = namedtuple_factory
 
-        self.sites: dict[str, MeteorologicalSite] = {}
+        self.sites: dict[id, MeteorologicalSite] = {}
 
         if autoload:
             self.load_from_db()
+
+    # Allow iterating through the class as if it was the site dict
+    def __iter__(self):
+        yield from self.sites
 
     def load_from_db(self) -> None:
         # Load the sites
@@ -34,7 +38,7 @@ class MeteorologicalLibrary:
                 else:
                     site.monthly_data[data_point.month_num] = data_point
 
-            self.sites[site.name] = site
+            self.sites[site.id] = site
 
     def reload(self) -> None:
         # Remove all existing entries
@@ -43,5 +47,14 @@ class MeteorologicalLibrary:
         # Load from the DB
         self.load_from_db()
 
-    def get_site(self, name: str) -> MeteorologicalSite | None:
-        return self.sites.get(name, None)
+    def get_site_by_id(self, site_id: int) -> MeteorologicalSite | None:
+        return self.sites.get(site_id, None)
+
+    def get_sites_by_name(self, site_name: str) -> list[MeteorologicalSite] | None:
+        # Site could have the same name so we return all matches
+        # TODO: Casing?
+        matches = [site for site in self.sites.values() if site.name == site_name]
+        return matches if matches else None
+
+    def get_sites_by_state(self, state_name: str) -> list[MeteorologicalSite]:
+        return [site for site in self.sites.values() if site.state.lower() == state_name.lower()]

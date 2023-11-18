@@ -42,6 +42,10 @@ class MainWindow(QMainWindow):
     def create_facility(self) -> None:
         result = FacilityCreator.create_facility(self)
 
+        # 0 = Canceled, > 0: Facility ID
+        if result > 0:
+            self.load_facility(result)
+
     def select_facility(self, allow_new: bool) -> None:
         # Show the startup facility selection dialog
         result = FacilitySelector.select_facility(self, allow_new=allow_new)

@@ -8,6 +8,7 @@ from src.components.facility import Facility
 from src.constants.meteorological import MeteorologicalSite
 from src.data.facility_library import FacilityLibrary
 from src.gui.widgets.dialog import Dialog
+from src.gui.widgets.meteorological_selection_frame import MeteorologicalSelectionFrame
 
 
 class FacilityInfoWidget(QWidget):
@@ -63,10 +64,14 @@ class MeteorologicalInfoWidget(QWidget):
         self._initial_setup()
 
     def _initial_setup(self) -> None:
-        pass
+        self.selection_frame = MeteorologicalSelectionFrame(self)
 
-    def check_and_get_site(self) -> MeteorologicalSite | None:
-        return None
+        layout = QHBoxLayout()
+        layout.addWidget(self.selection_frame)
+        self.setLayout(layout)
+
+    def get_site(self) -> MeteorologicalSite | None:
+        return self.selection_frame.get_selected_site()
 
 
 class FacilityCreator(Dialog):
@@ -109,12 +114,12 @@ class FacilityCreator(Dialog):
         # See if the facility info is filled out enough
         if (facility := self.facility_info.check_and_build_facility()) is None:
             return QMessageBox.critical(self, 'Form Error', 'Please fill out all mandatory fields (*)')
-        if (meteorological_site := self.meteorological_info.check_and_get_site()) is None:
+        if (meteorological_site := self.meteorological_info.get_site()) is None:
             return QMessageBox.critical(self, 'Form Error', 'Please choose a valid meteorological site')
 
         # Insert the facility into the DB
         facility.meteorological_data = meteorological_site
-        return self.library.store(facility)
+        self.done(self.library.store(facility))
 
     @classmethod
     def create_facility(cls, parent: QWidget) -> int:

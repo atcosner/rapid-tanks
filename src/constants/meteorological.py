@@ -34,6 +34,7 @@ class MeteorologicalMonthData:
 class MeteorologicalSite:
     id: int
     name: str
+    state: str
     gps_coordinates: tuple[str, str]
     atmospheric_pressure: Quantity
     monthly_data: dict[int, MeteorologicalMonthData] = field(default_factory=dict)
@@ -44,6 +45,7 @@ class MeteorologicalSite:
         return cls(
             id=row.id,
             name=row.name,
+            state=row.state,
             gps_coordinates=(row.gps_latitude, row.gps_longitude),
             atmospheric_pressure=unit_registry.Quantity(Decimal(row.atmospheric_pressure), 'psia'),
         )

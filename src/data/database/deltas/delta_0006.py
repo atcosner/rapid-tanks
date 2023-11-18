@@ -12,6 +12,7 @@ class Delta0006(BaseSchemaDelta):
             CREATE TABLE meteorological_location(
                 id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
                 name TEXT,
+                state TEXT,
                 gps_latitude TEXT,
                 gps_longitude TEXT,
                 atmospheric_pressure TEXT
