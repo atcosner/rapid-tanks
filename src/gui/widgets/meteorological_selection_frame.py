@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.Qt import pyqtSlot
+from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import (
     QWidget, QFrame, QVBoxLayout, QTreeWidget, QTreeWidgetItem,
 )
@@ -21,10 +21,14 @@ class MeteorologicalSiteItem(QTreeWidgetItem):
 
 
 class MeteorologicalSiteTree(QTreeWidget):
+    siteSelected = pyqtSignal(MeteorologicalSite)
+
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.library = MeteorologicalLibrary()
         self.state_items: dict[str, QTreeWidgetItem] = {}
+
+        self.itemClicked.connect(self.handle_item_clicked)
 
         # Set up our basic properties
         self.setColumnCount(1)
@@ -84,13 +88,21 @@ class MeteorologicalSiteTree(QTreeWidget):
         else:
             return None
 
+    @pyqtSlot(QTreeWidgetItem, int)
+    def handle_item_clicked(self, item: QTreeWidgetItem, column: int) -> None:
+        if isinstance(item, MeteorologicalSiteItem):
+            self.siteSelected.emit(item.get_site())
+
 
 class MeteorologicalSelectionFrame(QFrame):
+    siteSelected = pyqtSignal(MeteorologicalSite)
+
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)
 
         self.site_tree = MeteorologicalSiteTree(self)
+        self.site_tree.siteSelected.connect(self.siteSelected)
 
         self._initial_setup()
 

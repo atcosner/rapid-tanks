@@ -8,6 +8,7 @@ from src.components.facility import Facility
 from src.constants.meteorological import MeteorologicalSite
 from src.data.facility_library import FacilityLibrary
 from src.gui.widgets.dialog import Dialog
+from src.gui.widgets.meteorological_data_frame import MeteorologicalDataFrame
 from src.gui.widgets.meteorological_selection_frame import MeteorologicalSelectionFrame
 
 
@@ -65,9 +66,13 @@ class MeteorologicalInfoWidget(QWidget):
 
     def _initial_setup(self) -> None:
         self.selection_frame = MeteorologicalSelectionFrame(self)
+        self.data_frame = MeteorologicalDataFrame(self)
+
+        self.selection_frame.siteSelected.connect(self.data_frame.handle_site_selected)
 
         layout = QHBoxLayout()
         layout.addWidget(self.selection_frame)
+        layout.addWidget(self.data_frame)
         self.setLayout(layout)
 
     def get_site(self) -> MeteorologicalSite | None:
