@@ -3,11 +3,14 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from src.data.facility_library import FacilityLibrary
 from src.gui.modals.facility_creator import FacilityCreator
 from src.gui.modals.facility_selector import FacilitySelector
+from src.gui.widgets.facility_tab_widget import FacilityTabWidget
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__(None)
+
+        self.facility_tabs = FacilityTabWidget(self)
 
         self._initial_setup()
         self.show()
@@ -21,6 +24,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(600, 400)
 
         self._create_menubar()
+        self.setCentralWidget(self.facility_tabs)
 
     def _create_menubar(self) -> None:
         file_menu = self.menuBar().addMenu('File')
@@ -69,4 +73,5 @@ class MainWindow(QMainWindow):
         # Change our title
         self.setWindowTitle(f'Rapid Tanks | {facility.name}')
 
-        # TODO: Load something?
+        # Load the facility
+        self.facility_tabs.load(facility)
