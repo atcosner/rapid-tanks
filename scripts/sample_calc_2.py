@@ -16,11 +16,11 @@ configure_root_logger()
 logger = logging.getLogger(__name__)
 
 
-test_site = Facility('test1')
+test_site = Facility(0, 'test1')
 
 # Load the meteorological data
 meteorological_library = MeteorologicalLibrary()
-site_weather_data = meteorological_library.get_site('Denver, Colorado')
+site_weather_data = meteorological_library.get_sites_by_name('Denver')[0]
 test_site.set_meteorological_data(site_weather_data)
 
 test_tank = test_site.add_fixed_roof_tank('Tank 1', vertical=False)
