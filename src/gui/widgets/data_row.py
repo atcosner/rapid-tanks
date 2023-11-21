@@ -16,7 +16,7 @@ class DataRow(QHBoxLayout):
         self.addStretch()
 
         self.text_box = QLineEdit()
-        self.text_box.setDisabled(True)
+        self.text_box.setReadOnly(True)
         self.text_box.setMaximumWidth(150)
         self.text_box.setAlignment(QtCore.Qt.AlignRight)
         self.addWidget(self.text_box)

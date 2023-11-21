@@ -5,7 +5,7 @@ from src.constants.meteorological import MeteorologicalSite
 from src.gui.widgets.data_row import DataRow
 
 
-class MeteorologicalDataFrame(QFrame):
+class MeteorologicalInfoFrame(QFrame):
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)
