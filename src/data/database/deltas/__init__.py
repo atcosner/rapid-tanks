@@ -5,6 +5,8 @@ from .delta_0004 import Delta0004
 from .delta_0005 import Delta0005
 from .delta_0006 import Delta0006
 from .delta_0007 import Delta0007
+from .delta_0008 import Delta0008
+from .delta_0009 import Delta0009
 
 
 ALL_DELTAS = [
@@ -15,4 +17,6 @@ ALL_DELTAS = [
     Delta0005,
     Delta0006,
     Delta0007,
+    Delta0008,
+    Delta0009,
 ]

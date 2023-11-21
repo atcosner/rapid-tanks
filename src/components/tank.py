@@ -24,6 +24,7 @@ class Tank:
     All components of a tank that are similar between the both fixed and floating roof tanks should live here.
     """
     def __init__(self, name: str) -> None:
+        self.id: int = -1
         self.name: str = name
         self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
