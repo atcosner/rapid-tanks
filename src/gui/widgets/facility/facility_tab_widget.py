@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QTabWidget
 
 from src.components.facility import Facility
-from src.gui.widgets.facility_info_frame import FacilityInfoFrame
+from src.gui.widgets.facility.facility_info_frame import FacilityInfoFrame
 
 
 class FacilityTabWidget(QTabWidget):

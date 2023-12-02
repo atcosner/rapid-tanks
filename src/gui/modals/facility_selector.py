@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 )
 
 from ..widgets.dialog import Dialog
-from ..widgets.facility_selection_frame import FacilitySelectionFrame
+from src.gui.widgets.facility.facility_selection_frame import FacilitySelectionFrame
 
 
 class FacilitySelection(IntEnum):

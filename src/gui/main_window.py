@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from src.data.facility_library import FacilityLibrary
 from src.gui.modals.facility_creator import FacilityCreator
 from src.gui.modals.facility_selector import FacilitySelector
-from src.gui.widgets.facility_tab_widget import FacilityTabWidget
+from src.gui.modals.tank_editor import TankEditor
+from src.gui.widgets.facility.facility_tab_widget import FacilityTabWidget
 
 
 class MainWindow(QMainWindow):
@@ -36,7 +37,7 @@ class MainWindow(QMainWindow):
 
         # Create the menu to add new components
         add_menu = self.menuBar().addMenu('Add')
-        add_menu.addAction('New Tank')
+        add_menu.addAction('New Tank').triggered.connect(self.create_tank)
 
         # Create the menu for materials options
         materials_menu = self.menuBar().addMenu('Materials')
@@ -75,3 +76,6 @@ class MainWindow(QMainWindow):
 
         # Load the facility
         self.facility_tabs.load(facility)
+
+    def create_tank(self) -> None:
+        TankEditor.create_tank(self)

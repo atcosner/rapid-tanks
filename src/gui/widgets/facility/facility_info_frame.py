@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
 
 from src.components.facility import Facility
 
-from .. import RESOURCE_DIR
+from src.gui import RESOURCE_DIR
 
 
 class FacilityInfoFrame(QFrame):
@@ -55,7 +55,7 @@ class FacilityInfoFrame(QFrame):
         if self.read_only:
             main_layout.addWidget(self.edit_button, 0, 2)
         else:
-            main_layout.addWidget(QLabel('(*) = Mandatory Fields'), 3, 0)
+            main_layout.addWidget(QLabel('(*) = Required'), 3, 0)
 
     def load(self, facility: Facility) -> None:
         self.facility_name.setText(facility.name)

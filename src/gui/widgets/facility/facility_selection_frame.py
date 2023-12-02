@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 from src.components.facility import Facility
 from src.data.facility_library import FacilityLibrary
 
-from ..widgets.search_bar import SearchBar
+from src.gui.widgets.search_bar import SearchBar
 
 
 class FacilityListItem(QListWidgetItem):
