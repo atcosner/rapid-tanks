@@ -6,7 +6,9 @@ from PyQt5.QtWidgets import (
 from src.components.tank import Tank
 
 from src.gui import RESOURCE_DIR
-from src.gui.widgets.util.data_entry_rows import NumericDataRow, CheckboxDataRow
+from src.gui.widgets.util.data_entry_rows import (
+    NumericDataRow, CheckBoxDataRow, ComboBoxDataRow, ComboBoxDataType,
+)
 from src.gui.widgets.util.labels import SubSectionHeader
 
 
@@ -26,7 +28,27 @@ class TankPhysicalFrame(QFrame):
         self.working_volume = NumericDataRow('Working Volume', 'gal', read_only)
         self.turnovers_per_year = NumericDataRow('Turnovers Per Year', 'dimensionless', read_only)
         self.net_throughput = NumericDataRow('Net Throughput', 'gal/yr', read_only)
-        self.is_heated = CheckboxDataRow('Is Heated?', read_only)
+        self.is_heated = CheckBoxDataRow('Is Heated?', read_only)
+
+        # Shell Characteristics
+        self.shell_color = ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, read_only)
+        self.shell_condition = ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, read_only)
+
+        # Roof Characteristics
+        self.roof_color = ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, read_only)
+        self.roof_condition = ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, read_only)
+        self.roof_type = ComboBoxDataRow('Roof Type', ['Cone', 'Dome'], read_only)
+        self.roof_height = NumericDataRow('Roof Height', 'ft', read_only)
+        self.roof_radius = NumericDataRow('Radius', 'ft', read_only)
+        self.roof_slope = NumericDataRow('Slope', 'ft/ft', read_only, default='0.0625')
+
+        # Breather Vent Settings
+        self.vacuum_setting = NumericDataRow(
+            'Vacuum Setting', 'psig', read_only, allow_negative=True, default='-0.3',
+        )
+        self.pressure_setting = NumericDataRow(
+            'Pressure Setting', 'psig', read_only, default='0.3',
+        )
 
         self._initial_setup()
 
@@ -52,6 +74,38 @@ class TankPhysicalFrame(QFrame):
         dimensions_layout.addLayout(self.turnovers_per_year)
         dimensions_layout.addLayout(self.net_throughput)
         dimensions_layout.addLayout(self.is_heated)
+        dimensions_layout.addStretch()
+
+        # Shell Characteristics
+        shell_layout = QVBoxLayout()
+        main_layout.addLayout(shell_layout, 1, 0)
+
+        shell_layout.addStretch()
+        shell_layout.addWidget(SubSectionHeader('Shell Characteristics'))
+        shell_layout.addLayout(self.shell_color)
+        shell_layout.addLayout(self.shell_condition)
+
+        # Roof Characteristics
+        roof_layout = QVBoxLayout()
+        main_layout.addLayout(roof_layout, 0, 1)
+
+        roof_layout.addWidget(SubSectionHeader('Roof Characteristics'))
+        roof_layout.addLayout(self.roof_color)
+        roof_layout.addLayout(self.roof_condition)
+        roof_layout.addLayout(self.roof_type)
+        roof_layout.addLayout(self.roof_height)
+        roof_layout.addLayout(self.roof_radius)
+        roof_layout.addLayout(self.roof_slope)
+        roof_layout.addStretch()
+
+        # Breather Vent Settings
+        vent_layout = QVBoxLayout()
+        main_layout.addLayout(vent_layout, 1, 1)
+
+        vent_layout.addStretch()
+        vent_layout.addWidget(SubSectionHeader('Breather Vent Settings'))
+        vent_layout.addLayout(self.vacuum_setting)
+        vent_layout.addLayout(self.pressure_setting)
 
         if self.read_only:
             main_layout.addWidget(self.edit_button, 0, 2)
