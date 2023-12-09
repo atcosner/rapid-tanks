@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
 from src.constants.meteorological import MeteorologicalSite
 from src.data.meteorological_library import MeteorologicalLibrary
 from src.util.states import STATES_BY_ABBREVIATION
-from ..widgets.search_bar import SearchBar
+from src.gui.widgets.util.search_bar import SearchBar
 
 
 class MeteorologicalSiteItem(QTreeWidgetItem):

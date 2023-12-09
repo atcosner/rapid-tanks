@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QWidget, QRadioButton, QVBoxLayout, QButtonGroup, QHBoxLayout, QLabel, QPushButton, QMessageBox,
 )
 
-from ..widgets.dialog import Dialog
+from src.gui.widgets.util.dialog import Dialog
 from src.gui.widgets.facility.facility_selection_frame import FacilitySelectionFrame
 
 

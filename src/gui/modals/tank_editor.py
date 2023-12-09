@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout
 
 from src.components.tank import Tank
-from src.gui.widgets.dialog import Dialog
+from src.gui.widgets.util.dialog import Dialog
 from src.gui.widgets.tank.tank_tab_widget import TankTabWidget
 
 

@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QLineEdit, QWidget
 
-from .. import RESOURCE_DIR
+from src.gui import RESOURCE_DIR
 
 
 class SearchBar(QLineEdit):

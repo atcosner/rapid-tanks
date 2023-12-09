@@ -1,11 +1,13 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
-    QWidget, QFrame, QLabel, QLineEdit, QGridLayout, QPushButton, QCheckBox,
+    QWidget, QFrame, QLabel, QGridLayout, QPushButton, QVBoxLayout,
 )
 
 from src.components.tank import Tank
 
 from src.gui import RESOURCE_DIR
+from src.gui.widgets.util.data_entry_rows import NumericDataRow, CheckboxDataRow
+from src.gui.widgets.util.labels import SubSectionHeader
 
 
 class TankPhysicalFrame(QFrame):
@@ -17,28 +19,18 @@ class TankPhysicalFrame(QFrame):
         self.edit_button = QPushButton()
 
         # Dimensions
-        self.shell_height = QLineEdit()
-        self.shell_diameter = QLineEdit()
-        self.max_liquid_height = QLineEdit()
-        self.avg_liquid_height = QLineEdit()
-        self.working_volume = QLineEdit()
-        self.turnovers_per_year = QLineEdit()
-        self.net_throughput = QLineEdit()
-        self.is_heated = QCheckBox()
+        self.shell_height = NumericDataRow('Shell Height', 'ft', read_only)
+        self.shell_diameter = NumericDataRow('Shell Diameter', 'ft', read_only)
+        self.max_liquid_height = NumericDataRow('Maximum Liquid Height', 'ft', read_only)
+        self.avg_liquid_height = NumericDataRow('Average Liquid Height', 'ft', read_only)
+        self.working_volume = NumericDataRow('Working Volume', 'gal', read_only)
+        self.turnovers_per_year = NumericDataRow('Turnovers Per Year', 'dimensionless', read_only)
+        self.net_throughput = NumericDataRow('Net Throughput', 'gal/yr', read_only)
+        self.is_heated = CheckboxDataRow('Is Heated?', read_only)
 
         self._initial_setup()
 
     def _initial_setup(self) -> None:
-        # All the widgets should match our read-only status
-        self.shell_height.setReadOnly(self.read_only)
-        self.shell_diameter.setReadOnly(self.read_only)
-        self.max_liquid_height.setReadOnly(self.read_only)
-        self.avg_liquid_height.setReadOnly(self.read_only)
-        self.working_volume.setReadOnly(self.read_only)
-        self.turnovers_per_year.setReadOnly(self.read_only)
-        self.net_throughput.setReadOnly(self.read_only)
-        self.is_heated.setDisabled(self.read_only)
-
         # Set up the edit button
         # TODO: Open a tank edit window
         self.edit_button.setIcon(QIcon(str(RESOURCE_DIR / 'pencil.png')))
@@ -48,26 +40,18 @@ class TankPhysicalFrame(QFrame):
         self.setLayout(main_layout)
 
         # Dimensions
-        dimensions_layout = QGridLayout()
+        dimensions_layout = QVBoxLayout()
         main_layout.addLayout(dimensions_layout, 0, 0)
-        dimensions_layout.addWidget(QLabel('Dimensions'), 0, 0)
 
-        dimensions_layout.addWidget(QLabel('Shell Height'), 1, 0)
-        dimensions_layout.addWidget(self.shell_height, 1, 1)
-        dimensions_layout.addWidget(QLabel('Shell Diameter'), 2, 0)
-        dimensions_layout.addWidget(self.shell_diameter, 2, 1)
-        dimensions_layout.addWidget(QLabel('Max Liquid Height'), 3, 0)
-        dimensions_layout.addWidget(self.max_liquid_height, 3, 1)
-        dimensions_layout.addWidget(QLabel('Average Liquid Height'), 4, 0)
-        dimensions_layout.addWidget(self.avg_liquid_height, 4, 1)
-        dimensions_layout.addWidget(QLabel('Working Volume'), 5, 0)
-        dimensions_layout.addWidget(self.working_volume, 5, 1)
-        dimensions_layout.addWidget(QLabel('Turnovers Per Year'), 6, 0)
-        dimensions_layout.addWidget(self.turnovers_per_year, 6, 1)
-        dimensions_layout.addWidget(QLabel('Net Throughput'), 7, 0)
-        dimensions_layout.addWidget(self.net_throughput, 7, 1)
-        dimensions_layout.addWidget(QLabel('Heated?'), 8, 0)
-        dimensions_layout.addWidget(self.is_heated, 8, 1)
+        dimensions_layout.addWidget(SubSectionHeader('Dimensions'))
+        dimensions_layout.addLayout(self.shell_height)
+        dimensions_layout.addLayout(self.shell_diameter)
+        dimensions_layout.addLayout(self.max_liquid_height)
+        dimensions_layout.addLayout(self.avg_liquid_height)
+        dimensions_layout.addLayout(self.working_volume)
+        dimensions_layout.addLayout(self.turnovers_per_year)
+        dimensions_layout.addLayout(self.net_throughput)
+        dimensions_layout.addLayout(self.is_heated)
 
         if self.read_only:
             main_layout.addWidget(self.edit_button, 0, 2)

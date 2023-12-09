@@ -1,8 +1,8 @@
 from PyQt5.Qt import pyqtSlot
-from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout
 
 from src.constants.meteorological import MeteorologicalSite
-from src.gui.widgets.data_row import DataRow
+from src.gui.widgets.util.data_entry_rows import NumericDataRow
 
 
 class MeteorologicalInfoFrame(QFrame):
@@ -17,27 +17,27 @@ class MeteorologicalInfoFrame(QFrame):
         self.setLayout(layout)
 
         # Daily Average Ambient Temperature
-        self.daat = DataRow('Daily Average Ambient Temperature (F)', 'degF')
+        self.daat = NumericDataRow('Daily Average Ambient Temperature (F)', 'degF')
         layout.addLayout(self.daat)
 
         # Annual Average Maximum Temperature
-        self.aat_max = DataRow('Annual Average Maximum Temperature (F)', 'degF')
+        self.aat_max = NumericDataRow('Annual Average Maximum Temperature (F)', 'degF')
         layout.addLayout(self.aat_max)
 
         # Annual Average Minimum Temperature
-        self.aat_min = DataRow('Annual Average Minimum Temperature (F)', 'degF')
+        self.aat_min = NumericDataRow('Annual Average Minimum Temperature (F)', 'degF')
         layout.addLayout(self.aat_min)
 
         # Average Wind Speed
-        self.aws = DataRow('Average Wind Speed (mph)', 'mph')
+        self.aws = NumericDataRow('Average Wind Speed (mph)', 'mph')
         layout.addLayout(self.aws)
 
         # Annual Average Solar Insulation Factor
-        self.aasif = DataRow('Annual Average Solar Insulation Factor', 'dimensionless')
+        self.aasif = NumericDataRow('Annual Average Solar Insulation Factor', 'dimensionless')
         layout.addLayout(self.aasif)
 
         # Atmospheric Pressure
-        self.ap = DataRow('Atmospheric Pressure', 'psia')
+        self.ap = NumericDataRow('Atmospheric Pressure', 'psia')
         layout.addLayout(self.ap)
 
     @pyqtSlot(MeteorologicalSite)

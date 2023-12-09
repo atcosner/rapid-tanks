@@ -5,10 +5,10 @@ from PyQt5.QtWidgets import (
 
 from src.constants.meteorological import MeteorologicalSite
 from src.data.facility_library import FacilityLibrary
-from src.gui.widgets.dialog import Dialog
+from src.gui.widgets.util.dialog import Dialog
 from src.gui.widgets.facility.facility_info_frame import FacilityInfoFrame
-from src.gui.widgets.meteorological_info_frame import MeteorologicalInfoFrame
-from src.gui.widgets.meteorological_selection_frame import MeteorologicalSelectionFrame
+from src.gui.widgets.meteorological.meteorological_info_frame import MeteorologicalInfoFrame
+from src.gui.widgets.meteorological.meteorological_selection_frame import MeteorologicalSelectionFrame
 
 
 class MeteorologicalInfoWidget(QWidget):
