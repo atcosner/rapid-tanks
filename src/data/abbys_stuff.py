@@ -91,7 +91,7 @@ for i in filenames:
     name = pd.Series.to_string(name)
     name = name.split()
     name = name[:-10]
-    pressure = name[-1]
+    pressure = round(int(name[-1]) * 0.0145038, 2)
     name = name[:-2]
     loc_code = name[0]
     lat = ' '.join(name[-4:-2])
@@ -101,11 +101,11 @@ for i in filenames:
     name = name[:-6]
     name = ' '.join(name)
 
-    f.write(f"('{name}', '{state}', '{loc_code}, '{lat}', '{long}', '{pressure}' ,[\n")
+    f.write(f"('{name}', '{state}', '{loc_code}, '{lat}', '{long}', '{pressure}',\n    [\n")
 
     for index, row in data.iterrows():
-        f.write(f"    ('{index+1}', '{row[0]}', '{row[1]}', '{row[2]}', '{row[3]}'),\n")
+        f.write(f"      ('{index+1}', '{row[0]}', '{row[1]}', '{row[2]}', '{row[3]}'),\n")
 
-    f.write(']),\n')
+    f.write('   ],\n),\n')
 
 f.close()
