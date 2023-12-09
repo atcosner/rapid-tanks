@@ -13,6 +13,7 @@ class Delta0006(BaseSchemaDelta):
                 id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
                 name TEXT,
                 state TEXT,
+                station_identifier TEXT,
                 gps_latitude TEXT,
                 gps_longitude TEXT,
                 atmospheric_pressure TEXT
