@@ -17,28 +17,70 @@ class MeteorologicalInfoFrame(QFrame):
         self.setLayout(layout)
 
         # Daily Average Ambient Temperature
-        self.daat = NumericDataRow('Daily Average Ambient Temperature (F)', 'degF')
-        layout.addLayout(self.daat)
+        self.daat = NumericDataRow(
+            'Daily Average Ambient Temperature',
+            'degF',
+            read_only=True,
+            allow_negative=True,
+            default=None,
+            precision=2,
+        )
+        layout.addWidget(self.daat)
 
         # Annual Average Maximum Temperature
-        self.aat_max = NumericDataRow('Annual Average Maximum Temperature (F)', 'degF')
-        layout.addLayout(self.aat_max)
+        self.aat_max = NumericDataRow(
+            'Annual Average Maximum Temperature',
+            'degF',
+            read_only=True,
+            allow_negative=True,
+            default=None,
+            precision=2,
+        )
+        layout.addWidget(self.aat_max)
 
         # Annual Average Minimum Temperature
-        self.aat_min = NumericDataRow('Annual Average Minimum Temperature (F)', 'degF')
-        layout.addLayout(self.aat_min)
+        self.aat_min = NumericDataRow(
+            'Annual Average Minimum Temperature',
+            'degF',
+            read_only=True,
+            allow_negative=True,
+            default=None,
+            precision=2,
+        )
+        layout.addWidget(self.aat_min)
 
         # Average Wind Speed
-        self.aws = NumericDataRow('Average Wind Speed (mph)', 'mph')
-        layout.addLayout(self.aws)
+        self.aws = NumericDataRow(
+            'Average Wind Speed',
+            'mph',
+            read_only=True,
+            allow_negative=True,
+            default=None,
+            precision=2,
+        )
+        layout.addWidget(self.aws)
 
         # Annual Average Solar Insulation Factor
-        self.aasif = NumericDataRow('Annual Average Solar Insulation Factor', 'dimensionless')
-        layout.addLayout(self.aasif)
+        self.aasif = NumericDataRow(
+            'Annual Average Solar Insulation Factor',
+            'dimensionless',
+            read_only=True,
+            allow_negative=True,
+            default=None,
+            precision=0,
+        )
+        layout.addWidget(self.aasif)
 
         # Atmospheric Pressure
-        self.ap = NumericDataRow('Atmospheric Pressure', 'psia')
-        layout.addLayout(self.ap)
+        self.ap = NumericDataRow(
+            'Atmospheric Pressure',
+            'psia',
+            read_only=True,
+            allow_negative=True,
+            default=None,
+            precision=2,
+        )
+        layout.addWidget(self.ap)
 
     @pyqtSlot(MeteorologicalSite)
     def handle_site_selected(self, site: MeteorologicalSite) -> None:

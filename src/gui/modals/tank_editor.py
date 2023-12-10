@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QLayout
 
 from src.components.tank import Tank
 from src.gui.widgets.util.dialog import Dialog
@@ -31,6 +31,7 @@ class TankEditor(Dialog):
         button_layout.addWidget(cancel_button)
 
         main_layout = QVBoxLayout()
+        main_layout.setSizeConstraint(QLayout.SetFixedSize)
         main_layout.addWidget(self.tab_widget)
         main_layout.addLayout(button_layout)
         self.setLayout(main_layout)

@@ -4,11 +4,14 @@ from enum import Enum, auto
 from pint import Quantity
 
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QCheckBox, QComboBox
+from PyQt5.Qt import pyqtSignal
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QComboBox
 
 from src.util.units import to_human_readable
 
 from .validators import NonZeroDoubleValidator, DoubleValidator
+
+DEFAULT_MARGINS = [2, 2, 2, 2]
 
 
 class ComboBoxDataType(Enum):
@@ -17,43 +20,54 @@ class ComboBoxDataType(Enum):
 
 
 class DataEntryLineEdit(QLineEdit):
-    def __init__(self, read_only: bool, allow_negative: bool) -> None:
+    def __init__(
+            self,
+            read_only: bool,
+            allow_negative: bool,
+            precision: int,
+    ) -> None:
         super().__init__()
 
         # Set some defaults
         self.setReadOnly(read_only)
-        self.setMaximumWidth(100)
         self.setAlignment(QtCore.Qt.AlignRight)
 
         # Set up the validator
         if allow_negative:
-            self.setValidator(DoubleValidator())
+            self.setValidator(DoubleValidator(precision))
         else:
-            self.setValidator(NonZeroDoubleValidator())
+            self.setValidator(NonZeroDoubleValidator(precision))
 
 
-class NumericDataRow(QHBoxLayout):
+class NumericDataRow(QWidget):
     def __init__(
             self,
             label_string: str,
             unit: str,
             read_only: bool,
             allow_negative: bool = False,
-            default: str | None = None,
+            default: str | None = '0.0',
+            precision: int = 6,
     ) -> None:
         super().__init__(None)
         self.unit = unit
+        self.precision = precision
 
         self.label = QLabel(
             f'{label_string} ({to_human_readable(unit)})'
             if unit != 'dimensionless' else
             label_string
         )
-        self.data_box = DataEntryLineEdit(read_only, allow_negative)
+        self.data_box = DataEntryLineEdit(read_only, allow_negative, precision)
 
-        self.addWidget(self.label)
-        self.addStretch()
-        self.addWidget(self.data_box)
+        # Set up our layout
+        main_layout = QHBoxLayout()
+        main_layout.addWidget(self.label)
+        main_layout.addStretch()
+        main_layout.addWidget(self.data_box)
+        self.setLayout(main_layout)
+
+        main_layout.setContentsMargins(*DEFAULT_MARGINS)
 
         if default is not None:
             self.data_box.setPlaceholderText(default)
@@ -65,24 +79,30 @@ class NumericDataRow(QHBoxLayout):
             # Convert to our unit
             converted_value = value.to(self.unit)
 
-            # Limit to 6 decimal places
-            quantized_value = converted_value.magnitude.quantize(Decimal('1.000000'))
+            # Limit to our configured precision
+            quantized_value = converted_value.magnitude.quantize(Decimal(f'1.{"0" * self.precision}'))
             self.data_box.setText(str(quantized_value))
 
 
-class CheckBoxDataRow(QHBoxLayout):
+class CheckBoxDataRow(QWidget):
     def __init__(self, label_string: str, read_only: bool) -> None:
         super().__init__(None)
-
-        self.addWidget(QLabel(label_string))
-        self.addStretch()
-
         self.check_box = QCheckBox()
         self.check_box.setDisabled(read_only)
-        self.addWidget(self.check_box)
+
+        # Set up our layout
+        main_layout = QHBoxLayout()
+        self.setLayout(main_layout)
+        main_layout.addWidget(QLabel(label_string))
+        main_layout.addStretch()
+        main_layout.addWidget(self.check_box)
+
+        main_layout.setContentsMargins(*DEFAULT_MARGINS)
 
 
-class ComboBoxDataRow(QHBoxLayout):
+class ComboBoxDataRow(QWidget):
+    selectionChanged = pyqtSignal(str)
+
     def __init__(
             self,
             label_string: str,
@@ -91,10 +111,16 @@ class ComboBoxDataRow(QHBoxLayout):
     ) -> None:
         super().__init__(None)
         self.combo_box = QComboBox(None)
+        self.combo_box.currentTextChanged.connect(self.selectionChanged)
 
-        self.addWidget(QLabel(label_string))
-        self.addStretch()
-        self.addWidget(self.combo_box)
+        # Set up our layout
+        main_layout = QHBoxLayout()
+        self.setLayout(main_layout)
+        main_layout.addWidget(QLabel(label_string))
+        main_layout.addStretch()
+        main_layout.addWidget(self.combo_box)
+
+        main_layout.setContentsMargins(*DEFAULT_MARGINS)
 
         # Enforce read only
         self.combo_box.setDisabled(read_only)
@@ -110,3 +136,6 @@ class ComboBoxDataRow(QHBoxLayout):
             pass
         else:
             raise RuntimeError(f'Invalid type for "values": {type(values)}')
+
+    def get_selected(self) -> str:
+        return self.combo_box.currentText()

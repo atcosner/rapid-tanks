@@ -1,6 +1,7 @@
+from PyQt5.Qt import pyqtSlot
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
-    QWidget, QFrame, QLabel, QGridLayout, QPushButton, QVBoxLayout,
+    QWidget, QFrame, QGridLayout, QPushButton, QVBoxLayout,
 )
 
 from src.components.tank import Tank
@@ -66,15 +67,16 @@ class TankPhysicalFrame(QFrame):
         main_layout.addLayout(dimensions_layout, 0, 0)
 
         dimensions_layout.addWidget(SubSectionHeader('Dimensions'))
-        dimensions_layout.addLayout(self.shell_height)
-        dimensions_layout.addLayout(self.shell_diameter)
-        dimensions_layout.addLayout(self.max_liquid_height)
-        dimensions_layout.addLayout(self.avg_liquid_height)
-        dimensions_layout.addLayout(self.working_volume)
-        dimensions_layout.addLayout(self.turnovers_per_year)
-        dimensions_layout.addLayout(self.net_throughput)
-        dimensions_layout.addLayout(self.is_heated)
+        dimensions_layout.addWidget(self.shell_height)
+        dimensions_layout.addWidget(self.shell_diameter)
+        dimensions_layout.addWidget(self.max_liquid_height)
+        dimensions_layout.addWidget(self.avg_liquid_height)
+        dimensions_layout.addWidget(self.working_volume)
+        dimensions_layout.addWidget(self.turnovers_per_year)
+        dimensions_layout.addWidget(self.net_throughput)
+        dimensions_layout.addWidget(self.is_heated)
         dimensions_layout.addStretch()
+        self.setLayout(dimensions_layout)
 
         # Shell Characteristics
         shell_layout = QVBoxLayout()
@@ -82,20 +84,20 @@ class TankPhysicalFrame(QFrame):
 
         shell_layout.addStretch()
         shell_layout.addWidget(SubSectionHeader('Shell Characteristics'))
-        shell_layout.addLayout(self.shell_color)
-        shell_layout.addLayout(self.shell_condition)
+        shell_layout.addWidget(self.shell_color)
+        shell_layout.addWidget(self.shell_condition)
 
         # Roof Characteristics
         roof_layout = QVBoxLayout()
         main_layout.addLayout(roof_layout, 0, 1)
 
         roof_layout.addWidget(SubSectionHeader('Roof Characteristics'))
-        roof_layout.addLayout(self.roof_color)
-        roof_layout.addLayout(self.roof_condition)
-        roof_layout.addLayout(self.roof_type)
-        roof_layout.addLayout(self.roof_height)
-        roof_layout.addLayout(self.roof_radius)
-        roof_layout.addLayout(self.roof_slope)
+        roof_layout.addWidget(self.roof_color)
+        roof_layout.addWidget(self.roof_condition)
+        roof_layout.addWidget(self.roof_type)
+        roof_layout.addWidget(self.roof_height)
+        roof_layout.addWidget(self.roof_radius)
+        roof_layout.addWidget(self.roof_slope)
         roof_layout.addStretch()
 
         # Breather Vent Settings
@@ -104,11 +106,26 @@ class TankPhysicalFrame(QFrame):
 
         vent_layout.addStretch()
         vent_layout.addWidget(SubSectionHeader('Breather Vent Settings'))
-        vent_layout.addLayout(self.vacuum_setting)
-        vent_layout.addLayout(self.pressure_setting)
+        vent_layout.addWidget(self.vacuum_setting)
+        vent_layout.addWidget(self.pressure_setting)
+
+        # Set up the dynamic nature of the roof type
+        self.roof_type.selectionChanged.connect(self.handle_roof_type_change)
+        self.handle_roof_type_change(self.roof_type.get_selected())
 
         if self.read_only:
             main_layout.addWidget(self.edit_button, 0, 2)
+
+    @pyqtSlot(str)
+    def handle_roof_type_change(self, new_type: str) -> None:
+        if new_type == 'Dome':
+            self.roof_slope.hide()
+            self.roof_radius.show()
+        elif new_type == 'Cone':
+            self.roof_slope.show()
+            self.roof_radius.hide()
+        else:
+            raise RuntimeError(f'Unexpected roof type: "{new_type}"')
 
     def load(self, tank: Tank) -> None:
         pass

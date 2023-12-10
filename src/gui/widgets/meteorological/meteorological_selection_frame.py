@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 
 from src.constants.meteorological import MeteorologicalSite
 from src.data.meteorological_library import MeteorologicalLibrary
-from src.util.states import STATES_BY_ABBREVIATION
+from src.util.locations import STATES_AND_TERRITORIES
 from src.gui.widgets.util.search_bar import SearchBar
 
 
@@ -38,7 +38,7 @@ class MeteorologicalSiteTree(QTreeWidget):
 
     def _setup_top_level_items(self) -> None:
         # Create all the top level widgets (i.e. states)
-        for state_name in STATES_BY_ABBREVIATION.values():
+        for state_name in STATES_AND_TERRITORIES:
             state_item = QTreeWidgetItem(self)
             state_item.setFlags(state_item.flags() & ~QtCore.Qt.ItemIsSelectable)
             state_item.setText(0, f'{state_name} ({state_item.childCount()})')
@@ -54,20 +54,23 @@ class MeteorologicalSiteTree(QTreeWidget):
         self.library.reload()
 
         # Add in all the sites
+        for _, site in self.library:
+            state_item = self.state_items[site.state]
+            MeteorologicalSiteItem(state_item, site)
+
+        # Update all the states to include child counts
         for state_name, state_item in self.state_items.items():
-            for site in self.library.get_sites_by_state(state_name):
-                MeteorologicalSiteItem(state_item, site)
             state_item.setText(0, f'{state_name} ({state_item.childCount()})')
 
     @pyqtSlot(str)
     def handle_search(self, search_text: str) -> None:
         # Hide all items that do not have matches in the search text
-        for state_item in self.state_items.values():
+        for state_name, state_item in self.state_items.items():
             hidden_children = 0
 
             for idx in range(state_item.childCount()):
                 site_item = state_item.child(idx)
-                if not search_text or search_text in site_item.text(0):
+                if not search_text or search_text.lower() in site_item.text(0).lower():
                     site_item.setHidden(False)
                 else:
                     hidden_children += 1
@@ -78,6 +81,9 @@ class MeteorologicalSiteTree(QTreeWidget):
                 state_item.setHidden(False)
             else:
                 state_item.setHidden(True)
+
+            # Update the title
+            state_item.setText(0, f'{state_name} ({state_item.childCount() - hidden_children})')
 
     def get_selected_site(self) -> MeteorologicalSite | None:
         if current_item := self.currentItem():

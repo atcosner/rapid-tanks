@@ -19,7 +19,7 @@ class MeteorologicalLibrary:
 
     # Allow iterating through the class as if it was the site dict
     def __iter__(self):
-        yield from self.sites
+        yield from self.sites.items()
 
     def load_from_db(self) -> None:
         # Load the sites

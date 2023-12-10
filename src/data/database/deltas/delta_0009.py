@@ -14,6 +14,7 @@ class Delta0009(BaseSchemaDelta):
                 name TEXT,
                 description TEXT,
                 facility_id INTEGER,
+                is_vertical BOOL,
 
                 shell_height TEXT,
                 shell_diameter TEXT,
