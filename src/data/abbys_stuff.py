@@ -70,7 +70,7 @@ abbrev_to_us_state = dict(map(reversed, us_state_to_abbrev.items()))
 DIRECTORY = Path('C:/Users/acath/PycharmProjects/rapid-tanks')
 met_data = (DIRECTORY / 'met')
 
-f = open(r'C:/Users/acath/PycharmProjects/rapid-tanks/compiled_met.txt', 'a')
+f = open('C:/Users/acath/PycharmProjects/rapid-tanks/scratch/compiled_met.txt', 'w')
 filenames = glob2.glob('C:/Users/acath/PycharmProjects/rapid-tanks/met/*.txt')
 i = filenames[1]
 for i in filenames:
@@ -101,11 +101,11 @@ for i in filenames:
     name = name[:-6]
     name = ' '.join(name)
 
-    f.write(f"('{name}', '{state}', '{loc_code}, '{lat}', '{long}', '{pressure}',\n    [\n")
+    f.write(f"('{name}', '{state}', '{loc_code}', '{lat}', '{long}', '{pressure}',\n    [\n")
 
     for index, row in data.iterrows():
-        f.write(f"      ('{index+1}', '{row[0]}', '{row[1]}', '{row[2]}', '{row[3]}'),\n")
+        f.write(f"        ('{index+1}', '{row[0]}', '{row[1]}', '{row[2]}', '{row[3]}'),\n")
 
-    f.write('   ],\n),\n')
+    f.write('    ],\n),\n')
 
 f.close()
