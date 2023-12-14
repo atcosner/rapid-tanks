@@ -31,6 +31,7 @@ class DataEntryLineEdit(QLineEdit):
         # Set some defaults
         self.setReadOnly(read_only)
         self.setAlignment(QtCore.Qt.AlignRight)
+        self.setMaximumWidth(75)
 
         # Set up the validator
         if allow_negative:

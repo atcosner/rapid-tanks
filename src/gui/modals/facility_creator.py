@@ -1,6 +1,6 @@
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import (
-    QWidget, QTabWidget, QVBoxLayout, QHBoxLayout, QPushButton, QMessageBox,
+    QWidget, QTabWidget, QVBoxLayout, QHBoxLayout, QPushButton, QMessageBox, QSplitter,
 )
 
 from src.constants.meteorological import MeteorologicalSite
@@ -11,9 +11,9 @@ from src.gui.widgets.meteorological.meteorological_info_frame import Meteorologi
 from src.gui.widgets.meteorological.meteorological_selection_frame import MeteorologicalSelectionFrame
 
 
-class MeteorologicalInfoWidget(QWidget):
-    def __init__(self) -> None:
-        super().__init__(None)
+class MeteorologicalInfoWidget(QSplitter):
+    def __init__(self, parent: QWidget) -> None:
+        super().__init__(parent)
         self._initial_setup()
 
     def _initial_setup(self) -> None:
@@ -22,10 +22,8 @@ class MeteorologicalInfoWidget(QWidget):
 
         self.selection_frame.siteSelected.connect(self.data_frame.handle_site_selected)
 
-        layout = QHBoxLayout()
-        layout.addWidget(self.selection_frame)
-        layout.addWidget(self.data_frame)
-        self.setLayout(layout)
+        self.addWidget(self.selection_frame)
+        self.addWidget(self.data_frame)
 
     def get_site(self) -> MeteorologicalSite | None:
         return self.selection_frame.get_selected_site()
@@ -45,7 +43,7 @@ class FacilityCreator(Dialog):
         self.facility_info = FacilityInfoFrame(self, read_only=False)
         tab_widget.addTab(self.facility_info, 'Facility Info')
 
-        self.meteorological_info = MeteorologicalInfoWidget()
+        self.meteorological_info = MeteorologicalInfoWidget(self)
         tab_widget.addTab(self.meteorological_info, 'Meteorological Info')
 
         # Exit Buttons
