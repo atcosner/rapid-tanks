@@ -85,9 +85,9 @@ class MeteorologicalInfoFrame(QFrame):
     @pyqtSlot(MeteorologicalSite)
     def handle_site_selected(self, site: MeteorologicalSite) -> None:
         # Update our line edits with the new data
-        self.daat.set_text(site.annual_data.average_daily_max_temp)
-        self.aat_max.set_text(site.annual_data.average_daily_max_temp)
-        self.aat_min.set_text(site.annual_data.average_daily_min_temp)
-        self.aws.set_text(site.annual_data.average_wind_speed)
-        self.aasif.set_text(site.annual_data.average_solar_insolation)
-        self.ap.set_text(site.atmospheric_pressure)
+        self.daat.set(site.annual_data.average_daily_max_temp)
+        self.aat_max.set(site.annual_data.average_daily_max_temp)
+        self.aat_min.set(site.annual_data.average_daily_min_temp)
+        self.aws.set(site.annual_data.average_wind_speed)
+        self.aasif.set(site.annual_data.average_solar_insolation)
+        self.ap.set(site.atmospheric_pressure)

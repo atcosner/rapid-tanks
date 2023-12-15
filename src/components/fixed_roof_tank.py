@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, auto
 from pint import Quantity
@@ -13,6 +14,7 @@ class VerticalRoofType(Enum):
     CONE = auto()
 
 
+@dataclass
 class FixedRoofTank(Tank):
     """
     This is the base class for both Vertical and Horizontal fixed roof tanks.
@@ -20,14 +22,11 @@ class FixedRoofTank(Tank):
     Most things can be generic between horizontal and vertical tanks and should be placed here. Anything that needs to
     be specific to the orientation of the tank should be placed in the respective subclasses.
     """
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
 
-        # These will be set in the subclasses as they differ between horizontal and vertical
-        self.diameter: Quantity | None = None
-        self.height: Quantity | None = None
-
-        self.liquid_height: Quantity | None = None
+    # These will be set in the subclasses as they differ between horizontal and vertical
+    diameter: Quantity | None = None
+    height: Quantity | None = None
+    liquid_height: Quantity | None = None
 
     def set_liquid_height(self, height: Quantity) -> None:
         self.liquid_height = height
@@ -44,22 +43,51 @@ class FixedRoofTank(Tank):
         return (PI / 4 * self.diameter**2) * vapor_space_outage
 
 
+@dataclass
 class VerticalFixedRoofTank(FixedRoofTank):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
+    roof_type: VerticalRoofType | None = None
+    roof_height: Quantity | None = None
+    roof_slope: Quantity | None = None
+    roof_radius: Quantity | None = None
 
-        self.roof_type: VerticalRoofType | None = None
+    def to_db_row(self) -> str:
+        # Convert the internal quantities to the right units
+        shell_height_str = self.height.to('ft').magnitude
+        shell_diameter_str = self.diameter.to('ft').magnitude
+        roof_height_str = self.roof_height.to('ft').magnitude
+        roof_slope_str = self.roof_slope.to('ft/ft').magnitude
+        roof_radius_str = self.roof_radius.to('ft').magnitude
 
-    def set_dimensions(self, height: Quantity, diameter: Quantity) -> None:
-        self.diameter = diameter
-        self.height = height
-
-    def set_roof_type(self, roof_type: VerticalRoofType) -> None:
-        self.roof_type = roof_type
+        # TODO: Handle all values
+        return f"""(
+            NULL,
+            '{self.identifier}',
+            '{self.description}',
+            1,
+            TRUE,
+            '{shell_height_str}',
+            '{shell_diameter_str}',
+            1,
+            1,
+            1,
+            1,
+            1,
+            '{roof_height_str}',
+            '{roof_slope_str}',
+            '{roof_radius_str}',
+            '-0.3',
+            '0.3',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            FALSE
+        )"""
 
     def calculate_vapor_space_outage(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-16
-        # H_VO = H_S − H_L+ H_RO
+        # H_VO = H_S − H_L + H_RO
 
         # Calculate the roof outage based on the roof type
         if self.roof_type is VerticalRoofType.CONE:

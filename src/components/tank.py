@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 from enum import Enum, auto
@@ -17,25 +18,27 @@ class Insulation(Enum):
     FULL = auto()
 
 
+@dataclass
 class Tank:
     """
     This is the base class for all tanks.
 
     All components of a tank that are similar between the both fixed and floating roof tanks should live here.
     """
-    def __init__(self, identifier: str) -> None:
-        self.id: int = -1
-        self.identifier: str = identifier
-        self.description: str = ''
+    identifier: str
+    id: int = -1
+    description: str = ''
+
+    mixture: Mixture | None = None
+    throughput: Quantity | None = None
+    shell_solar_absorption: Decimal | None = None
+    roof_solar_absorption: Decimal | None = None
+    insulation: Insulation = Insulation.NONE  # Assume no insulation
+
+    operational_period: tuple[date, date] | None = None
+
+    def __post_init__(self) -> None:
         self.logger = NamedLoggerAdapter(logger, {'name': self.identifier})
-
-        self.mixture: Mixture | None = None
-        self.throughput: Quantity | None = None
-        self.shell_solar_absorption: Decimal | None = None
-        self.roof_solar_absorption: Decimal | None = None
-        self.insulation: Insulation = Insulation.NONE  # Assume no insulation
-
-        self.operational_period: tuple[date, date] | None = None
 
     def set_shell_color(self, color: PaintColor, condition: PaintCondition) -> None:
         self.shell_solar_absorption = ALL_COLORS[color].get_absorption_for_condition(condition)

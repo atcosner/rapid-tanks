@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
 from src.components.tank import Tank
 
 from src.gui import RESOURCE_DIR
+from src.util.errors import DataEntryResult
 
 
 class TankInfoFrame(QFrame):
@@ -15,6 +16,7 @@ class TankInfoFrame(QFrame):
 
         self.read_only = read_only
 
+        self.identifier_label = QLabel('Identifier:' if self.read_only else 'Identifier (*):')
         self.identifier = QLineEdit()
         self.description = QTextEdit()
         self.edit_button = QPushButton()
@@ -36,7 +38,7 @@ class TankInfoFrame(QFrame):
         self.setLayout(main_layout)
 
         # Identifier
-        main_layout.addWidget(QLabel('Identifier:' if self.read_only else 'Identifier (*):'), 0, 0)
+        main_layout.addWidget(self.identifier_label, 0, 0)
         main_layout.addWidget(self.identifier, 0, 1)
 
         # Description
@@ -51,3 +53,22 @@ class TankInfoFrame(QFrame):
     def load(self, tank: Tank) -> None:
         self.identifier.setText(tank.identifier)
         self.description.setText(tank.description)
+
+    def check(self) -> DataEntryResult:
+        error_strings = []
+
+        # Identifier is a required field
+        identifier_valid = bool(self.identifier.text())
+        if identifier_valid:
+            self.identifier_label.setStyleSheet('QLabel { color : black; }')
+        else:
+            self.identifier_label.setStyleSheet('QLabel { color : red; }')
+            error_strings.append('Tank Identifier is a required field!')
+
+        return DataEntryResult(identifier_valid, error_strings)
+
+    def build(self) -> Tank:
+        return Tank(
+            identifier=self.identifier.text(),
+            description=self.description.toPlainText(),
+        )

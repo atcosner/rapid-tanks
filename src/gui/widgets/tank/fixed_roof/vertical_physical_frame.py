@@ -4,16 +4,17 @@ from PyQt5.QtWidgets import (
     QWidget, QFrame, QGridLayout, QPushButton, QVBoxLayout,
 )
 
-from src.components.tank import Tank
+from src.components.fixed_roof_tank import VerticalFixedRoofTank
 
 from src.gui import RESOURCE_DIR
 from src.gui.widgets.util.data_entry_rows import (
     NumericDataRow, CheckBoxDataRow, ComboBoxDataRow, ComboBoxDataType,
 )
 from src.gui.widgets.util.labels import SubSectionHeader
+from src.util.errors import DataEntryResult
 
 
-class TankPhysicalFrame(QFrame):
+class VerticalPhysicalFrame(QFrame):
     def __init__(self, parent: QWidget, read_only: bool) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)
@@ -127,5 +128,24 @@ class TankPhysicalFrame(QFrame):
         else:
             raise RuntimeError(f'Unexpected roof type: "{new_type}"')
 
-    def load(self, tank: Tank) -> None:
-        pass
+    def load(self, tank: VerticalFixedRoofTank) -> None:
+        # Check that we got the right type
+        if not isinstance(tank, VerticalFixedRoofTank):
+            raise RuntimeError(f'Incompatible tank type: {type(tank)}')
+
+    def check(self) -> DataEntryResult:
+        # TODO: Check for some valid data
+        return DataEntryResult(True, [])
+
+    def build(self) -> VerticalFixedRoofTank:
+        # TODO: Reconcile the other parameters that we need
+        return VerticalFixedRoofTank(
+            identifier='',
+            diameter=self.shell_diameter.get(),
+            height=self.shell_height.get(),
+            liquid_height=self.avg_liquid_height.get(),
+
+            roof_height=self.roof_height.get(),
+            roof_slope=self.roof_slope.get(),
+            roof_radius=self.roof_radius.get(),
+        )

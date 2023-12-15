@@ -7,6 +7,7 @@ from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QComboBox
 
+from src import unit_registry
 from src.util.units import to_human_readable
 
 from .validators import NonZeroDoubleValidator, DoubleValidator
@@ -71,9 +72,9 @@ class NumericDataRow(QWidget):
         main_layout.setContentsMargins(*DEFAULT_MARGINS)
 
         if default is not None:
-            self.data_box.setPlaceholderText(default)
+            self.set(default)
 
-    def set_text(self, value: Quantity | str) -> None:
+    def set(self, value: Quantity | str) -> None:
         if isinstance(value, str):
             self.data_box.setText(value)
         else:
@@ -83,6 +84,11 @@ class NumericDataRow(QWidget):
             # Limit to our configured precision
             quantized_value = converted_value.magnitude.quantize(Decimal(f'1.{"0" * self.precision}'))
             self.data_box.setText(str(quantized_value))
+
+    def get(self) -> Quantity:
+        # TODO: How should we handle errors in the conversion?
+        string_value = self.data_box.text()
+        return unit_registry.Quantity(Decimal(string_value), self.unit)
 
 
 class CheckBoxDataRow(QWidget):
