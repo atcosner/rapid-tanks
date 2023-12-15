@@ -18,8 +18,19 @@ class TankLibrary:
         if autoload:
             self.load_from_db()
 
+    # Allow iterating through the class as if it was the site dict
+    def __iter__(self):
+        yield from self.tanks_by_identifier.items()
+
     def load_from_db(self) -> None:
         cursor = self.cxn.cursor()
+
+        # Load the fixed roof tanks
+        for row in cursor.execute('SELECT * FROM fixed_roof_tank'):
+            if row.is_vertical:
+                self.tanks_by_identifier[row.name] = VerticalFixedRoofTank.from_db_row(row)
+            else:
+                pass
 
         # TODO: Handle the other types of tanks
 

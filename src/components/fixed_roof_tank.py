@@ -1,3 +1,4 @@
+from collections import namedtuple
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, auto
@@ -84,6 +85,19 @@ class VerticalFixedRoofTank(FixedRoofTank):
             '0',
             FALSE
         )"""
+
+    @classmethod
+    def from_db_row(cls, row: namedtuple):
+        # TODO: Handle all values
+        return cls(
+            identifier=row.name,
+            description=row.description,
+            height=unit_registry.Quantity(Decimal(row.shell_height), 'ft'),
+            diameter=unit_registry.Quantity(Decimal(row.shell_diameter), 'ft'),
+            roof_height=unit_registry.Quantity(Decimal(row.roof_height), 'ft'),
+            roof_slope=unit_registry.Quantity(Decimal(row.roof_slope), 'ft/ft'),
+            roof_radius=unit_registry.Quantity(Decimal(row.roof_radius), 'ft'),
+        )
 
     def calculate_vapor_space_outage(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-16

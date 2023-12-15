@@ -1,3 +1,4 @@
+from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QTabWidget, QMessageBox
 
 from src.components.tank import Tank
@@ -38,3 +39,8 @@ class TankTabWidget(QTabWidget):
         tank.identifier = generic_tank.identifier
         tank.description = generic_tank.description
         return tank
+
+    @pyqtSlot(object)
+    def load_tank(self, tank: Tank) -> None:
+        self.tank_info.load(tank)
+        self.physical_properties.load(tank)

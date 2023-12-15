@@ -133,6 +133,28 @@ class VerticalPhysicalFrame(QFrame):
         if not isinstance(tank, VerticalFixedRoofTank):
             raise RuntimeError(f'Incompatible tank type: {type(tank)}')
 
+        self.shell_height.set(tank.height)
+        self.shell_diameter.set(tank.diameter)
+        # self.max_liquid_height = NumericDataRow('Maximum Liquid Height', 'ft', read_only)
+        # self.avg_liquid_height = NumericDataRow('Average Liquid Height', 'ft', read_only)
+        # self.working_volume = NumericDataRow('Working Volume', 'gal', read_only)
+        # self.turnovers_per_year = NumericDataRow('Turnovers Per Year', 'dimensionless', read_only)
+        # self.net_throughput = NumericDataRow('Net Throughput', 'gal/yr', read_only)
+        # self.is_heated = CheckBoxDataRow('Is Heated?', read_only)
+
+        # self.shell_color = ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, read_only)
+        # self.shell_condition = ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, read_only)
+        #
+        # self.roof_color = ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, read_only)
+        # self.roof_condition = ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, read_only)
+        # self.roof_type = ComboBoxDataRow('Roof Type', ['Cone', 'Dome'], read_only)
+        self.roof_height.set(tank.roof_height)
+        self.roof_radius.set(tank.roof_radius)
+        self.roof_slope.set(tank.roof_slope)
+
+        # self.vacuum_setting.set()
+        # self.pressure_setting.set()
+
     def check(self) -> DataEntryResult:
         # TODO: Check for some valid data
         return DataEntryResult(True, [])
