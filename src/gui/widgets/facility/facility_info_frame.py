@@ -1,47 +1,43 @@
-from PyQt5.QtGui import QIcon
+from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import (
-    QWidget, QFrame, QLabel, QLineEdit, QTextEdit, QGridLayout, QPushButton,
+    QWidget, QLabel, QLineEdit, QTextEdit, QGridLayout, QVBoxLayout,
 )
 
 from src.components.facility import Facility
+from src.gui.widgets.util.editable_frame import EditableFrame
 
-from src.gui import RESOURCE_DIR
 
-
-class FacilityInfoFrame(QFrame):
-    def __init__(self, parent: QWidget, read_only: bool) -> None:
+class FacilityInfoFrame(EditableFrame):
+    def __init__(self, parent: QWidget, start_read_only: bool) -> None:
         super().__init__(parent)
-        self.setFrameStyle(QFrame.Box)
 
-        self.read_only = read_only
+        self.facility_name = self.register_control(QLineEdit())
+        self.facility_company = self.register_control(QLineEdit())
+        self.facility_description = self.register_control(QTextEdit())
 
-        self.facility_name = QLineEdit()
-        self.facility_company = QLineEdit()
-        self.facility_description = QTextEdit()
-        self.edit_button = QPushButton()
+        self.previous_facility: Facility | None = None
 
-        self._initial_setup()
+        if start_read_only:
+            super().handle_end_editing()
+        else:
+            super().handle_begin_editing()
 
-    def _initial_setup(self) -> None:
-        # Start in a disabled state
-        self.setDisabled(True)
+        # Register our edit handlers
+        self.register_edit_handlers(
+            begin_func=self.handle_begin_editing,
+            end_close_func=lambda: self.handle_end_editing(False),
+            end_save_func=lambda: self.handle_end_editing(True),
+        )
 
-        # All the text widgets should match our read-only status
-        self.facility_name.setReadOnly(self.read_only)
-        self.facility_company.setReadOnly(self.read_only)
-        self.facility_description.setReadOnly(self.read_only)
+        self._set_up_layout()
 
-        # Set up the edit button
-        # TODO: Open a facility edit window
-        self.edit_button.setIcon(QIcon(str(RESOURCE_DIR / 'pencil.png')))
-        self.edit_button.setMaximumSize(65, 65)
-
+    def _set_up_layout(self) -> None:
         # Layout the widgets
         main_layout = QGridLayout()
         self.setLayout(main_layout)
 
         # Facility Name
-        main_layout.addWidget(QLabel('Name:' if self.read_only else 'Name (*):'), 0, 0)
+        main_layout.addWidget(QLabel('Name (*):'), 0, 0)
         main_layout.addWidget(self.facility_name, 0, 1)
 
         # Company
@@ -52,10 +48,8 @@ class FacilityInfoFrame(QFrame):
         main_layout.addWidget(QLabel('Description:'), 2, 0)
         main_layout.addWidget(self.facility_description, 2, 1)
 
-        if self.read_only:
-            main_layout.addWidget(self.edit_button, 0, 2)
-        else:
-            main_layout.addWidget(QLabel('(*) = Required'), 3, 0)
+        # Edit Buttons
+        main_layout.addLayout(self.edit_button_layout, 0, 2)
 
     def load(self, facility: Facility) -> None:
         self.facility_name.setText(facility.name)
@@ -65,10 +59,11 @@ class FacilityInfoFrame(QFrame):
         # Enable all the widgets
         self.setEnabled(True)
 
-    def get_facility(self) -> Facility | None:
+    def get_facility(self, validate: bool = True) -> Facility | None:
         # Validate mandatory fields
-        if not self.facility_name.text():
-            return None
+        if validate:
+            if not self.facility_name.text():
+                return None
 
         # Return a new facility
         return Facility(
@@ -77,3 +72,22 @@ class FacilityInfoFrame(QFrame):
             description=self.facility_description.toPlainText(),
             company=self.facility_company.text(),
         )
+
+    @pyqtSlot()
+    def handle_begin_editing(self) -> None:
+        super().handle_begin_editing()
+
+        # Save the current state
+        self.previous_facility = self.get_facility(validate=False)
+
+    @pyqtSlot(bool)
+    def handle_end_editing(self, save: bool) -> None:
+        super().handle_end_editing()
+
+        # Handle if we need to save the new data or reload the old data
+        if save:
+            # TODO: How do we handle this since we don't have a library?
+            pass
+        else:
+            # If we cancel, reload the previous data
+            self.load(self.previous_facility)

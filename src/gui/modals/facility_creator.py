@@ -40,7 +40,7 @@ class FacilityCreator(Dialog):
 
         tab_widget = QTabWidget(self)
 
-        self.facility_info = FacilityInfoFrame(self, read_only=False)
+        self.facility_info = FacilityInfoFrame(self, start_read_only=False)
         tab_widget.addTab(self.facility_info, 'Facility Info')
 
         self.meteorological_info = MeteorologicalInfoWidget(self)

@@ -10,7 +10,7 @@ class FacilityTabWidget(QTabWidget):
         super().__init__(parent)
 
         # Widgets for each tab
-        self.facility_info = FacilityInfoFrame(self, read_only=True)
+        self.facility_info = FacilityInfoFrame(self, start_read_only=True)
         self.tanks_info = FacilityTanksFrame(self)
 
         self._initial_setup()
