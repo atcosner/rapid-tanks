@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
 from src.data.facility_library import FacilityLibrary
-from src.gui.modals.facility_creator import FacilityCreator
 from src.gui.modals.facility_selector import FacilitySelector
 from src.gui.modals.tank_editor import TankEditor
 from src.gui.widgets.facility.facility_tab_widget import FacilityTabWidget
@@ -12,6 +11,9 @@ class MainWindow(QMainWindow):
         super().__init__(None)
 
         self.facility_tabs = FacilityTabWidget(self)
+
+        # Libraries
+        self.facility_library = FacilityLibrary()
 
         self._initial_setup()
         self.show()
@@ -45,11 +47,7 @@ class MainWindow(QMainWindow):
         materials_menu.addSeparator()
 
     def create_facility(self) -> None:
-        result = FacilityCreator.create_facility(self)
-
-        # 0 = Canceled, > 0: Facility ID
-        if result > 0:
-            self.load_facility(result)
+        self.load_facility(self.facility_library.create().id)
 
     def select_facility(self, allow_new: bool) -> None:
         # Show the startup facility selection dialog

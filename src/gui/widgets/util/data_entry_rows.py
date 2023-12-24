@@ -5,7 +5,9 @@ from pint import Quantity
 
 from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QComboBox
+from PyQt5.QtWidgets import (
+    QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QComboBox, QTextEdit,
+)
 
 from src import unit_registry
 from src.util.units import to_human_readable
@@ -146,3 +148,67 @@ class ComboBoxDataRow(QWidget):
 
     def get_selected(self) -> str:
         return self.combo_box.currentText()
+
+
+class TextLineDataRow(QWidget):
+    def __init__(
+            self,
+            label_string: str,
+            read_only: bool,
+    ) -> None:
+        super().__init__(None)
+
+        self.label = QLabel(label_string)
+        self.data_box = QLineEdit()
+
+        self.data_box.setReadOnly(read_only)
+
+        # Set up our layout
+        main_layout = QHBoxLayout()
+        main_layout.addWidget(self.label)
+        main_layout.addStretch()
+        main_layout.addWidget(self.data_box)
+        self.setLayout(main_layout)
+
+        main_layout.setContentsMargins(*DEFAULT_MARGINS)
+
+    def set_read_only(self, read_only: bool) -> None:
+        self.data_box.setReadOnly(read_only)
+
+    def set(self, value: str) -> None:
+        self.data_box.setText(value)
+
+    def get(self) -> str:
+        return self.data_box.text()
+
+
+class TextEditDataRow(QWidget):
+    def __init__(
+            self,
+            label_string: str,
+            read_only: bool,
+    ) -> None:
+        super().__init__(None)
+
+        self.label = QLabel(label_string)
+        self.data_box = QTextEdit()
+
+        self.data_box.setReadOnly(read_only)
+
+        # Set up our layout
+        main_layout = QHBoxLayout()
+        main_layout.addWidget(self.label)
+        main_layout.addStretch()
+        main_layout.addWidget(self.data_box)
+        self.setLayout(main_layout)
+
+        main_layout.setContentsMargins(*DEFAULT_MARGINS)
+
+    def set_read_only(self, read_only: bool) -> None:
+        self.data_box.setReadOnly(read_only)
+
+    def set(self, value: str) -> None:
+        self.data_box.setText(value)
+
+    def get(self) -> str:
+        return self.data_box.toPlainText()

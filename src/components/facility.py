@@ -32,11 +32,13 @@ class Facility:
         self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
     def to_db_row(self) -> str:
-        # Some values cannot be null in the DB
+        # Handle if the meteorological data has not been set yet
         if self.meteorological_data is None:
-            raise Exception('Meteorological data cannot be NULL in the DB!')
+            meteorological_id = 'NULL'
+        else:
+            meteorological_id = self.meteorological_data.id
 
-        return f"""(NULL, '{self.name}', '{self.description}', '{self.company}', {self.meteorological_data.id})"""
+        return f"""(NULL, '{self.name}', '{self.description}', '{self.company}', {meteorological_id})"""
 
     @classmethod
     def from_db_row(cls, row: namedtuple):

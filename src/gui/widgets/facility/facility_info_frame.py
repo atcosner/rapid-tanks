@@ -1,9 +1,8 @@
 from PyQt5.Qt import pyqtSlot
-from PyQt5.QtWidgets import (
-    QWidget, QLabel, QLineEdit, QTextEdit, QGridLayout, QVBoxLayout,
-)
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
 from src.components.facility import Facility
+from src.gui.widgets.util.data_entry_rows import TextLineDataRow, TextEditDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
 
 
@@ -11,9 +10,9 @@ class FacilityInfoFrame(EditableFrame):
     def __init__(self, parent: QWidget, start_read_only: bool) -> None:
         super().__init__(parent)
 
-        self.facility_name = self.register_control(QLineEdit())
-        self.facility_company = self.register_control(QLineEdit())
-        self.facility_description = self.register_control(QTextEdit())
+        self.facility_name = self.register_control(TextLineDataRow('Name (*):', start_read_only))
+        self.facility_company = self.register_control(TextLineDataRow('Company:', start_read_only))
+        self.facility_description = self.register_control(TextEditDataRow('Description:', start_read_only))
 
         self.previous_facility: Facility | None = None
 
@@ -33,44 +32,36 @@ class FacilityInfoFrame(EditableFrame):
 
     def _set_up_layout(self) -> None:
         # Layout the widgets
-        main_layout = QGridLayout()
+        main_layout = QHBoxLayout()
         self.setLayout(main_layout)
 
-        # Facility Name
-        main_layout.addWidget(QLabel('Name (*):'), 0, 0)
-        main_layout.addWidget(self.facility_name, 0, 1)
+        facility_layout = QVBoxLayout()
+        main_layout.addLayout(facility_layout)
 
-        # Company
-        main_layout.addWidget(QLabel('Company:'), 1, 0)
-        main_layout.addWidget(self.facility_company, 1, 1)
-
-        # Description
-        main_layout.addWidget(QLabel('Description:'), 2, 0)
-        main_layout.addWidget(self.facility_description, 2, 1)
+        facility_layout.addWidget(self.facility_name)
+        facility_layout.addWidget(self.facility_company)
+        facility_layout.addWidget(self.facility_description)
 
         # Edit Buttons
-        main_layout.addLayout(self.edit_button_layout, 0, 2)
+        main_layout.addLayout(self.edit_button_layout)
 
     def load(self, facility: Facility) -> None:
-        self.facility_name.setText(facility.name)
-        self.facility_company.setText(facility.company)
-        self.facility_description.setText(facility.description)
-
-        # Enable all the widgets
-        self.setEnabled(True)
+        self.facility_name.set(facility.name)
+        self.facility_company.set(facility.company)
+        self.facility_description.set(facility.description)
 
     def get_facility(self, validate: bool = True) -> Facility | None:
         # Validate mandatory fields
         if validate:
-            if not self.facility_name.text():
+            if not self.facility_name.get():
                 return None
 
         # Return a new facility
         return Facility(
             id=-1,  # This is set in the DB once the facility is inserted
-            name=self.facility_name.text(),
-            description=self.facility_description.toPlainText(),
-            company=self.facility_company.text(),
+            name=self.facility_name.get(),
+            description=self.facility_description.get(),
+            company=self.facility_company.get(),
         )
 
     @pyqtSlot()

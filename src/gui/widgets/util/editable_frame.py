@@ -21,6 +21,7 @@ class EditableFrame(QFrame):
         self.edit_button_layout.addWidget(self.edit_button)
         self.edit_button_layout.addWidget(self.save_button)
         self.edit_button_layout.addWidget(self.close_button)
+        self.edit_button_layout.addStretch()
 
         # Set up the edit control buttons
         self.edit_button.setIcon(QIcon(str(RESOURCE_DIR / 'pencil.png')))
@@ -43,7 +44,9 @@ class EditableFrame(QFrame):
     def set_widgets_read_only(self, read_only: bool) -> None:
         for widget in self.editable_controls:
             # Widgets can have a few different ways to enforce "read-only"
-            if hasattr(widget, 'setReadOnly'):
+            if hasattr(widget, 'set_read_only'):
+                widget.set_read_only(read_only)
+            elif hasattr(widget, 'setReadOnly'):
                 widget.setReadOnly(read_only)
             elif hasattr(widget, 'setDisabled'):
                 widget.setDisabled(read_only)

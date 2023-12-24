@@ -47,3 +47,9 @@ class FacilityLibrary:
             facility_row = facility.to_db_row()
             cursor.execute(f'INSERT INTO facility_master VALUES {facility_row}')
             return cursor.lastrowid
+
+    def create(self) -> Facility:
+        # Create a new facility and store it in the database
+        new_facility = Facility(id=-1, name=f'New Facility ({len(self.facilities)})')
+        new_facility.id = self.store(new_facility)
+        return new_facility
