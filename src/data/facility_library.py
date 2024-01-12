@@ -45,8 +45,14 @@ class FacilityLibrary:
         with self.cxn:
             cursor = self.cxn.cursor()
             facility_row = facility.to_db_row()
-            cursor.execute(f'INSERT INTO facility_master VALUES {facility_row}')
-            return cursor.lastrowid
+
+            # Insert or update depending on if the facility already has an id
+            if facility.id:
+                # TODO: Update the DB
+                return facility.id
+            else:
+                cursor.execute(f'INSERT INTO facility_master VALUES {facility_row}')
+                return cursor.lastrowid
 
     def create(self) -> Facility:
         # Create a new facility and store it in the database

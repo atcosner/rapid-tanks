@@ -37,10 +37,6 @@ class MainWindow(QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction('Exit').triggered.connect(self.close)
 
-        # Create the menu to add new components
-        add_menu = self.menuBar().addMenu('Add')
-        add_menu.addAction('New Tank').triggered.connect(self.create_tank)
-
         # Create the menu for materials options
         materials_menu = self.menuBar().addMenu('Materials')
         materials_menu.addAction('Create Custom Material')

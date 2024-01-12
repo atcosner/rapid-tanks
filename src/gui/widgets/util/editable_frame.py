@@ -12,6 +12,8 @@ class EditableFrame(QFrame):
         self.setFrameStyle(QFrame.Box)
 
         self.editable_controls: list[QWidget] = []
+
+        self.edit_in_progress: bool = False
         self.previous_values: Any | None = None
 
         # Edit controls
@@ -65,6 +67,8 @@ class EditableFrame(QFrame):
         # Enable all editable widgets
         self.set_widgets_read_only(False)
 
+        self.edit_in_progress = True
+
     def handle_end_editing(self) -> None:
         # Show and hide the edit controls
         self.edit_button.show()
@@ -74,6 +78,8 @@ class EditableFrame(QFrame):
         # Disable all editable widgets
         self.set_widgets_read_only(True)
 
+        self.edit_in_progress = False
+
     def get_current_values(self) -> Any:
         raise NotImplementedError()
 
@@ -81,4 +87,4 @@ class EditableFrame(QFrame):
         raise NotImplementedError()
 
     def is_dirty(self) -> bool:
-        return self.previous_values != self.get_current_values()
+        return self.edit_in_progress and self.previous_values != self.get_current_values()
