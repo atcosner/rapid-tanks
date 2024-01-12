@@ -1,14 +1,16 @@
-from PyQt5.Qt import pyqtSlot
+from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QSplitter, QHBoxLayout
 
 from src.constants.meteorological import MeteorologicalSite
 from src.gui.widgets.meteorological.meteorological_info_frame import MeteorologicalInfoFrame
 from src.gui.widgets.meteorological.meteorological_selection_frame import MeteorologicalSelectionFrame
 from src.gui.widgets.util.editable_frame import EditableFrame
-from src.gui.widgets.util.message_boxes import confirm_dirty_cancel
+from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
 
 
 class FacilityMeteorologicalFrame(EditableFrame):
+    updateMeteorologicalSite = pyqtSignal(MeteorologicalSite)
+
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
 
@@ -62,6 +64,9 @@ class FacilityMeteorologicalFrame(EditableFrame):
         if site is not None:
             self.info_frame.handle_site_selected(site)
 
+    def check(self) -> bool:
+        return self.get_site() is not None
+
     @pyqtSlot()
     def handle_begin_editing(self) -> None:
         super().handle_begin_editing()
@@ -76,8 +81,10 @@ class FacilityMeteorologicalFrame(EditableFrame):
     def handle_end_editing(self, save: bool) -> None:
         # Handle if we need to save the new data or reload the old data
         if save:
-            # TODO: How do we handle this since we don't have a library?
-            pass
+            if self.check():
+                self.updateMeteorologicalSite.emit(self.get_site())
+            else:
+                return warn_mandatory_fields(self)
         else:
             # Prompt the user to confirm they are deleting unsaved data
             if self.is_dirty() and not confirm_dirty_cancel(self):

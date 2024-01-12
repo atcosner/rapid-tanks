@@ -58,6 +58,7 @@ class MainWindow(QMainWindow):
     def load_facility(self, facility_id: int) -> None:
         # Get the facility from the library
         facility = self.facility_library.get_facility_by_id(facility_id)
+        print(facility)
         if facility is None:
             return QMessageBox.critical(
                 self,

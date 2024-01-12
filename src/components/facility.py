@@ -31,14 +31,20 @@ class Facility:
     def __post_init__(self) -> None:
         self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
-    def to_db_row(self) -> str:
+    def get_meteorological_id(self) -> str:
         # Handle if the meteorological data has not been set yet
-        if self.meteorological_data is None:
-            meteorological_id = 'NULL'
-        else:
-            meteorological_id = self.meteorological_data.id
+        return 'NULL' if self.meteorological_data is None else str(self.meteorological_data.id)
 
-        return f"""(NULL, '{self.name}', '{self.description}', '{self.company}', {meteorological_id})"""
+    def to_db_values(self) -> str:
+        return f"""(NULL, '{self.name}', '{self.description}', '{self.company}', {self.get_meteorological_id()})"""
+
+    def to_db_update(self) -> str:
+        return f"""
+            name = '{self.name}',
+            description = '{self.description}',
+            company = '{self.company}',
+            meteorological_site_id = {self.get_meteorological_id()}
+        """
 
     @classmethod
     def from_db_row(cls, row: namedtuple):

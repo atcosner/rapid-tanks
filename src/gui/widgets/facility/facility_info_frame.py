@@ -1,12 +1,12 @@
 from typing import NamedTuple
 
-from PyQt5.Qt import pyqtSlot
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMessageBox
+from PyQt5.Qt import pyqtSlot, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
 from src.components.facility import Facility
 from src.gui.widgets.util.data_entry_rows import TextLineDataRow, TextEditDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
-from src.gui.widgets.util.message_boxes import confirm_dirty_cancel
+from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
 
 
 class FacilityInfo(NamedTuple):
@@ -16,6 +16,8 @@ class FacilityInfo(NamedTuple):
 
 
 class FacilityInfoFrame(EditableFrame):
+    updateFacility = pyqtSignal(Facility)
+
     def __init__(self, parent: QWidget, start_read_only: bool) -> None:
         super().__init__(parent)
 
@@ -57,13 +59,11 @@ class FacilityInfoFrame(EditableFrame):
         self.facility_company.set(facility.company)
         self.facility_description.set(facility.description)
 
-    def get_facility(self, validate: bool = True) -> Facility | None:
-        # Validate mandatory fields
-        if validate:
-            if not self.facility_name.get():
-                return None
+    def check(self) -> bool:
+        # Just use the bool nature of strings
+        return self.facility_name.get()
 
-        # Return a new facility
+    def get_facility(self) -> Facility:
         return Facility(
             id=-1,  # This is set in the DB once the facility is inserted
             name=self.facility_name.get(),
@@ -71,7 +71,6 @@ class FacilityInfoFrame(EditableFrame):
             company=self.facility_company.get(),
         )
 
-    # Override from EditableFrame
     def get_current_values(self) -> FacilityInfo:
         return FacilityInfo(
             name=self.facility_name.get(),
@@ -90,8 +89,10 @@ class FacilityInfoFrame(EditableFrame):
     def handle_end_editing(self, save: bool) -> None:
         # Handle saving the new data or returning to the old data
         if save:
-            # TODO: How do we handle this since we don't have a library?
-            pass
+            if self.check():
+                self.updateFacility.emit(self.get_facility())
+            else:
+                return warn_mandatory_fields(self)
         else:
             # Prompt the user to confirm they are deleting unsaved data
             if self.is_dirty() and not confirm_dirty_cancel(self):

@@ -9,3 +9,11 @@ def confirm_dirty_cancel(parent: QWidget) -> bool:
         buttons=QMessageBox.Yes | QMessageBox.No,
         defaultButton=QMessageBox.Yes,
     ) == QMessageBox.Yes
+
+
+def warn_mandatory_fields(parent: QWidget) -> None:
+    return QMessageBox.warning(
+        parent,
+        'Form Error',
+        'Please fill out mandatory fields (*) before saving changes',
+    )

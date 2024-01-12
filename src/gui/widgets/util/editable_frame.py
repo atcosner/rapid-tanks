@@ -83,6 +83,10 @@ class EditableFrame(QFrame):
     def get_current_values(self) -> Any:
         raise NotImplementedError()
 
+    def check(self) -> bool:
+        # Most frames will want to override this if they have mandatory fields
+        return True
+
     def load(self, value: Any) -> None:
         raise NotImplementedError()
 

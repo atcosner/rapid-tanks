@@ -1,7 +1,9 @@
+from PyQt5.Qt import pyqtSlot
 from PyQt5.QtCore import QObject, QEvent, QTimer, Qt
 from PyQt5.QtWidgets import QWidget, QTabWidget, QMessageBox
 
 from src.components.facility import Facility
+from src.constants.meteorological import MeteorologicalSite
 from src.data.facility_library import FacilityLibrary
 from src.gui.widgets.facility.facility_info_frame import FacilityInfoFrame
 from src.gui.widgets.facility.facility_meteorological_frame import FacilityMeteorologicalFrame
@@ -16,10 +18,17 @@ class FacilityTabWidget(QTabWidget):
     ) -> None:
         super().__init__(parent)
 
+        self.current_id: int | None = None
+        self.facility_library = facility_library
+
         # Widgets for each tab
         self.facility_info = FacilityInfoFrame(self, start_read_only=True)
         self.facility_meteorological_info = FacilityMeteorologicalFrame(self)
         self.tanks_info = FacilityTanksFrame(self)
+
+        # Connect signals
+        self.facility_info.updateFacility.connect(self.update_facility)
+        self.facility_meteorological_info.updateMeteorologicalSite.connect(self.update_meteorological_site)
 
         self._initial_setup()
 
@@ -33,8 +42,19 @@ class FacilityTabWidget(QTabWidget):
         self.tabBar().installEventFilter(self)
 
     def load(self, facility: Facility) -> None:
+        self.current_id = facility.id
+
         self.facility_info.load(facility)
         self.facility_meteorological_info.load(facility.meteorological_data)
+
+    @pyqtSlot(Facility)
+    def update_facility(self, facility: Facility) -> None:
+        facility.id = self.current_id
+        self.facility_library.store(facility)
+
+    @pyqtSlot(MeteorologicalSite)
+    def update_meteorological_site(self, site: MeteorologicalSite) -> None:
+        self.facility_library.update_meteorological_id(self.current_id, site.id)
 
     def can_change_tab(self) -> bool:
         if self.currentWidget().is_dirty():

@@ -1,9 +1,12 @@
+import logging
 import sqlite3
 from pathlib import Path
 
 from src.components.facility import Facility
 from src.data.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory, get_db_connection
+
+logger = logging.getLogger(__name__)
 
 
 class FacilityLibrary:
@@ -44,14 +47,23 @@ class FacilityLibrary:
     def store(self, facility: Facility) -> int | None:
         with self.cxn:
             cursor = self.cxn.cursor()
-            facility_row = facility.to_db_row()
 
             # Insert or update depending on if the facility already has an id
             if facility.id:
-                # TODO: Update the DB
+                sql = f"""
+                    UPDATE facility_master
+                    SET {facility.to_db_update()}
+                    WHERE id = {facility.id}
+                """
+
+                logger.info(f'Executing: "{sql}"')
+                cursor.execute(sql)
                 return facility.id
             else:
-                cursor.execute(f'INSERT INTO facility_master VALUES {facility_row}')
+                sql = f'INSERT INTO facility_master VALUES {facility.to_db_values()}'
+
+                logger.info(f'Executing: "{sql}"')
+                cursor.execute(sql)
                 return cursor.lastrowid
 
     def create(self) -> Facility:
@@ -59,3 +71,14 @@ class FacilityLibrary:
         new_facility = Facility(id=-1, name=f'New Facility ({len(self.facilities)})')
         new_facility.id = self.store(new_facility)
         return new_facility
+
+    def update_meteorological_id(self, facility_id: int, meteorological_id: int) -> None:
+        with self.cxn as cxn:
+            sql = f"""
+                UPDATE facility_master
+                SET meteorological_site_id = {meteorological_id}
+                WHERE id = {facility_id}
+            """
+
+            logger.info(f'Executing: "{sql}"')
+            cxn.execute(sql)

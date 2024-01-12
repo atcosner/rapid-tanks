@@ -4,6 +4,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 
 from src.gui.main_window import MainWindow
+from src.util.logging import configure_root_logger
 
 
 def main() -> int:
@@ -16,5 +17,5 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    logging.basicConfig()
+    configure_root_logger()
     sys.exit(main())
