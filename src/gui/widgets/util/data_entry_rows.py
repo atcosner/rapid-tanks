@@ -155,6 +155,7 @@ class TextLineDataRow(QWidget):
             self,
             label_string: str,
             read_only: bool,
+            no_stretch: bool = True,
     ) -> None:
         super().__init__(None)
 
@@ -166,7 +167,10 @@ class TextLineDataRow(QWidget):
         # Set up our layout
         main_layout = QHBoxLayout()
         main_layout.addWidget(self.label)
-        main_layout.addStretch()
+
+        if not no_stretch:
+            main_layout.addStretch()
+
         main_layout.addWidget(self.data_box)
         self.setLayout(main_layout)
 
@@ -187,6 +191,7 @@ class TextEditDataRow(QWidget):
             self,
             label_string: str,
             read_only: bool,
+            no_stretch: bool = True,
     ) -> None:
         super().__init__(None)
 
@@ -198,7 +203,10 @@ class TextEditDataRow(QWidget):
         # Set up our layout
         main_layout = QHBoxLayout()
         main_layout.addWidget(self.label)
-        main_layout.addStretch()
+
+        if not no_stretch:
+            main_layout.addStretch()
+
         main_layout.addWidget(self.data_box)
         self.setLayout(main_layout)
 

@@ -1,3 +1,5 @@
+from typing import Any
+
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QWidget, QFrame, QPushButton, QVBoxLayout
 
@@ -10,6 +12,7 @@ class EditableFrame(QFrame):
         self.setFrameStyle(QFrame.Box)
 
         self.editable_controls: list[QWidget] = []
+        self.previous_values: Any | None = None
 
         # Edit controls
         self.edit_button = QPushButton()
@@ -70,3 +73,12 @@ class EditableFrame(QFrame):
 
         # Disable all editable widgets
         self.set_widgets_read_only(True)
+
+    def get_current_values(self) -> Any:
+        raise NotImplementedError()
+
+    def load(self, value: Any) -> None:
+        raise NotImplementedError()
+
+    def is_dirty(self) -> bool:
+        return self.previous_values != self.get_current_values()

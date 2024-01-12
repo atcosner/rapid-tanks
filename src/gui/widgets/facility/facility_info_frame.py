@@ -1,9 +1,18 @@
+from typing import NamedTuple
+
 from PyQt5.Qt import pyqtSlot
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMessageBox
 
 from src.components.facility import Facility
 from src.gui.widgets.util.data_entry_rows import TextLineDataRow, TextEditDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
+from src.gui.widgets.util.message_boxes import confirm_dirty_cancel
+
+
+class FacilityInfo(NamedTuple):
+    name: str
+    company: str
+    description: str
 
 
 class FacilityInfoFrame(EditableFrame):
@@ -13,8 +22,6 @@ class FacilityInfoFrame(EditableFrame):
         self.facility_name = self.register_control(TextLineDataRow('Name (*):', start_read_only))
         self.facility_company = self.register_control(TextLineDataRow('Company:', start_read_only))
         self.facility_description = self.register_control(TextEditDataRow('Description:', start_read_only))
-
-        self.previous_facility: Facility | None = None
 
         if start_read_only:
             super().handle_end_editing()
@@ -45,7 +52,7 @@ class FacilityInfoFrame(EditableFrame):
         # Edit Buttons
         main_layout.addLayout(self.edit_button_layout)
 
-    def load(self, facility: Facility) -> None:
+    def load(self, facility: Facility | FacilityInfo) -> None:
         self.facility_name.set(facility.name)
         self.facility_company.set(facility.company)
         self.facility_description.set(facility.description)
@@ -64,21 +71,32 @@ class FacilityInfoFrame(EditableFrame):
             company=self.facility_company.get(),
         )
 
+    # Override from EditableFrame
+    def get_current_values(self) -> FacilityInfo:
+        return FacilityInfo(
+            name=self.facility_name.get(),
+            description=self.facility_description.get(),
+            company=self.facility_company.get(),
+        )
+
     @pyqtSlot()
     def handle_begin_editing(self) -> None:
         super().handle_begin_editing()
 
         # Save the current state
-        self.previous_facility = self.get_facility(validate=False)
+        self.previous_values = self.get_current_values()
 
     @pyqtSlot(bool)
     def handle_end_editing(self, save: bool) -> None:
-        super().handle_end_editing()
-
-        # Handle if we need to save the new data or reload the old data
+        # Handle saving the new data or returning to the old data
         if save:
             # TODO: How do we handle this since we don't have a library?
             pass
         else:
-            # If we cancel, reload the previous data
-            self.load(self.previous_facility)
+            # Prompt the user to confirm they are deleting unsaved data
+            if self.is_dirty() and not confirm_dirty_cancel(self):
+                return
+
+            self.load(self.previous_values)
+
+        super().handle_end_editing()

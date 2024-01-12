@@ -24,4 +24,4 @@ class FacilityTabWidget(QTabWidget):
 
     def load(self, facility: Facility) -> None:
         self.facility_info.load(facility)
-        self.facility_meteorological_info.load_site(facility.meteorological_data)
+        self.facility_meteorological_info.load(facility.meteorological_data)
