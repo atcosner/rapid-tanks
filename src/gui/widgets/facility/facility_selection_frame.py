@@ -22,11 +22,16 @@ class FacilityListItem(QListWidgetItem):
 
 
 class FacilitySelectionFrame(QFrame):
-    def __init__(self, parent: QWidget, auto_populate: bool = True) -> None:
+    def __init__(
+            self,
+            parent: QWidget,
+            library: FacilityLibrary,
+            auto_populate: bool = True,
+    ) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)
 
-        self.library = FacilityLibrary()
+        self.library = library
         self._initial_setup()
 
         if auto_populate:

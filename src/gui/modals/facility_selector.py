@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (
     QWidget, QRadioButton, QVBoxLayout, QButtonGroup, QHBoxLayout, QLabel, QPushButton, QMessageBox,
 )
 
+from src.data.facility_library import FacilityLibrary
 from src.gui.widgets.util.dialog import Dialog
 from src.gui.widgets.facility.facility_selection_frame import FacilitySelectionFrame
 
@@ -15,14 +16,14 @@ class FacilitySelection(IntEnum):
 
 
 class FacilitySelector(Dialog):
-    def __init__(self, parent: QWidget) -> None:
+    def __init__(self, parent: QWidget, library: FacilityLibrary) -> None:
         super().__init__(parent)
         self.setWindowTitle('Facility Selector')
 
         # Widgets
         self.new_facility_button = QRadioButton('Create a new Facility')
         self.existing_facility_button = QRadioButton('Open an existing Facility')
-        self.existing_facility_frame = FacilitySelectionFrame(self)
+        self.existing_facility_frame = FacilitySelectionFrame(self, library)
 
         self.exit_buttons_layout = QHBoxLayout()
 
@@ -98,8 +99,13 @@ class FacilitySelector(Dialog):
         self.setLayout(main_layout)
 
     @classmethod
-    def select_facility(cls, parent: QWidget, allow_new: bool) -> int:
-        dialog = cls(parent)
+    def select_facility(
+            cls,
+            parent: QWidget,
+            library: FacilityLibrary,
+            allow_new: bool,
+    ) -> int:
+        dialog = cls(parent, library)
         if allow_new:
             dialog._initial_new_and_existing_setup()
         else:

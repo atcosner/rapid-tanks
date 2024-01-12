@@ -2,13 +2,18 @@ from PyQt5.QtCore import QObject, QEvent, QTimer, Qt
 from PyQt5.QtWidgets import QWidget, QTabWidget, QMessageBox
 
 from src.components.facility import Facility
+from src.data.facility_library import FacilityLibrary
 from src.gui.widgets.facility.facility_info_frame import FacilityInfoFrame
 from src.gui.widgets.facility.facility_meteorological_frame import FacilityMeteorologicalFrame
 from src.gui.widgets.facility.facility_tanks_frame import FacilityTanksFrame
 
 
 class FacilityTabWidget(QTabWidget):
-    def __init__(self, parent: QWidget) -> None:
+    def __init__(
+            self,
+            parent: QWidget,
+            facility_library: FacilityLibrary,
+    ) -> None:
         super().__init__(parent)
 
         # Widgets for each tab
@@ -45,7 +50,8 @@ class FacilityTabWidget(QTabWidget):
             return True
         else:
             # Not dirty, which could mean an edit with no changes so end editing before we change
-            self.currentWidget().handle_end_editing(save=False)
+            if self.currentWidget().edit_in_progress:
+                self.currentWidget().handle_end_editing(save=False)
 
         return False
 

@@ -10,10 +10,10 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__(None)
 
-        self.facility_tabs = FacilityTabWidget(self)
-
         # Libraries
         self.facility_library = FacilityLibrary()
+
+        self.facility_tabs = FacilityTabWidget(self, self.facility_library)
 
         self._initial_setup()
         self.show()
@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
 
     def select_facility(self, allow_new: bool) -> None:
         # Show the startup facility selection dialog
-        result = FacilitySelector.select_facility(self, allow_new=allow_new)
+        result = FacilitySelector.select_facility(self, self.facility_library, allow_new=allow_new)
         if result == -1:
             # New Facility
             self.create_facility()
@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
 
     def load_facility(self, facility_id: int) -> None:
         # Get the facility from the library
-        facility = FacilityLibrary().get_facility_by_id(facility_id)
+        facility = self.facility_library.get_facility_by_id(facility_id)
         if facility is None:
             return QMessageBox.critical(
                 self,
