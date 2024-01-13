@@ -54,7 +54,7 @@ class FacilityTabWidget(QTabWidget):
 
     @pyqtSlot(MeteorologicalSite)
     def update_meteorological_site(self, site: MeteorologicalSite) -> None:
-        self.facility_library.update_meteorological_id(self.current_id, site.id)
+        self.facility_library.update_meteorological_site(self.current_id, site)
 
     def can_change_tab(self) -> bool:
         if self.currentWidget().is_dirty():

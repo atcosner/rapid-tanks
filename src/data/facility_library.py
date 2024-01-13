@@ -3,17 +3,26 @@ import sqlite3
 from pathlib import Path
 
 from src.components.facility import Facility
+from src.constants.meteorological import MeteorologicalSite
 from src.data.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory, get_db_connection
+
+from .meteorological_library import MeteorologicalLibrary
 
 logger = logging.getLogger(__name__)
 
 
 class FacilityLibrary:
-    def __init__(self, db_location: Path | sqlite3.Connection | None = None, autoload: bool = True):
+    def __init__(
+            self,
+            db_location: Path | sqlite3.Connection | None = None,
+            autoload: bool = True,
+    ):
         # Establish a connection to the DB
         self.cxn = get_db_connection(db_location if db_location is not None else DEV_DB_FILE_PATH)
         self.cxn.row_factory = namedtuple_factory
+
+        self.meteorological_library = MeteorologicalLibrary(self.cxn)
 
         self.facilities: dict[str, Facility] = {}
 
@@ -26,6 +35,7 @@ class FacilityLibrary:
         # Load the facilities
         for row in cursor.execute('SELECT * FROM facility_master'):
             facility = Facility.from_db_row(row)
+            facility.meteorological_data = self.meteorological_library.get_site_by_id(row.meteorological_site_id)
             self.facilities[facility.name] = facility
 
     def reload(self) -> None:
@@ -72,13 +82,20 @@ class FacilityLibrary:
         new_facility.id = self.store(new_facility)
         return new_facility
 
-    def update_meteorological_id(self, facility_id: int, meteorological_id: int) -> None:
+    def update_meteorological_site(self, facility_id: int, site: MeteorologicalSite) -> None:
         with self.cxn as cxn:
             sql = f"""
                 UPDATE facility_master
-                SET meteorological_site_id = {meteorological_id}
+                SET meteorological_site_id = {site.id}
                 WHERE id = {facility_id}
             """
 
             logger.info(f'Executing: "{sql}"')
             cxn.execute(sql)
+
+        # Update our local facility
+        if facility := self.get_facility_by_id(facility_id):
+            facility.meteorological_data = site
+        else:
+            # TODO: How did we get here?
+            raise RuntimeError(f'Could not find facility with id: {facility_id}')

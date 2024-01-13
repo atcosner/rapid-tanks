@@ -31,9 +31,8 @@ class MainWindow(QMainWindow):
 
     def _create_menubar(self) -> None:
         file_menu = self.menuBar().addMenu('File')
-        file_menu.addAction('New Site').triggered.connect(self.create_facility)
-        file_menu.addAction('Open Site').triggered.connect(lambda: self.select_facility(allow_new=False))
-        file_menu.addAction('Save')
+        file_menu.addAction('New Facility').triggered.connect(self.create_facility)
+        file_menu.addAction('Open Facility').triggered.connect(lambda: self.select_facility(allow_new=False))
         file_menu.addSeparator()
         file_menu.addAction('Exit').triggered.connect(self.close)
 
