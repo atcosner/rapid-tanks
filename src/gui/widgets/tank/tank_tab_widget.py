@@ -2,23 +2,30 @@ from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QTabWidget, QMessageBox
 
 from src.components.tank import Tank
-from src.gui.widgets.tank.tank_info_frame import TankInfoFrame
 from src.gui.widgets.tank.fixed_roof.vertical_physical_frame import VerticalPhysicalFrame
+from src.gui.widgets.tank.tank_info_frame import TankInfoFrame
+from src.gui.widgets.tank.tank_usage_frame import TankUsageFrame
 
 
 class TankTabWidget(QTabWidget):
-    def __init__(self, parent: QWidget, read_only: bool) -> None:
+    def __init__(
+            self,
+            parent: QWidget,
+            read_only: bool,
+    ) -> None:
         super().__init__(parent)
 
         # Widgets for each tab
         self.tank_info = TankInfoFrame(self, read_only=read_only)
         self.physical_properties = VerticalPhysicalFrame(self, read_only=False)
+        self.tank_usage = TankUsageFrame(self, start_read_only=read_only)
 
         self._initial_setup()
 
     def _initial_setup(self) -> None:
         self.addTab(self.tank_info, 'Identification')
         self.addTab(self.physical_properties, 'Physical Properties')
+        self.addTab(self.tank_usage, 'Usage')
 
     def get_tank(self) -> Tank | None:
         # Check if the tank info has the required fields filled out
