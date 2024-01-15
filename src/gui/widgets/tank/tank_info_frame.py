@@ -1,74 +1,95 @@
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (
-    QWidget, QFrame, QLabel, QLineEdit, QTextEdit, QGridLayout, QPushButton,
-)
+from typing import NamedTuple
+
+from PyQt5.Qt import pyqtSlot, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
 from src.components.tank import Tank
+from src.gui.widgets.util.data_entry_rows import TextLineDataRow, TextEditDataRow
+from src.gui.widgets.util.editable_frame import EditableFrame
+from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
 
-from src.gui import RESOURCE_DIR
-from src.util.errors import DataEntryResult
+
+class TankInfo(NamedTuple):
+    name: str
+    description: str
 
 
-class TankInfoFrame(QFrame):
-    def __init__(self, parent: QWidget, read_only: bool) -> None:
+class TankInfoFrame(EditableFrame):
+    updateTankInfo = pyqtSignal(Tank)
+
+    def __init__(self, parent: QWidget, start_read_only: bool) -> None:
         super().__init__(parent)
-        self.setFrameStyle(QFrame.Box)
 
-        self.read_only = read_only
+        self.tank_name = self.register_control(TextLineDataRow('Name (*):', start_read_only))
+        self.tank_description = self.register_control(TextEditDataRow('Description:', start_read_only))
 
-        self.identifier_label = QLabel('Identifier:' if self.read_only else 'Identifier (*):')
-        self.identifier = QLineEdit()
-        self.description = QTextEdit()
-        self.edit_button = QPushButton()
+        if start_read_only:
+            super().handle_end_editing()
+        else:
+            super().handle_begin_editing()
 
-        self._initial_setup()
+        # Register our edit handlers
+        self.register_edit_handlers(
+            begin_func=self.handle_begin_editing,
+            end_close_func=lambda: self.handle_end_editing(False),
+            end_save_func=lambda: self.handle_end_editing(True),
+        )
 
-    def _initial_setup(self) -> None:
-        # All the text widgets should match our read-only status
-        self.identifier.setReadOnly(self.read_only)
-        self.description.setReadOnly(self.read_only)
+        self._set_up_layout()
 
-        # Set up the edit button
-        # TODO: Open a tank edit window
-        self.edit_button.setIcon(QIcon(str(RESOURCE_DIR / 'pencil.png')))
-        self.edit_button.setMaximumSize(65, 65)
-
-        # Layout the widgets
-        main_layout = QGridLayout()
+    def _set_up_layout(self) -> None:
+        main_layout = QHBoxLayout()
         self.setLayout(main_layout)
 
-        # Identifier
-        main_layout.addWidget(self.identifier_label, 0, 0)
-        main_layout.addWidget(self.identifier, 0, 1)
+        info_layout = QVBoxLayout()
+        main_layout.addLayout(info_layout)
 
-        # Description
-        main_layout.addWidget(QLabel('Description:'), 1, 0)
-        main_layout.addWidget(self.description, 1, 1)
+        info_layout.addWidget(self.tank_name)
+        info_layout.addWidget(self.tank_description)
 
-        if self.read_only:
-            main_layout.addWidget(self.edit_button, 0, 2)
-        else:
-            main_layout.addWidget(QLabel('(*) = Required'), 3, 0)
+        # Edit Buttons
+        main_layout.addLayout(self.edit_button_layout)
 
-    def load(self, tank: Tank) -> None:
-        self.identifier.setText(tank.identifier)
-        self.description.setText(tank.description)
+    def load(self, tank: Tank | TankInfo) -> None:
+        self.tank_name.set(tank.name)
+        self.tank_description.set(tank.description)
 
-    def check(self) -> DataEntryResult:
-        error_strings = []
+    def check(self) -> bool:
+        return bool(self.tank_name.get())
 
-        # Identifier is a required field
-        identifier_valid = bool(self.identifier.text())
-        if identifier_valid:
-            self.identifier_label.setStyleSheet('QLabel { color : black; }')
-        else:
-            self.identifier_label.setStyleSheet('QLabel { color : red; }')
-            error_strings.append('Tank Identifier is a required field!')
-
-        return DataEntryResult(identifier_valid, error_strings)
-
-    def build(self) -> Tank:
+    def get_tank(self) -> Tank:
         return Tank(
-            identifier=self.identifier.text(),
-            description=self.description.toPlainText(),
+            id=-1,  # This is set once it's inserted into the DB
+            name=self.tank_name.get(),
+            description=self.tank_description.get(),
         )
+
+    def get_current_values(self) -> TankInfo:
+        return TankInfo(
+            name=self.tank_name.get(),
+            description=self.tank_description.get(),
+        )
+
+    @pyqtSlot()
+    def handle_begin_editing(self) -> None:
+        super().handle_begin_editing()
+
+        # Save the current state
+        self.previous_values = self.get_current_values()
+
+    @pyqtSlot(bool)
+    def handle_end_editing(self, save: bool) -> None:
+        # Handle saving the new data or returning to the old data
+        if save:
+            if self.check():
+                self.updateTankInfo.emit(self.get_tank())
+            else:
+                return warn_mandatory_fields(self)
+        else:
+            # Prompt the user to confirm they are deleting unsaved data
+            if self.is_dirty() and not confirm_dirty_cancel(self):
+                return
+
+            self.load(self.previous_values)
+
+        super().handle_end_editing()

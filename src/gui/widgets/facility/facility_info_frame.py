@@ -60,8 +60,7 @@ class FacilityInfoFrame(EditableFrame):
         self.facility_description.set(facility.description)
 
     def check(self) -> bool:
-        # Just use the bool nature of strings
-        return self.facility_name.get()
+        return bool(self.facility_name.get())
 
     def get_facility(self) -> Facility:
         return Facility(

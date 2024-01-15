@@ -16,9 +16,11 @@ class TankTabWidget(QTabWidget):
         super().__init__(parent)
 
         # Widgets for each tab
-        self.tank_info = TankInfoFrame(self, read_only=read_only)
-        self.physical_properties = VerticalPhysicalFrame(self, read_only=False)
+        self.tank_info = TankInfoFrame(self, start_read_only=read_only)
+        self.physical_properties = VerticalPhysicalFrame(self, start_read_only=read_only)
         self.tank_usage = TankUsageFrame(self, start_read_only=read_only)
+
+        self.current_tank: Tank | None = None
 
         self._initial_setup()
 
@@ -26,6 +28,14 @@ class TankTabWidget(QTabWidget):
         self.addTab(self.tank_info, 'Identification')
         self.addTab(self.physical_properties, 'Physical Properties')
         self.addTab(self.tank_usage, 'Usage')
+
+        # Start each widget disabled until we lod a tank
+        self.tank_info.setDisabled(True)
+        self.physical_properties.setDisabled(True)
+        self.tank_usage.setDisabled(True)
+
+    def is_dirty(self) -> bool:
+        return self.tank_info.is_dirty() or self.tank_usage.is_dirty()
 
     def get_tank(self) -> Tank | None:
         # Check if the tank info has the required fields filled out
@@ -49,5 +59,12 @@ class TankTabWidget(QTabWidget):
 
     @pyqtSlot(object)
     def load_tank(self, tank: Tank) -> None:
+        self.current_tank = tank
+
         self.tank_info.load(tank)
         self.physical_properties.load(tank)
+
+        # Enable the tabs
+        self.tank_info.setDisabled(False)
+        self.physical_properties.setDisabled(False)
+        self.tank_usage.setDisabled(False)

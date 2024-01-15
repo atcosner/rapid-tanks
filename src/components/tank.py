@@ -25,7 +25,7 @@ class Tank:
 
     All components of a tank that are similar between the both fixed and floating roof tanks should live here.
     """
-    identifier: str
+    name: str
     id: int = -1
     description: str = ''
 

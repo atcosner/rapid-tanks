@@ -1,65 +1,82 @@
-from PyQt5.Qt import pyqtSlot
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (
-    QWidget, QFrame, QGridLayout, QPushButton, QVBoxLayout,
-)
+from PyQt5.Qt import pyqtSlot, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QGridLayout, QVBoxLayout
 
 from src.components.fixed_roof_tank import VerticalFixedRoofTank
 
-from src.gui import RESOURCE_DIR
 from src.gui.widgets.util.data_entry_rows import (
     NumericDataRow, CheckBoxDataRow, ComboBoxDataRow, ComboBoxDataType,
 )
+from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.labels import SubSectionHeader
-from src.util.errors import DataEntryResult
+from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
 
 
-class VerticalPhysicalFrame(QFrame):
-    def __init__(self, parent: QWidget, read_only: bool) -> None:
+class VerticalPhysicalFrame(EditableFrame):
+    updateTankPhysical = pyqtSignal(VerticalFixedRoofTank)
+
+    def __init__(self, parent: QWidget, start_read_only: bool) -> None:
         super().__init__(parent)
-        self.setFrameStyle(QFrame.Box)
-
-        self.read_only = read_only
-        self.edit_button = QPushButton()
 
         # Dimensions
-        self.shell_height = NumericDataRow('Shell Height', 'ft', read_only)
-        self.shell_diameter = NumericDataRow('Shell Diameter', 'ft', read_only)
-        self.max_liquid_height = NumericDataRow('Maximum Liquid Height', 'ft', read_only)
-        self.avg_liquid_height = NumericDataRow('Average Liquid Height', 'ft', read_only)
-        self.working_volume = NumericDataRow('Working Volume', 'gal', read_only)
-        self.turnovers_per_year = NumericDataRow('Turnovers Per Year', 'dimensionless', read_only)
-        self.net_throughput = NumericDataRow('Net Throughput', 'gal/yr', read_only)
-        self.is_heated = CheckBoxDataRow('Is Heated?', read_only)
+        self.shell_height = self.register_control(NumericDataRow('Shell Height', 'ft', start_read_only))
+        self.shell_diameter = self.register_control(NumericDataRow('Shell Diameter', 'ft', start_read_only))
+        self.max_liquid_height = self.register_control(NumericDataRow('Maximum Liquid Height', 'ft', start_read_only))
+        self.avg_liquid_height = self.register_control(NumericDataRow('Average Liquid Height', 'ft', start_read_only))
+        self.working_volume = self.register_control(NumericDataRow('Working Volume', 'gal', start_read_only))
+        self.turnovers_per_year = self.register_control(NumericDataRow('Turnovers Per Year', 'dimensionless', start_read_only))
+        self.net_throughput = self.register_control(NumericDataRow('Net Throughput', 'gal/yr', start_read_only))
+        self.is_heated = self.register_control(CheckBoxDataRow('Is Heated?', start_read_only))
 
         # Shell Characteristics
-        self.shell_color = ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, read_only)
-        self.shell_condition = ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, read_only)
+        self.shell_color = self.register_control(ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, start_read_only))
+        self.shell_condition = self.register_control(ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only))
 
         # Roof Characteristics
-        self.roof_color = ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, read_only)
-        self.roof_condition = ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, read_only)
-        self.roof_type = ComboBoxDataRow('Roof Type', ['Cone', 'Dome'], read_only)
-        self.roof_height = NumericDataRow('Roof Height', 'ft', read_only)
-        self.roof_radius = NumericDataRow('Radius', 'ft', read_only)
-        self.roof_slope = NumericDataRow('Slope', 'ft/ft', read_only, default='0.0625')
+        self.roof_color = self.register_control(ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, start_read_only))
+        self.roof_condition = self.register_control(ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only))
+        self.roof_type = self.register_control(ComboBoxDataRow('Roof Type', ['Cone', 'Dome'], start_read_only))
+        self.roof_height = self.register_control(NumericDataRow('Roof Height', 'ft', start_read_only))
+        self.roof_radius = self.register_control(NumericDataRow('Radius', 'ft', start_read_only))
+        self.roof_slope = self.register_control(NumericDataRow('Slope', 'ft/ft', start_read_only, default='0.0625'))
 
         # Breather Vent Settings
-        self.vacuum_setting = NumericDataRow(
-            'Vacuum Setting', 'psig', read_only, allow_negative=True, default='-0.3',
+        self.vacuum_setting = self.register_control(
+            NumericDataRow(
+                'Vacuum Setting',
+                'psig',
+                start_read_only,
+                allow_negative=True,
+                default='-0.3',
+            )
         )
-        self.pressure_setting = NumericDataRow(
-            'Pressure Setting', 'psig', read_only, default='0.3',
+        self.pressure_setting = self.register_control(
+            NumericDataRow(
+                'Pressure Setting',
+                'psig',
+                start_read_only,
+                default='0.3',
+            )
         )
 
-        self._initial_setup()
+        # Set up the dynamic nature of the roof type
+        self.roof_type.selectionChanged.connect(self.handle_roof_type_change)
+        self.handle_roof_type_change(self.roof_type.get_selected())
 
-    def _initial_setup(self) -> None:
-        # Set up the edit button
-        # TODO: Open a tank edit window
-        self.edit_button.setIcon(QIcon(str(RESOURCE_DIR / 'pencil.png')))
-        self.edit_button.setMaximumSize(65, 65)
+        if start_read_only:
+            super().handle_end_editing()
+        else:
+            super().handle_begin_editing()
 
+        # Register our edit handlers
+        self.register_edit_handlers(
+            begin_func=self.handle_begin_editing,
+            end_close_func=lambda: self.handle_end_editing(False),
+            end_save_func=lambda: self.handle_end_editing(True),
+        )
+
+        self._set_up_layout()
+
+    def _set_up_layout(self) -> None:
         main_layout = QGridLayout()
         self.setLayout(main_layout)
 
@@ -110,12 +127,8 @@ class VerticalPhysicalFrame(QFrame):
         vent_layout.addWidget(self.vacuum_setting)
         vent_layout.addWidget(self.pressure_setting)
 
-        # Set up the dynamic nature of the roof type
-        self.roof_type.selectionChanged.connect(self.handle_roof_type_change)
-        self.handle_roof_type_change(self.roof_type.get_selected())
-
-        if self.read_only:
-            main_layout.addWidget(self.edit_button, 0, 2)
+        # Edit controls
+        main_layout.addLayout(self.edit_button_layout, 0, 2)
 
     @pyqtSlot(str)
     def handle_roof_type_change(self, new_type: str) -> None:
@@ -135,19 +148,19 @@ class VerticalPhysicalFrame(QFrame):
 
         self.shell_height.set(tank.height)
         self.shell_diameter.set(tank.diameter)
-        # self.max_liquid_height = NumericDataRow('Maximum Liquid Height', 'ft', read_only)
-        # self.avg_liquid_height = NumericDataRow('Average Liquid Height', 'ft', read_only)
-        # self.working_volume = NumericDataRow('Working Volume', 'gal', read_only)
-        # self.turnovers_per_year = NumericDataRow('Turnovers Per Year', 'dimensionless', read_only)
-        # self.net_throughput = NumericDataRow('Net Throughput', 'gal/yr', read_only)
-        # self.is_heated = CheckBoxDataRow('Is Heated?', read_only)
+        # self.max_liquid_height = NumericDataRow('Maximum Liquid Height', 'ft', start_read_only)
+        # self.avg_liquid_height = NumericDataRow('Average Liquid Height', 'ft', start_read_only)
+        # self.working_volume = NumericDataRow('Working Volume', 'gal', start_read_only)
+        # self.turnovers_per_year = NumericDataRow('Turnovers Per Year', 'dimensionless', start_read_only)
+        # self.net_throughput = NumericDataRow('Net Throughput', 'gal/yr', start_read_only)
+        # self.is_heated = CheckBoxDataRow('Is Heated?', start_read_only)
 
-        # self.shell_color = ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, read_only)
-        # self.shell_condition = ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, read_only)
+        # self.shell_color = ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, start_read_only)
+        # self.shell_condition = ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only)
         #
-        # self.roof_color = ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, read_only)
-        # self.roof_condition = ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, read_only)
-        # self.roof_type = ComboBoxDataRow('Roof Type', ['Cone', 'Dome'], read_only)
+        # self.roof_color = ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, start_read_only)
+        # self.roof_condition = ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only)
+        # self.roof_type = ComboBoxDataRow('Roof Type', ['Cone', 'Dome'], start_read_only)
         self.roof_height.set(tank.roof_height)
         self.roof_radius.set(tank.roof_radius)
         self.roof_slope.set(tank.roof_slope)
@@ -155,14 +168,14 @@ class VerticalPhysicalFrame(QFrame):
         # self.vacuum_setting.set()
         # self.pressure_setting.set()
 
-    def check(self) -> DataEntryResult:
+    def check(self) -> bool:
         # TODO: Check for some valid data
-        return DataEntryResult(True, [])
+        return True
 
-    def build(self) -> VerticalFixedRoofTank:
+    def get_tank(self) -> VerticalFixedRoofTank:
         # TODO: Reconcile the other parameters that we need
         return VerticalFixedRoofTank(
-            identifier='',
+            name='',
             diameter=self.shell_diameter.get(),
             height=self.shell_height.get(),
             liquid_height=self.avg_liquid_height.get(),
@@ -171,3 +184,30 @@ class VerticalPhysicalFrame(QFrame):
             roof_slope=self.roof_slope.get(),
             roof_radius=self.roof_radius.get(),
         )
+
+    def get_current_values(self) -> VerticalFixedRoofTank:
+        return self.get_tank()
+
+    @pyqtSlot()
+    def handle_begin_editing(self) -> None:
+        super().handle_begin_editing()
+
+        # Save the current state
+        self.previous_values = self.get_current_values()
+
+    @pyqtSlot(bool)
+    def handle_end_editing(self, save: bool) -> None:
+        # Handle saving the new data or returning to the old data
+        if save:
+            if self.check():
+                self.updateTankPhysical.emit(self.get_tank())
+            else:
+                return warn_mandatory_fields(self)
+        else:
+            # Prompt the user to confirm they are deleting unsaved data
+            if self.is_dirty() and not confirm_dirty_cancel(self):
+                return
+
+            self.load(self.previous_values)
+
+        super().handle_end_editing()

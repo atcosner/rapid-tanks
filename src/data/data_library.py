@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 from src.components.facility import Facility
@@ -40,7 +41,11 @@ class DataLibrary:
 
     def create_facility(self) -> Facility:
         # Create a new facility and store it in the database
-        new_facility = Facility(id=-1, name='New Facility')
+        new_facility = Facility(
+            id=-1,
+            name='New Facility',
+            description=f'Created {datetime.now():%d/%m/%y %H:%M:%S}'
+        )
         new_facility.id = self.store(new_facility)
         return new_facility
 
