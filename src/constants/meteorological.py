@@ -49,3 +49,12 @@ class MeteorologicalSite:
             gps_coordinates=(row.gps_latitude, row.gps_longitude),
             atmospheric_pressure=unit_registry.Quantity(Decimal(row.atmospheric_pressure), 'psia'),
         )
+
+    def set_monthly_data(self, data: list[namedtuple]) -> None:
+        for month_row in data:
+            month = MeteorologicalMonthData.from_db_row(month_row)
+
+            if month.month_num == 13:
+                self.annual_data = month
+            else:
+                self.monthly_data[month.month_num] = month

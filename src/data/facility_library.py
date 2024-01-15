@@ -22,7 +22,7 @@ class FacilityLibrary:
         self.cxn = get_db_connection(db_location if db_location is not None else DEV_DB_FILE_PATH)
         self.cxn.row_factory = namedtuple_factory
 
-        self.meteorological_library = MeteorologicalLibrary(self.cxn)
+        self.meteorological_library = MeteorologicalLibrary(self.cxn, autoload)
 
         self.facilities: dict[str, Facility] = {}
 
@@ -44,6 +44,9 @@ class FacilityLibrary:
 
         # Load from the DB
         self.load_from_db()
+
+        # Reload any libraries we have
+        self.meteorological_library.reload()
 
     def get_facility_by_name(self, name: str) -> Facility | None:
         return self.facilities.get(name, None)

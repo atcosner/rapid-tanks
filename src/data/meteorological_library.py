@@ -23,14 +23,14 @@ class MeteorologicalLibrary:
 
     def load_from_db(self) -> None:
         # Load the sites
-        for location_row in self.cxn.cursor().execute('SELECT * FROM meteorological_location'):
+        for location_row in self.cxn.cursor().execute('SELECT * FROM meteorological_site'):
             site = MeteorologicalSite.from_db_row(location_row)
 
             # Select all detailed data for this site
             data_points = [
                 MeteorologicalMonthData.from_db_row(detail_row)
                 for detail_row in
-                self.cxn.cursor().execute(f'SELECT * FROM meteorological_location_detail WHERE site_id = {site.id}')
+                self.cxn.cursor().execute(f'SELECT * FROM meteorological_site_detail WHERE site_id = {site.id}')
             ]
             for data_point in data_points:
                 if data_point.month_num == 13:

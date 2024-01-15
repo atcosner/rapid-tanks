@@ -3,35 +3,32 @@ from PyQt5.QtWidgets import (
     QWidget, QFrame, QVBoxLayout, QListWidget, QListWidgetItem,
 )
 
-from src.components.facility import Facility
-from src.data.facility_library import FacilityLibrary
-
 from src.gui.widgets.util.search_bar import SearchBar
 
 
 class FacilityListItem(QListWidgetItem):
-    def __init__(self, facility: Facility) -> None:
-        super().__init__(facility.name)
-        self.facility = facility
+    def __init__(
+            self,
+            facility_key: tuple[str, int],
+    ) -> None:
+        super().__init__(facility_key[0])
+        self.facility_key = facility_key
 
     def get_id(self) -> int:
-        return self.facility.id
-
-    def get_facility(self) -> Facility:
-        return self.facility
+        return self.facility_key[1]
 
 
 class FacilitySelectionFrame(QFrame):
     def __init__(
             self,
             parent: QWidget,
-            library: FacilityLibrary,
+            facility_names: list[tuple[str, int]],
             auto_populate: bool = True,
     ) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)
 
-        self.library = library
+        self.facility_names = facility_names
         self._initial_setup()
 
         if auto_populate:
@@ -60,11 +57,10 @@ class FacilitySelectionFrame(QFrame):
     def populate(self) -> None:
         # Clear all existing entries
         self.facility_list.clear()
-        self.library.reload()
 
         # Load all facilities into the list
-        for facility in self.library.facilities.values():
-            self.facility_list.addItem(FacilityListItem(facility))
+        for facility_key in self.facility_names:
+            self.facility_list.addItem(FacilityListItem(facility_key))
 
         # Select the first entry if we loaded any
         if self.facility_list.count() > 0:
@@ -73,9 +69,9 @@ class FacilitySelectionFrame(QFrame):
     def get_facility_count(self) -> int:
         return self.facility_list.count()
 
-    def get_selected_facility(self) -> Facility | None:
+    def get_selected_facility_id(self) -> int | None:
         current_item = self.facility_list.currentItem()
         if current_item.isHidden():
             return None
         else:
-            return current_item.get_facility()
+            return current_item.get_id()

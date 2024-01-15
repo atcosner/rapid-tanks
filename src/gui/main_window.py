@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
-from src.data.facility_library import FacilityLibrary
+from src.data.data_library import DataLibrary
 from src.gui.modals.facility_selector import FacilitySelector
 from src.gui.modals.tank_editor import TankEditor
 from src.gui.widgets.facility.facility_tab_widget import FacilityTabWidget
@@ -10,10 +10,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__(None)
 
-        # Libraries
-        self.facility_library = FacilityLibrary()
+        self.data_library = DataLibrary(preload=False)
 
-        self.facility_tabs = FacilityTabWidget(self, self.facility_library)
+        self.facility_tabs = FacilityTabWidget(self, self.data_library)
 
         self._initial_setup()
         self.show()
@@ -21,13 +20,16 @@ class MainWindow(QMainWindow):
         self.select_facility(allow_new=True)
 
     def _initial_setup(self) -> None:
-        self.setWindowTitle('Rapid Tanks | Version 0.1')
-
         # Ensure we are never shrunk too small
         self.setMinimumSize(600, 400)
 
-        self._create_menubar()
+        self.setWindowTitle('Rapid Tanks')
         self.setCentralWidget(self.facility_tabs)
+
+        self._create_menubar()
+
+        # TODO: Show a slash screen and preload the DB
+        self.data_library.preload()
 
     def _create_menubar(self) -> None:
         file_menu = self.menuBar().addMenu('File')
@@ -36,17 +38,21 @@ class MainWindow(QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction('Exit').triggered.connect(self.close)
 
-        # Create the menu for materials options
-        materials_menu = self.menuBar().addMenu('Materials')
-        materials_menu.addAction('Create Custom Material')
-        materials_menu.addSeparator()
+        # # Create the menu for materials options
+        # materials_menu = self.menuBar().addMenu('Materials')
+        # materials_menu.addAction('Create Custom Material')
+        # materials_menu.addSeparator()
 
     def create_facility(self) -> None:
-        self.load_facility(self.facility_library.create().id)
+        self.load_facility(self.data_library.create_facility().id)
 
     def select_facility(self, allow_new: bool) -> None:
-        # Show the startup facility selection dialog
-        result = FacilitySelector.select_facility(self, self.facility_library, allow_new=allow_new)
+        result = FacilitySelector.select_facility(
+            self,
+            self.data_library.get_facility_names(),
+            allow_new=allow_new,
+        )
+
         if result == -1:
             # New Facility
             self.create_facility()
@@ -56,8 +62,7 @@ class MainWindow(QMainWindow):
 
     def load_facility(self, facility_id: int) -> None:
         # Get the facility from the library
-        facility = self.facility_library.get_facility_by_id(facility_id)
-        print(facility)
+        facility = self.data_library.get_facility(facility_id)
         if facility is None:
             return QMessageBox.critical(
                 self,

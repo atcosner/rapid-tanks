@@ -48,6 +48,8 @@ class TankTree(QTreeWidget):
     def _setup_top_level_items(self) -> None:
         self.horizontal_parent = TankTypeItem(self, 'Horizontal')
         self.vertical_fixed_parent = TankTypeItem(self, 'Vertical Fixed Roof')
+        self.internal_floating_parent = TankTypeItem(self, 'Internal Floating Roof')
+        self.external_floating_parent = TankTypeItem(self, 'External Floating Roof')
 
     def populate(self) -> None:
         # Reset ourselves
@@ -65,6 +67,8 @@ class TankTree(QTreeWidget):
         # Update the child counts
         self.horizontal_parent.update_title()
         self.vertical_fixed_parent.update_title()
+        self.internal_floating_parent.update_title()
+        self.external_floating_parent.update_title()
 
     @pyqtSlot(str)
     def handle_search(self, search_text: str) -> None:

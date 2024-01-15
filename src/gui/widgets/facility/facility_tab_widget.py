@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QTabWidget, QMessageBox
 
 from src.components.facility import Facility
 from src.constants.meteorological import MeteorologicalSite
-from src.data.facility_library import FacilityLibrary
+from src.data.data_library import DataLibrary
 from src.gui.widgets.facility.facility_info_frame import FacilityInfoFrame
 from src.gui.widgets.facility.facility_meteorological_frame import FacilityMeteorologicalFrame
 from src.gui.widgets.facility.facility_tanks_frame import FacilityTanksFrame
@@ -14,12 +14,12 @@ class FacilityTabWidget(QTabWidget):
     def __init__(
             self,
             parent: QWidget,
-            facility_library: FacilityLibrary,
+            library: DataLibrary,
     ) -> None:
         super().__init__(parent)
 
-        self.current_id: int | None = None
-        self.facility_library = facility_library
+        self.current_facility: Facility | None = None
+        self.library = library
 
         # Widgets for each tab
         self.facility_info = FacilityInfoFrame(self, start_read_only=True)
@@ -42,19 +42,22 @@ class FacilityTabWidget(QTabWidget):
         self.tabBar().installEventFilter(self)
 
     def load(self, facility: Facility) -> None:
-        self.current_id = facility.id
+        self.current_facility = facility
 
         self.facility_info.load(facility)
         self.facility_meteorological_info.load(facility.meteorological_data)
 
     @pyqtSlot(Facility)
     def update_facility(self, facility: Facility) -> None:
-        facility.id = self.current_id
-        self.facility_library.store(facility)
+        # TODO: Should the facility info hold onto the loaded facility?
+        facility.id = self.current_facility.id
+        self.current_facility = facility
+        self.library.store_facility(self.current_facility)
 
     @pyqtSlot(MeteorologicalSite)
     def update_meteorological_site(self, site: MeteorologicalSite) -> None:
-        self.facility_library.update_meteorological_site(self.current_id, site)
+        self.current_facility.meteorological_data = site
+        self.library.store_facility(self.current_facility)
 
     def can_change_tab(self) -> bool:
         if self.currentWidget().is_dirty():

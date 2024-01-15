@@ -9,7 +9,7 @@ class Delta0006(BaseSchemaDelta):
     def upgrade(self, cursor: sqlite3.Cursor) -> None:
         # Add in the master table for meteorological data
         cursor.execute("""
-            CREATE TABLE meteorological_location(
+            CREATE TABLE meteorological_site(
                 id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
                 name TEXT,
                 state TEXT,
@@ -22,7 +22,7 @@ class Delta0006(BaseSchemaDelta):
 
         # Add in the detail table for meteorological data
         cursor.execute("""
-            CREATE TABLE meteorological_location_detail(
+            CREATE TABLE meteorological_site_detail(
                 id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
                 site_id INTEGER,
                 month_id INTEGER,

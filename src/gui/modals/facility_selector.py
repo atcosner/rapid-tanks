@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import (
     QWidget, QRadioButton, QVBoxLayout, QButtonGroup, QHBoxLayout, QLabel, QPushButton, QMessageBox,
 )
 
-from src.data.facility_library import FacilityLibrary
 from src.gui.widgets.util.dialog import Dialog
 from src.gui.widgets.facility.facility_selection_frame import FacilitySelectionFrame
 
@@ -16,14 +15,18 @@ class FacilitySelection(IntEnum):
 
 
 class FacilitySelector(Dialog):
-    def __init__(self, parent: QWidget, library: FacilityLibrary) -> None:
+    def __init__(
+            self,
+            parent: QWidget,
+            facility_names: list[tuple[str, int]],
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle('Facility Selector')
 
         # Widgets
         self.new_facility_button = QRadioButton('Create a new Facility')
         self.existing_facility_button = QRadioButton('Open an existing Facility')
-        self.existing_facility_frame = FacilitySelectionFrame(self, library)
+        self.existing_facility_frame = FacilitySelectionFrame(self, facility_names)
 
         self.exit_buttons_layout = QHBoxLayout()
 
@@ -48,11 +51,11 @@ class FacilitySelector(Dialog):
         if self.new_facility_button.isChecked():
             self.done(-1)
         else:
-            selected_facility = self.existing_facility_frame.get_selected_facility()
-            if selected_facility is None:
+            selected_facility_id = self.existing_facility_frame.get_selected_facility_id()
+            if selected_facility_id is None:
                 return QMessageBox.critical(self, 'Selection Error', 'Please select a facility')
             else:
-                self.done(selected_facility.id)
+                self.done(selected_facility_id)
 
     def _initial_new_and_existing_setup(self) -> None:
         main_layout = QVBoxLayout()
@@ -102,10 +105,10 @@ class FacilitySelector(Dialog):
     def select_facility(
             cls,
             parent: QWidget,
-            library: FacilityLibrary,
+            facility_names: list[tuple[str, int]],
             allow_new: bool,
     ) -> int:
-        dialog = cls(parent, library)
+        dialog = cls(parent, facility_names)
         if allow_new:
             dialog._initial_new_and_existing_setup()
         else:

@@ -14771,7 +14771,7 @@ class Delta0010(BaseSchemaDelta):
         master_records = [record[:6] for record in meteorological_sites]
         cursor.executemany(
             """
-                INSERT INTO meteorological_location VALUES
+                INSERT INTO meteorological_site VALUES
                 (NULL, ?, ?, ?, ?, ?, ?)
             """,
             master_records
@@ -14781,13 +14781,13 @@ class Delta0010(BaseSchemaDelta):
         for record in meteorological_sites:
             # Get the ID of the master row for this data
             site_id = cursor.execute(
-                f"SELECT id from meteorological_location where name = '{record[0]}'"
+                f"SELECT id from meteorological_site where name = '{record[0]}'"
             ).fetchone()[0]
 
             # Add the detailed records
             cursor.executemany(
                 f"""
-                    INSERT INTO meteorological_location_detail VALUES
+                    INSERT INTO meteorological_site_detail VALUES
                     (NULL, {site_id}, ?, ?, ?, ?, ?)
                 """,
                 record[6]
