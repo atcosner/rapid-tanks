@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QFrame, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QHBoxLayout
 
 from src.components.fixed_roof_tank import VerticalFixedRoofTank
 from src.components.tank import Tank
@@ -110,28 +110,33 @@ class TankTree(QTreeWidget):
             self.tankSelected.emit(item.get())
 
 
-class FacilityTanksFrame(QFrame):
+class TankSelect(QWidget):
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
-        self.setFrameStyle(QFrame.Box)
 
-        # Widgets
         self.search_bar = SearchBar(self)
         self.tank_tree = TankTree(self)
-        self.tank_info = TankTabWidget(self, read_only=True)
 
         self.search_bar.textChanged.connect(self.tank_tree.handle_search)
-        self.tank_tree.tankSelected.connect(self.tank_info.load_tank)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.search_bar)
+        layout.addWidget(self.tank_tree)
+        self.setLayout(layout)
+
+
+class FacilityTanksFrame(QSplitter):
+    def __init__(self, parent: QWidget) -> None:
+        super().__init__(parent)
+
+        # Widgets
+        self.tank_select = TankSelect(self)
+        self.tank_tabs = TankTabWidget(self, read_only=True)
 
         self._initial_setup()
 
     def _initial_setup(self) -> None:
-        layout = QHBoxLayout()
-        self.setLayout(layout)
+        self.tank_select.tank_tree.tankSelected.connect(self.tank_tabs.load_tank)
 
-        search_layout = QVBoxLayout()
-        search_layout.addWidget(self.search_bar)
-        search_layout.addWidget(self.tank_tree)
-        layout.addLayout(search_layout)
-
-        layout.addWidget(self.tank_info)
+        self.addWidget(self.tank_select)
+        self.addWidget(self.tank_tabs)
