@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
 from src.data.data_library import DataLibrary
 from src.gui.modals.facility_selector import FacilitySelector
-from src.gui.modals.tank_editor import TankEditor
 from src.gui.widgets.facility.facility_tab_widget import FacilityTabWidget
 
 
@@ -75,6 +74,3 @@ class MainWindow(QMainWindow):
 
         # Load the facility
         self.facility_tabs.load(facility)
-
-    def create_tank(self) -> None:
-        TankEditor.create_tank(self)

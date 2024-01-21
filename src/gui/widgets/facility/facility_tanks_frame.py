@@ -1,6 +1,9 @@
 from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import (
+    QWidget, QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QToolButton,
+    QMenu,
+)
 
 from src.components.fixed_roof_tank import VerticalFixedRoofTank
 from src.components.tank import Tank
@@ -114,12 +117,25 @@ class TankSelect(QWidget):
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
 
+        self.create_tank = QToolButton(self)
         self.search_bar = SearchBar(self)
         self.tank_tree = TankTree(self)
 
         self.search_bar.textChanged.connect(self.tank_tree.handle_search)
 
+        self.tank_menu = QMenu()
+        self.tank_menu.addAction('Horizontal Fixed Roof')
+        self.tank_menu.addAction('Vertical Fixed Roof')
+        self.tank_menu.addAction('Internal Floating Roof')
+        self.tank_menu.addAction('External Floating Roof')
+
+        self.create_tank.setText('Create')
+        self.create_tank.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
+        self.create_tank.setPopupMode(QToolButton.MenuButtonPopup)
+        self.create_tank.setMenu(self.tank_menu)
+
         layout = QVBoxLayout()
+        layout.addWidget(self.create_tank)
         layout.addWidget(self.search_bar)
         layout.addWidget(self.tank_tree)
         self.setLayout(layout)
