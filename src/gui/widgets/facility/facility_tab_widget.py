@@ -3,6 +3,7 @@ from PyQt5.QtCore import QObject, QEvent, QTimer, Qt
 from PyQt5.QtWidgets import QWidget, QTabWidget, QMessageBox
 
 from src.components.facility import Facility
+from src.components.tank import TankType
 from src.constants.meteorological import MeteorologicalSite
 from src.data.data_library import DataLibrary
 from src.gui.widgets.facility.facility_info_frame import FacilityInfoFrame
@@ -29,6 +30,7 @@ class FacilityTabWidget(QTabWidget):
         # Connect signals
         self.facility_info.updateFacility.connect(self.update_facility)
         self.facility_meteorological_info.updateMeteorologicalSite.connect(self.update_meteorological_site)
+        self.tanks_info.createTank.connect(self.create_tank)
 
         self._initial_setup()
 
@@ -46,6 +48,7 @@ class FacilityTabWidget(QTabWidget):
 
         self.facility_info.load(facility)
         self.facility_meteorological_info.load(facility.meteorological_data)
+        self.tanks_info.load(facility, self.library)
 
     @pyqtSlot(Facility)
     def update_facility(self, facility: Facility) -> None:
@@ -58,6 +61,10 @@ class FacilityTabWidget(QTabWidget):
     def update_meteorological_site(self, site: MeteorologicalSite) -> None:
         self.current_facility.meteorological_data = site
         self.library.store_facility(self.current_facility)
+
+    @pyqtSlot(TankType)
+    def create_tank(self, tank_type: TankType) -> None:
+        self.library.create_tank(self.current_facility.id, tank_type)
 
     def can_change_tab(self) -> bool:
         if self.currentWidget().is_dirty():

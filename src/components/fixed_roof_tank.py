@@ -7,7 +7,7 @@ from pint import Quantity
 from src import unit_registry
 from src.components.tank import Tank
 from src.util.errors import MissingData
-from src.util.quantities import PI
+from src.util.quantities import PI, to_string
 
 
 class VerticalRoofType(Enum):
@@ -51,20 +51,20 @@ class VerticalFixedRoofTank(FixedRoofTank):
     roof_slope: Quantity | None = None
     roof_radius: Quantity | None = None
 
-    def to_db_row(self) -> str:
+    def to_db_values(self) -> str:
         # Convert the internal quantities to the right units
-        shell_height_str = self.height.to('ft').magnitude
-        shell_diameter_str = self.diameter.to('ft').magnitude
-        roof_height_str = self.roof_height.to('ft').magnitude
-        roof_slope_str = self.roof_slope.to('ft/ft').magnitude
-        roof_radius_str = self.roof_radius.to('ft').magnitude
+        shell_height_str = to_string(self.height, 'ft')
+        shell_diameter_str = to_string(self.diameter, 'ft')
+        roof_height_str = to_string(self.roof_height, 'ft')
+        roof_slope_str = to_string(self.roof_slope, 'ft/ft')
+        roof_radius_str = to_string(self.roof_radius, 'ft')
 
         # TODO: Handle all values
         return f"""(
             NULL,
-            '{self.identifier}',
+            '{self.name}',
             '{self.description}',
-            1,
+            {self.facility_id},
             TRUE,
             '{shell_height_str}',
             '{shell_diameter_str}',
@@ -90,7 +90,7 @@ class VerticalFixedRoofTank(FixedRoofTank):
     def from_db_row(cls, row: namedtuple):
         # TODO: Handle all values
         return cls(
-            identifier=row.name,
+            name=row.name,
             description=row.description,
             height=unit_registry.Quantity(Decimal(row.shell_height), 'ft'),
             diameter=unit_registry.Quantity(Decimal(row.shell_diameter), 'ft'),

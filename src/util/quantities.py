@@ -17,3 +17,10 @@ def to_quantity(registry: UnitRegistry, value: str | None, unit: str) -> Quantit
         return None
     else:
         return registry.Quantity(Decimal(value), unit)
+
+
+def to_string(quantity: Quantity | None, unit: str, default: str = '0.0') -> str:
+    if quantity is not None:
+        return str(quantity.to(unit).magnitude)
+    else:
+        return default

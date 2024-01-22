@@ -5,8 +5,10 @@ from PyQt5.QtWidgets import (
     QMenu,
 )
 
+from src.components.facility import Facility
 from src.components.fixed_roof_tank import VerticalFixedRoofTank
-from src.components.tank import Tank
+from src.components.tank import Tank, TankType
+from src.data.data_library import DataLibrary
 from src.data.tank_library import TankLibrary
 from src.gui.widgets.tank.tank_tab_widget import TankTabWidget
 from src.gui.widgets.util.search_bar import SearchBar
@@ -16,7 +18,7 @@ class TankItem(QTreeWidgetItem):
     def __init__(self, parent: QWidget, tank: Tank) -> None:
         super().__init__(parent)
         self.tank = tank
-        self.setText(0, tank.identifier)
+        self.setText(0, tank.name)
 
     def get(self) -> Tank:
         return self.tank
@@ -39,20 +41,33 @@ class TankTree(QTreeWidget):
 
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
-        self.library = TankLibrary()
 
         # Set up our basic properties
         self.setColumnCount(1)
         self.setHeaderLabels(['Name'])
         self.itemClicked.connect(self.handle_item_clicked)
 
-        self.populate()
 
     def _setup_top_level_items(self) -> None:
         self.horizontal_parent = TankTypeItem(self, 'Horizontal')
         self.vertical_fixed_parent = TankTypeItem(self, 'Vertical Fixed Roof')
         self.internal_floating_parent = TankTypeItem(self, 'Internal Floating Roof')
         self.external_floating_parent = TankTypeItem(self, 'External Floating Roof')
+
+    def load(self, tanks: dict[TankType, list[Tank]]) -> None:
+        # Reset ourselves
+        self.clear()
+        self._setup_top_level_items()
+
+        # Add the tanks
+        for tank in tanks[TankType.VERTICAL_FIXED_ROOF]:
+            TankItem(self.vertical_fixed_parent, tank)
+
+        # Update the child counts
+        self.horizontal_parent.update_title()
+        self.vertical_fixed_parent.update_title()
+        self.internal_floating_parent.update_title()
+        self.external_floating_parent.update_title()
 
     def populate(self) -> None:
         # Reset ourselves
@@ -114,40 +129,62 @@ class TankTree(QTreeWidget):
 
 
 class TankSelect(QWidget):
+    createTank = pyqtSignal(TankType)
+
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
 
-        self.create_tank = QToolButton(self)
+        self.create_tank_dropdown = QToolButton(self)
         self.search_bar = SearchBar(self)
         self.tank_tree = TankTree(self)
 
         self.search_bar.textChanged.connect(self.tank_tree.handle_search)
 
         self.tank_menu = QMenu()
-        self.tank_menu.addAction('Horizontal Fixed Roof')
-        self.tank_menu.addAction('Vertical Fixed Roof')
-        self.tank_menu.addAction('Internal Floating Roof')
-        self.tank_menu.addAction('External Floating Roof')
+        self.tank_menu.addAction('Horizontal Fixed Roof').triggered.connect(
+            lambda: self.create_tank(TankType.HORIZONTAL_FIXED_ROOF)
+        )
+        self.tank_menu.addAction('Vertical Fixed Roof').triggered.connect(
+            lambda: self.create_tank(TankType.VERTICAL_FIXED_ROOF)
+        )
+        self.tank_menu.addAction('Internal Floating Roof').triggered.connect(
+            lambda: self.create_tank(TankType.INTERNAL_FLOATING_ROOF)
+        )
+        self.tank_menu.addAction('External Floating Roof').triggered.connect(
+            lambda: self.create_tank(TankType.EXTERNAL_FLOATING_ROOF)
+        )
 
-        self.create_tank.setText('Create')
-        self.create_tank.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
-        self.create_tank.setPopupMode(QToolButton.MenuButtonPopup)
-        self.create_tank.setMenu(self.tank_menu)
+        self.create_tank_dropdown.setText('Create')
+        self.create_tank_dropdown.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
+        self.create_tank_dropdown.setPopupMode(QToolButton.MenuButtonPopup)
+        self.create_tank_dropdown.setMenu(self.tank_menu)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.create_tank)
+        layout.addWidget(self.create_tank_dropdown)
         layout.addWidget(self.search_bar)
         layout.addWidget(self.tank_tree)
         self.setLayout(layout)
 
+    def load(self, tanks: dict[TankType, list[Tank]]) -> None:
+        self.tank_tree.load(tanks)
+
+    def create_tank(self, tank_type: TankType) -> None:
+        self.createTank.emit(tank_type)
+
+        # TODO: Reload the tree
+
 
 class FacilityTanksFrame(QSplitter):
+    createTank = pyqtSignal(TankType)
+
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
 
         # Widgets
         self.tank_select = TankSelect(self)
         self.tank_tabs = TankTabWidget(self, read_only=True)
+
+        self.tank_select.createTank.connect(self.createTank)
 
         self._initial_setup()
 
@@ -156,3 +193,6 @@ class FacilityTanksFrame(QSplitter):
 
         self.addWidget(self.tank_select)
         self.addWidget(self.tank_tabs)
+
+    def load(self, facility: Facility, library: DataLibrary) -> None:
+        self.tank_select.load(library.get_tanks(facility.id))

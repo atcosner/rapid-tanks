@@ -20,7 +20,7 @@ class Facility:
     meteorological data can either come from the location data we ship or it can be manually input by the user into
     a custom location.
     """
-    id: int
+    id: int | None
     name: str
     description: str = ''
     company: str = ''

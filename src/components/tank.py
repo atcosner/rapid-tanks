@@ -12,6 +12,13 @@ from src.util.logging import NamedLoggerAdapter
 logger = logging.getLogger(__name__)
 
 
+class TankType(Enum):
+    HORIZONTAL_FIXED_ROOF = auto()
+    VERTICAL_FIXED_ROOF = auto()
+    EXTERNAL_FLOATING_ROOF = auto()
+    INTERNAL_FLOATING_ROOF = auto()
+
+
 class Insulation(Enum):
     NONE = auto()
     PARTIAL = auto()  # TODO: Per AP 42 Chapter 7, this means the shell is insulated. Can it ever be only the roof?
@@ -26,7 +33,8 @@ class Tank:
     All components of a tank that are similar between the both fixed and floating roof tanks should live here.
     """
     name: str
-    id: int = -1
+    id: int | None = None
+    facility_id: int | None = None
     description: str = ''
 
     mixture: Mixture | None = None
@@ -38,7 +46,7 @@ class Tank:
     operational_period: tuple[date, date] | None = None
 
     def __post_init__(self) -> None:
-        self.logger = NamedLoggerAdapter(logger, {'name': self.identifier})
+        self.logger = NamedLoggerAdapter(logger, {'name': self.name})
 
     def set_shell_color(self, color: PaintColor, condition: PaintCondition) -> None:
         self.shell_solar_absorption = ALL_COLORS[color].get_absorption_for_condition(condition)
