@@ -14787,7 +14787,7 @@ class Delta0010(BaseSchemaDelta):
             # Add the detailed records
             cursor.executemany(
                 f"""
-                    INSERT INTO meteorological_site_detail VALUES
+                    INSERT INTO meteorological_month_record VALUES
                     (NULL, {site_id}, ?, ?, ?, ?, ?)
                 """,
                 record[6]

@@ -20,9 +20,9 @@ class Delta0006(BaseSchemaDelta):
             );
         """)
 
-        # Add in the detail table for meteorological data
+        # Add in the table for month records at meteorological sites
         cursor.execute("""
-            CREATE TABLE meteorological_site_detail(
+            CREATE TABLE meteorological_month_record(
                 id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
                 site_id INTEGER,
                 month_id INTEGER,
