@@ -30,7 +30,7 @@ class MeteorologicalLibrary:
             data_points = [
                 MeteorologicalMonthData.from_db_row(detail_row)
                 for detail_row in
-                self.cxn.cursor().execute(f'SELECT * FROM meteorological_site_detail WHERE site_id = {site.id}')
+                self.cxn.cursor().execute(f'SELECT * FROM meteorological_month_record WHERE site_id = {site.id}')
             ]
             for data_point in data_points:
                 if data_point.month_num == 13:

@@ -64,7 +64,7 @@ class FacilityLibrary:
             # Insert or update depending on if the facility already has an id
             if facility.id:
                 sql = f"""
-                    UPDATE facility_master
+                    UPDATE facility
                     SET {facility.to_db_update()}
                     WHERE id = {facility.id}
                 """
@@ -73,7 +73,7 @@ class FacilityLibrary:
                 cursor.execute(sql)
                 return facility.id
             else:
-                sql = f'INSERT INTO facility_master VALUES {facility.to_db_values()}'
+                sql = f'INSERT INTO facility VALUES {facility.to_db_values()}'
 
                 logger.info(f'Executing: "{sql}"')
                 cursor.execute(sql)
@@ -88,7 +88,7 @@ class FacilityLibrary:
     def update_meteorological_site(self, facility_id: int, site: MeteorologicalSite) -> None:
         with self.cxn as cxn:
             sql = f"""
-                UPDATE facility_master
+                UPDATE facility
                 SET meteorological_site_id = {site.id}
                 WHERE id = {facility_id}
             """

@@ -55,7 +55,7 @@ class DataLibrary:
     def get_facility(self, identifier: str | int | None) -> Facility | list[Facility] | None:
         if identifier is None:
             facilities = []
-            for row in self.cxn.cursor().execute('SELECT * FROM facility_master'):
+            for row in self.cxn.cursor().execute('SELECT * FROM facility'):
                 facility = Facility.from_db_row(row)
                 facility.meteorological_data = self.get_meteorological_site(row.meteorological_site_id)
                 facilities.append(facility)
@@ -70,9 +70,10 @@ class DataLibrary:
             else:
                 raise RuntimeError(f'Unknown identifier type: {type(identifier)}')
 
-            if row := self.cxn.cursor().execute(f'SELECT * FROM facility_master {filter_clause}').fetchone():
+            if row := self.cxn.cursor().execute(f'SELECT * FROM facility {filter_clause}').fetchone():
                 facility = Facility.from_db_row(row)
-                facility.meteorological_data = self.get_meteorological_site(row.meteorological_site_id)
+                if row.meteorological_site_id is not None:
+                    facility.meteorological_data = self.get_meteorological_site(row.meteorological_site_id)
                 return facility
             else:
                 logger.warning(f'Could not find a facility matching the identifier: "{identifier}"')
@@ -80,7 +81,7 @@ class DataLibrary:
 
     def get_facility_names(self) -> list[tuple[str, int]]:
         return [
-            (row.name, row.id) for row in self.cxn.cursor().execute('SELECT id, name FROM facility_master')
+            (row.name, row.id) for row in self.cxn.cursor().execute('SELECT id, name FROM facility')
         ]
 
     def store_facility(self, facility: Facility) -> int:
@@ -90,7 +91,7 @@ class DataLibrary:
             # Insert or update depending on if the facility already has an id
             if facility.id:
                 sql = f"""
-                    UPDATE facility_master
+                    UPDATE facility
                     SET {facility.to_db_update()}
                     WHERE id = {facility.id}
                 """
@@ -99,7 +100,7 @@ class DataLibrary:
                 cursor.execute(sql)
                 return facility.id
             else:
-                sql = f'INSERT INTO facility_master VALUES {facility.to_db_values()}'
+                sql = f'INSERT INTO facility VALUES {facility.to_db_values()}'
 
                 logger.info(f'Executing: "{sql}"')
                 cursor.execute(sql)
@@ -124,7 +125,7 @@ class DataLibrary:
                 site = MeteorologicalSite.from_db_row(row)
                 site.set_monthly_data(
                     data=self.cxn.cursor().execute(
-                        f'SELECT * FROM meteorological_site_detail WHERE site_id = {site.id}'
+                        f'SELECT * FROM meteorological_month_record WHERE site_id = {site.id}'
                     ).fetchall(),
                 )
                 sites.append(site)
@@ -135,7 +136,7 @@ class DataLibrary:
                 site = MeteorologicalSite.from_db_row(row)
                 site.set_monthly_data(
                     data=self.cxn.cursor().execute(
-                        f'SELECT * FROM meteorological_site_detail WHERE site_id = {site.id}'
+                        f'SELECT * FROM meteorological_month_record WHERE site_id = {site.id}'
                     ).fetchall(),
                 )
                 return site
