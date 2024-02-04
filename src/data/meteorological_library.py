@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 
 from src.constants.meteorological import MeteorologicalSite, MeteorologicalMonthData
-from src.data.database import DEV_DB_FILE_PATH
+from src.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory, get_db_connection
 
 

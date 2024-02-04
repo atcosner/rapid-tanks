@@ -4,7 +4,7 @@ from pathlib import Path
 
 from src.components.facility import Facility
 from src.constants.meteorological import MeteorologicalSite
-from src.data.database import DEV_DB_FILE_PATH
+from src.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory, get_db_connection
 
 from .meteorological_library import MeteorologicalLibrary

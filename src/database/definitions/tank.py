@@ -3,19 +3,13 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 
 from . import OrmBase
 from .facility import Facility
-
-
-class FixedRoofType(MappedAsDataclass, OrmBase):
-    __tablename__ = "fixed_roof_type"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
+from .paint import SolarAbsorptance
 
 
 class FixedRoofTank(MappedAsDataclass, OrmBase):
     __tablename__ = "fixed_roof_tank"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
     description: Mapped[str]
     facility_id = mapped_column(ForeignKey("facility.id"))
@@ -26,7 +20,7 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
     shell_color_id = mapped_column(ForeignKey("paint_color.id"))
     shell_condition_id = mapped_column(ForeignKey("paint_condition.id"))
 
-    roof_type_id = mapped_column(ForeignKey("fixed_roof_type.id"))
+    roof_type: Mapped[str]
     roof_color_id = mapped_column(ForeignKey("paint_color.id"))
     roof_condition_id = mapped_column(ForeignKey("paint_condition.id"))
     roof_height: Mapped[str]
@@ -43,4 +37,16 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
     net_throughput: Mapped[str]
     is_heated: Mapped[bool]
 
-    facility: Mapped[Facility] = relationship(back_populates="fixed_roof_tanks")
+    facility: Mapped[Facility] = relationship(init=False, back_populates="fixed_roof_tanks")
+    shell_solar_absorptance: Mapped[SolarAbsorptance] = relationship(
+        init=False,
+        foreign_keys=[shell_color_id, shell_condition_id],
+        primaryjoin="and_(FixedRoofTank.shell_color_id==SolarAbsorptance.color_id,"
+                    "FixedRoofTank.shell_condition_id==SolarAbsorptance.condition_id)",
+    )
+    roof_solar_absorptance: Mapped[SolarAbsorptance] = relationship(
+        init=False,
+        foreign_keys=[roof_color_id, roof_condition_id],
+        primaryjoin="and_(FixedRoofTank.roof_color_id==SolarAbsorptance.color_id,"
+                    "FixedRoofTank.roof_condition_id==SolarAbsorptance.condition_id)",
+    )

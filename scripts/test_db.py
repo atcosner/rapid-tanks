@@ -1,9 +1,7 @@
 import sqlite3
 
-from src.data.facility_library import FacilityLibrary
-from src.data.meteorological_library import MeteorologicalLibrary
-from src.data.database import DEV_DB_FILE_PATH
-from src.data.database.schema_repository import SchemaRepository
+from src.database import DEV_DB_FILE_PATH
+from src.database import SchemaRepository
 from src.util.logging import configure_root_logger
 
 configure_root_logger()

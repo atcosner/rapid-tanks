@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 from src.constants.material import Material, Petrochemical, PetroleumLiquid
-from src.data.database import DEV_DB_FILE_PATH
+from src.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory, get_db_connection
 
 

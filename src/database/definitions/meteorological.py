@@ -7,7 +7,7 @@ from . import OrmBase
 class MeteorologicalSite(MappedAsDataclass, OrmBase):
     __tablename__ = "meteorological_site"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
     state: Mapped[str]
     station_identifier: Mapped[str]
@@ -21,7 +21,7 @@ class MeteorologicalSite(MappedAsDataclass, OrmBase):
 class MeteorologicalMonthRecord(MappedAsDataclass, OrmBase):
     __tablename__ = "meteorological_month_record"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     site_id = mapped_column(ForeignKey("meteorological_site.id"))
     month_id: Mapped[int]
     average_temp_min: Mapped[str]
@@ -29,4 +29,4 @@ class MeteorologicalMonthRecord(MappedAsDataclass, OrmBase):
     average_wind_speed: Mapped[str]
     average_daily_insolation: Mapped[str]
 
-    site: Mapped[MeteorologicalSite] = relationship(back_populates="month_records")
+    site: Mapped[MeteorologicalSite] = relationship(init=False, back_populates="month_records")

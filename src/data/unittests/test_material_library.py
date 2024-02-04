@@ -2,8 +2,8 @@ import sqlite3
 import unittest
 
 from ..material_library import MaterialLibrary
-from ..database.deltas.delta_0002 import Delta0002
-from ..database.deltas.delta_0004 import Delta0004
+from src.database.deltas.delta_0002 import Delta0002
+from src.database import Delta0004
 from ...constants.material import Petrochemical
 
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from src.components.tank import Tank
 from src.components.fixed_roof_tank import VerticalFixedRoofTank
-from src.data.database import DEV_DB_FILE_PATH
+from src.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory, get_db_connection
 
 

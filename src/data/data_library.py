@@ -8,7 +8,7 @@ from src.components.facility import Facility
 from src.components.fixed_roof_tank import VerticalFixedRoofTank, HorizontalFixedRoofTank
 from src.components.tank import TankType, Tank
 from src.constants.meteorological import MeteorologicalSite
-from src.data.database import DEV_DB_FILE_PATH
+from src.database import DEV_DB_FILE_PATH
 from src.util.database import namedtuple_factory, get_db_connection
 
 logger = logging.getLogger(__name__)
