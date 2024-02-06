@@ -1,38 +1,36 @@
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import (
     QWidget, QFrame, QVBoxLayout, QListWidget, QListWidgetItem,
 )
 
+from src.database import DB_ENGINE
+from src.database.definitions.facility import Facility
 from src.gui.widgets.util.search_bar import SearchBar
 
 
 class FacilityListItem(QListWidgetItem):
     def __init__(
             self,
-            facility_key: tuple[str, int],
+            facility_name: str,
+            facility_id: int,
     ) -> None:
-        super().__init__(facility_key[0])
-        self.facility_key = facility_key
+        super().__init__(facility_name)
+        self.facility_id = facility_id
 
     def get_id(self) -> int:
-        return self.facility_key[1]
+        return self.facility_id
 
 
 class FacilitySelectionFrame(QFrame):
-    def __init__(
-            self,
-            parent: QWidget,
-            facility_names: list[tuple[str, int]],
-            auto_populate: bool = True,
-    ) -> None:
+    def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)
 
-        self.facility_names = facility_names
         self._initial_setup()
-
-        if auto_populate:
-            self.populate()
+        self.populate()
 
     def _initial_setup(self) -> None:
         layout = QVBoxLayout()
@@ -59,8 +57,9 @@ class FacilitySelectionFrame(QFrame):
         self.facility_list.clear()
 
         # Load all facilities into the list
-        for facility_key in self.facility_names:
-            self.facility_list.addItem(FacilityListItem(facility_key))
+        with Session(DB_ENGINE) as session:
+            for facility_name, facility_id in session.execute(select(Facility.name, Facility.id)).all():
+                self.facility_list.addItem(FacilityListItem(facility_name, facility_id))
 
         # Select the first entry if we loaded any
         if self.facility_list.count() > 0:

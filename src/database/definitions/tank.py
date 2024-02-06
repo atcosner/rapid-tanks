@@ -2,7 +2,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
 from . import OrmBase
-from .facility import Facility
 from .paint import SolarAbsorptance
 
 
@@ -37,7 +36,7 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
     net_throughput: Mapped[str]
     is_heated: Mapped[bool]
 
-    facility: Mapped[Facility] = relationship(init=False, back_populates="fixed_roof_tanks")
+    facility: Mapped["Facility"] = relationship(init=False, back_populates="fixed_roof_tanks")
     shell_solar_absorptance: Mapped[SolarAbsorptance] = relationship(
         init=False,
         foreign_keys=[shell_color_id, shell_condition_id],

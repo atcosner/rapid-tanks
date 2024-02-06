@@ -15,18 +15,14 @@ class FacilitySelection(IntEnum):
 
 
 class FacilitySelector(Dialog):
-    def __init__(
-            self,
-            parent: QWidget,
-            facility_names: list[tuple[str, int]],
-    ) -> None:
+    def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setWindowTitle('Facility Selector')
 
         # Widgets
         self.new_facility_button = QRadioButton('Create a new Facility')
         self.existing_facility_button = QRadioButton('Open an existing Facility')
-        self.existing_facility_frame = FacilitySelectionFrame(self, facility_names)
+        self.existing_facility_frame = FacilitySelectionFrame(self)
 
         self.exit_buttons_layout = QHBoxLayout()
 
@@ -102,13 +98,8 @@ class FacilitySelector(Dialog):
         self.setLayout(main_layout)
 
     @classmethod
-    def select_facility(
-            cls,
-            parent: QWidget,
-            facility_names: list[tuple[str, int]],
-            allow_new: bool,
-    ) -> int:
-        dialog = cls(parent, facility_names)
+    def select_facility(cls, parent: QWidget, allow_new: bool) -> int:
+        dialog = cls(parent)
         if allow_new:
             dialog._initial_new_and_existing_setup()
         else:

@@ -46,11 +46,7 @@ class MainWindow(QMainWindow):
         self.load_facility(self.data_library.create_facility().id)
 
     def select_facility(self, allow_new: bool) -> None:
-        result = FacilitySelector.select_facility(
-            self,
-            self.data_library.get_facility_names(),
-            allow_new=allow_new,
-        )
+        result = FacilitySelector.select_facility(self, allow_new=allow_new)
 
         if result == -1:
             # New Facility
