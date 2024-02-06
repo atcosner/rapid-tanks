@@ -15,7 +15,7 @@ class MeteorologicalSite(MappedAsDataclass, OrmBase):
     gps_longitude: Mapped[str]
     atmospheric_pressure: Mapped[str]
 
-    month_records: Mapped[list["MeteorologicalMonthRecord"]] = relationship(init=False, back_populates="site")
+    month_records: Mapped[list["MeteorologicalMonthRecord"]] = relationship(back_populates="site")
 
 
 class MeteorologicalMonthRecord(MappedAsDataclass, OrmBase):

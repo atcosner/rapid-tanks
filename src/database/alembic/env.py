@@ -1,9 +1,12 @@
 from logging.config import fileConfig
+from pathlib import Path
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
+from src.database import DEV_DB_FILE_PATH
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,6 +28,8 @@ target_metadata = None
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+URL_PREFIX = 'sqlite+pysqlite:///'
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -38,7 +43,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = f'{URL_PREFIX}{DEV_DB_FILE_PATH}'
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -58,7 +63,7 @@ def run_migrations_online() -> None:
 
     """
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        {'sqlalchemy.url': f'{URL_PREFIX}{DEV_DB_FILE_PATH}'},
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
