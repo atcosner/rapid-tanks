@@ -1,7 +1,10 @@
+from sqlalchemy.orm import Session
+
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout, QLabel, QHBoxLayout
 
-from src.constants.meteorological import MeteorologicalSite
+from src.database import DB_ENGINE
+from src.database.definitions.meteorological import MeteorologicalSite
 from src.gui.widgets.util.data_entry_rows import NumericDataRow
 
 from src.gui.widgets.util.labels import SubSectionHeader
@@ -11,8 +14,7 @@ class MeteorologicalInfoFrame(QFrame):
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)
-
-        self.site: MeteorologicalSite | None = None
+        self.site_id: int | None = None
 
         self._initial_setup()
 
@@ -99,18 +101,21 @@ class MeteorologicalInfoFrame(QFrame):
 
         layout.addStretch()
 
-    @pyqtSlot(MeteorologicalSite)
-    def handle_site_selected(self, site: MeteorologicalSite) -> None:
-        self.site = site
+    @pyqtSlot(int)
+    def handle_site_selected(self, site_id: int) -> None:
+        print(site_id)
+        with Session(DB_ENGINE) as session:
+            site = session.get(MeteorologicalSite, site_id)
+            self.site_id = site.id
+            self.site_name.setText(f'{site.name}, {site.state}')
 
-        # Load values
-        self.site_name.setText(f'{site.name}, {site.state}')
-        self.daat.set(site.annual_data.average_daily_max_temp)
-        self.aat_max.set(site.annual_data.average_daily_max_temp)
-        self.aat_min.set(site.annual_data.average_daily_min_temp)
-        self.aws.set(site.annual_data.average_wind_speed)
-        self.aasif.set(site.annual_data.average_solar_insolation)
-        self.ap.set(site.atmospheric_pressure)
+            annual_data = site.month_records[13]
+            self.daat.set('0')  # TODO: Where does this come from?
+            self.aat_max.set(annual_data.average_temp_max)
+            self.aat_min.set(annual_data.average_temp_min)
+            self.aws.set(annual_data.average_wind_speed)
+            self.aasif.set(annual_data.average_daily_insolation)
+            self.ap.set(site.atmospheric_pressure)
 
-    def get_site(self) -> MeteorologicalSite | None:
-        return self.site
+    def get_site_id(self) -> int | None:
+        return self.site_id

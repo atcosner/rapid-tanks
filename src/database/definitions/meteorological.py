@@ -1,5 +1,6 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
+from sqlalchemy.orm.collections import attribute_keyed_dict
 
 from . import OrmBase
 
@@ -15,7 +16,10 @@ class MeteorologicalSite(MappedAsDataclass, OrmBase):
     gps_longitude: Mapped[str]
     atmospheric_pressure: Mapped[str]
 
-    month_records: Mapped[list["MeteorologicalMonthRecord"]] = relationship(back_populates="site")
+    month_records: Mapped[dict[int, "MeteorologicalMonthRecord"]] = relationship(
+        collection_class=attribute_keyed_dict("id"),
+        back_populates="site",
+    )
 
 
 class MeteorologicalMonthRecord(MappedAsDataclass, OrmBase):

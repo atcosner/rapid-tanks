@@ -62,7 +62,7 @@ class FacilityMeteorologicalFrame(EditableFrame):
 
     def load(self, site: MeteorologicalSite | None) -> None:
         if site is not None:
-            self.info_frame.handle_site_selected(site)
+            self.info_frame.handle_site_selected(site.id)
 
     def check(self) -> bool:
         return self.get_site() is not None

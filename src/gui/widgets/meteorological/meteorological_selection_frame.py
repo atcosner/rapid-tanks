@@ -1,31 +1,37 @@
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import (
-    QWidget, QFrame, QVBoxLayout, QTreeWidget, QTreeWidgetItem,
-)
+from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 
-from src.constants.meteorological import MeteorologicalSite
-from src.data.meteorological_library import MeteorologicalLibrary
+from src.database import DB_ENGINE
+from src.database.definitions.meteorological import MeteorologicalSite
 from src.util.locations import STATES_AND_TERRITORIES
 from src.gui.widgets.util.search_bar import SearchBar
 
 
 class MeteorologicalSiteItem(QTreeWidgetItem):
-    def __init__(self, parent: QWidget, site: MeteorologicalSite) -> None:
+    def __init__(
+            self,
+            parent: QWidget,
+            site_name: str,
+            site_state: str,
+            site_id: int,
+    ) -> None:
         super().__init__(parent)
-        self.site = site
-        self.setText(0, f'{site.name}, {site.state}')
+        self.site_id = site_id
+        self.setText(0, f'{site_name}, {site_state}')
 
-    def get_site(self) -> MeteorologicalSite:
-        return self.site
+    def get_id(self) -> int:
+        return self.site_id
 
 
 class MeteorologicalSiteTree(QTreeWidget):
-    siteSelected = pyqtSignal(MeteorologicalSite)
+    siteSelected = pyqtSignal(int)
 
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
-        self.library = MeteorologicalLibrary()
         self.state_items: dict[str, QTreeWidgetItem] = {}
 
         self.itemClicked.connect(self.handle_item_clicked)
@@ -50,13 +56,11 @@ class MeteorologicalSiteTree(QTreeWidget):
         self.clear()
         self._setup_top_level_items()
 
-        # Reload the library
-        self.library.reload()
-
-        # Add in all the sites
-        for _, site in self.library:
-            state_item = self.state_items[site.state]
-            MeteorologicalSiteItem(state_item, site)
+        # Load all facilities into the list
+        with Session(DB_ENGINE) as session:
+            for site in session.scalars(select(MeteorologicalSite)).all():
+                state_item = self.state_items[site.state]
+                MeteorologicalSiteItem(state_item, site.name, site.state, site.id)
 
         # Update all the states to include child counts
         for state_name, state_item in self.state_items.items():
@@ -85,23 +89,14 @@ class MeteorologicalSiteTree(QTreeWidget):
             # Update the title
             state_item.setText(0, f'{state_name} ({state_item.childCount() - hidden_children})')
 
-    def get_selected_site(self) -> MeteorologicalSite | None:
-        if current_item := self.currentItem():
-            if current_item.isHidden():
-                return None
-            else:
-                return current_item.get_site()
-        else:
-            return None
-
     @pyqtSlot(QTreeWidgetItem, int)
     def handle_item_clicked(self, item: QTreeWidgetItem, column: int) -> None:
         if isinstance(item, MeteorologicalSiteItem):
-            self.siteSelected.emit(item.get_site())
+            self.siteSelected.emit(item.get_id())
 
 
 class MeteorologicalSelectionFrame(QFrame):
-    siteSelected = pyqtSignal(MeteorologicalSite)
+    siteSelected = pyqtSignal(int)
 
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
@@ -122,6 +117,3 @@ class MeteorologicalSelectionFrame(QFrame):
         layout.addWidget(search_bar)
 
         layout.addWidget(self.site_tree)
-
-    def get_selected_site(self) -> MeteorologicalSite | None:
-        return self.site_tree.get_selected_site()
