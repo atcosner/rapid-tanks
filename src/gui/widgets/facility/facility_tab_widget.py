@@ -1,11 +1,11 @@
+from sqlalchemy.orm import Session
+
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtCore import QObject, QEvent, QTimer, Qt
 from PyQt5.QtWidgets import QWidget, QTabWidget, QMessageBox
 
-from src.components.facility import Facility
-from src.components.tank import TankType
-from src.constants.meteorological import MeteorologicalSite
-from src.data.data_library import DataLibrary
+from src.database import DB_ENGINE
+from src.database.definitions.facility import Facility
 from src.gui.widgets.facility.facility_info_frame import FacilityInfoFrame
 from src.gui.widgets.facility.facility_meteorological_frame import FacilityMeteorologicalFrame
 from src.gui.widgets.facility.facility_tanks_frame import FacilityTanksFrame
@@ -15,12 +15,10 @@ class FacilityTabWidget(QTabWidget):
     def __init__(
             self,
             parent: QWidget,
-            library: DataLibrary,
     ) -> None:
         super().__init__(parent)
 
-        self.current_facility: Facility | None = None
-        self.library = library
+        self.current_facility_id: int | None = None
 
         # Widgets for each tab
         self.facility_info = FacilityInfoFrame(self, start_read_only=True)
@@ -28,9 +26,7 @@ class FacilityTabWidget(QTabWidget):
         self.tanks_info = FacilityTanksFrame(self)
 
         # Connect signals
-        self.facility_info.updateFacility.connect(self.update_facility)
-        self.facility_meteorological_info.updateMeteorologicalSite.connect(self.update_meteorological_site)
-        self.tanks_info.createTank.connect(self.create_tank)
+        self.facility_info.facilityInfoChanged.connect(self.handle_update_facility_info)
 
         self._initial_setup()
 
@@ -44,27 +40,21 @@ class FacilityTabWidget(QTabWidget):
         self.tabBar().installEventFilter(self)
 
     def load(self, facility: Facility) -> None:
-        self.current_facility = facility
+        self.current_facility_id = facility.id
 
         self.facility_info.load(facility)
-        self.facility_meteorological_info.load(facility.meteorological_data)
-        self.tanks_info.load(facility, self.library)
+        self.facility_meteorological_info.load(facility.site)
+        self.tanks_info.load(facility)
 
-    @pyqtSlot(Facility)
-    def update_facility(self, facility: Facility) -> None:
-        # TODO: Should the facility info hold onto the loaded facility?
-        facility.id = self.current_facility.id
-        self.current_facility = facility
-        self.library.store_facility(self.current_facility)
+    @pyqtSlot(int)
+    def handle_update_facility_info(self, facility_id: int) -> None:
+        assert facility_id == self.current_facility_id, \
+            f'Updating a facility not currently loaded! Current: {self.current_facility_id}, New: {facility_id}'
 
-    @pyqtSlot(MeteorologicalSite)
-    def update_meteorological_site(self, site: MeteorologicalSite) -> None:
-        self.current_facility.meteorological_data = site
-        self.library.store_facility(self.current_facility)
-
-    @pyqtSlot(TankType)
-    def create_tank(self, tank_type: TankType) -> None:
-        self.library.create_tank(self.current_facility.id, tank_type)
+        # Update the title of our parent
+        with Session(DB_ENGINE) as session:
+            facility = session.get(Facility, facility_id)
+            self.parent().setWindowTitle(f'Rapid Tanks | {facility.name}')
 
     def can_change_tab(self) -> bool:
         if self.currentWidget().is_dirty():

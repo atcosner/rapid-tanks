@@ -103,7 +103,6 @@ class MeteorologicalInfoFrame(QFrame):
 
     @pyqtSlot(int)
     def handle_site_selected(self, site_id: int) -> None:
-        print(site_id)
         with Session(DB_ENGINE) as session:
             site = session.get(MeteorologicalSite, site_id)
             self.site_id = site.id

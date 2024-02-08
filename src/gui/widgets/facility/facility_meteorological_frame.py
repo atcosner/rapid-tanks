@@ -1,7 +1,7 @@
 from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QSplitter, QHBoxLayout
 
-from src.constants.meteorological import MeteorologicalSite
+from src.database.definitions.meteorological import MeteorologicalSite
 from src.gui.widgets.meteorological.meteorological_info_frame import MeteorologicalInfoFrame
 from src.gui.widgets.meteorological.meteorological_selection_frame import MeteorologicalSelectionFrame
 from src.gui.widgets.util.editable_frame import EditableFrame
@@ -9,15 +9,13 @@ from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandat
 
 
 class FacilityMeteorologicalFrame(EditableFrame):
-    updateMeteorologicalSite = pyqtSignal(MeteorologicalSite)
+    meteorologicalSiteChanged = pyqtSignal(int)
 
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
 
         self.selection_frame = MeteorologicalSelectionFrame(self)
         self.info_frame = MeteorologicalInfoFrame(self)
-
-        self.previous_site: MeteorologicalSite | None = None
 
         # Connect the selection tree to the info frame
         self.selection_frame.siteSelected.connect(self.info_frame.handle_site_selected)
@@ -52,27 +50,21 @@ class FacilityMeteorologicalFrame(EditableFrame):
     # Override from EditableFrame
     def get_current_values(self) -> int | None:
         # Save the ID of the current site if we have one to allow for trivial is_dirty logic
-        if site := self.info_frame.get_site():
-            return site.id
-        else:
-            return None
-
-    def get_site(self) -> MeteorologicalSite | None:
-        return self.info_frame.get_site()
+        return self.info_frame.get_site_id()
 
     def load(self, site: MeteorologicalSite | None) -> None:
         if site is not None:
             self.info_frame.handle_site_selected(site.id)
 
     def check(self) -> bool:
-        return self.get_site() is not None
+        # Ensure a site is selected
+        return self.get_current_values() is not None
 
     @pyqtSlot()
     def handle_begin_editing(self) -> None:
         super().handle_begin_editing()
 
         self.previous_values = self.get_current_values()
-        self.previous_site = self.info_frame.get_site()
 
         # Show the selection frame
         self.selection_frame.show()
@@ -82,7 +74,9 @@ class FacilityMeteorologicalFrame(EditableFrame):
         # Handle if we need to save the new data or reload the old data
         if save:
             if self.check():
-                self.updateMeteorologicalSite.emit(self.get_site())
+                # Only emit updates that actually change state
+                if self.previous_values != self.get_current_values():
+                    self.meteorologicalSiteChanged.emit(self.get_current_values())
             else:
                 return warn_mandatory_fields(self)
         else:

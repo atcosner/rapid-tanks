@@ -1,9 +1,12 @@
+from sqlalchemy.orm import Session
 from typing import NamedTuple
 
 from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
 from src.components.tank import Tank
+from src.database import DB_ENGINE
+from src.database.definitions.tank import FixedRoofTank
 from src.gui.widgets.util.data_entry_rows import TextLineDataRow, TextEditDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
@@ -15,10 +18,9 @@ class TankInfo(NamedTuple):
 
 
 class TankInfoFrame(EditableFrame):
-    updateTankInfo = pyqtSignal(Tank)
-
     def __init__(self, parent: QWidget, start_read_only: bool) -> None:
         super().__init__(parent)
+        self.current_tank_id: int | None = None
 
         self.tank_name = self.register_control(TextLineDataRow('Name (*):', start_read_only))
         self.tank_description = self.register_control(TextEditDataRow('Description:', start_read_only))
@@ -54,15 +56,20 @@ class TankInfoFrame(EditableFrame):
         self.tank_name.set(tank.name)
         self.tank_description.set(tank.description)
 
+        if hasattr(tank, 'id'):
+            self.current_tank_id = tank.id
+
     def check(self) -> bool:
         return bool(self.tank_name.get())
 
-    def get_tank(self) -> Tank:
-        return Tank(
-            id=-1,  # This is set once it's inserted into the DB
-            name=self.tank_name.get(),
-            description=self.tank_description.get(),
-        )
+    def update_tank(self) -> int:
+        with Session(DB_ENGINE) as session:
+            # TODO: Other types of tanks
+            tank = session.get(FixedRoofTank, self.current_tank_id)
+            tank.name = self.tank_name.get()
+            tank.description = self.tank_description.get()
+            session.commit()
+        return self.current_tank_id
 
     def get_current_values(self) -> TankInfo:
         return TankInfo(
@@ -82,7 +89,9 @@ class TankInfoFrame(EditableFrame):
         # Handle saving the new data or returning to the old data
         if save:
             if self.check():
-                self.updateTankInfo.emit(self.get_tank())
+                # Only emit updates that actually change state
+                if self.previous_values != self.get_current_values():
+                    self.update_tank()
             else:
                 return warn_mandatory_fields(self)
         else:

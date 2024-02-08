@@ -1,8 +1,10 @@
-from PyQt5.Qt import pyqtSlot, pyqtSignal
+from sqlalchemy.orm import Session
+
+from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QGridLayout, QVBoxLayout
 
-from src.components.fixed_roof_tank import VerticalFixedRoofTank
-
+from src.database import DB_ENGINE
+from src.database.definitions.tank import FixedRoofTank
 from src.gui.widgets.util.data_entry_rows import (
     NumericDataRow, CheckBoxDataRow, ComboBoxDataRow, ComboBoxDataType,
 )
@@ -12,10 +14,9 @@ from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandat
 
 
 class VerticalPhysicalFrame(EditableFrame):
-    updateTankPhysical = pyqtSignal(VerticalFixedRoofTank)
-
     def __init__(self, parent: QWidget, start_read_only: bool) -> None:
         super().__init__(parent)
+        self.current_tank_id: int | None = None
 
         # Dimensions
         self.shell_height = self.register_control(NumericDataRow('Shell Height', 'ft', start_read_only))
@@ -141,13 +142,11 @@ class VerticalPhysicalFrame(EditableFrame):
         else:
             raise RuntimeError(f'Unexpected roof type: "{new_type}"')
 
-    def load(self, tank: VerticalFixedRoofTank) -> None:
-        # Check that we got the right type
-        if not isinstance(tank, VerticalFixedRoofTank):
-            raise RuntimeError(f'Incompatible tank type: {type(tank)}')
+    def load(self, tank: FixedRoofTank) -> None:
+        self.current_tank_id = tank.id
 
-        self.shell_height.set(tank.height)
-        self.shell_diameter.set(tank.diameter)
+        self.shell_height.set(tank.shell_height)
+        self.shell_diameter.set(tank.shell_diameter)
         # self.max_liquid_height = NumericDataRow('Maximum Liquid Height', 'ft', start_read_only)
         # self.avg_liquid_height = NumericDataRow('Average Liquid Height', 'ft', start_read_only)
         # self.working_volume = NumericDataRow('Working Volume', 'gal', start_read_only)
@@ -172,21 +171,23 @@ class VerticalPhysicalFrame(EditableFrame):
         # TODO: Check for some valid data
         return True
 
-    def get_tank(self) -> VerticalFixedRoofTank:
-        # TODO: Reconcile the other parameters that we need
-        return VerticalFixedRoofTank(
-            name='',
-            diameter=self.shell_diameter.get(),
-            height=self.shell_height.get(),
-            liquid_height=self.avg_liquid_height.get(),
+    def update_tank(self) -> int:
+        with Session(DB_ENGINE) as session:
+            tank = session.get(FixedRoofTank, self.current_tank_id)
 
-            roof_height=self.roof_height.get(),
-            roof_slope=self.roof_slope.get(),
-            roof_radius=self.roof_radius.get(),
-        )
+            tank.shell_height = self.shell_height.get()
+            tank.shell_diameter = self.shell_diameter.get()
+            tank.roof_height = self.roof_height.get(),
+            tank.roof_slope = self.roof_slope.get(),
+            tank.roof_radius = self.roof_radius.get(),
+            # TODO: Reconcile the other parameters that we need
 
-    def get_current_values(self) -> VerticalFixedRoofTank:
-        return self.get_tank()
+            session.commit()
+        return self.current_tank_id
+
+    def get_current_values(self) -> FixedRoofTank:
+        # TODO: Implement this
+        return FixedRoofTank()
 
     @pyqtSlot()
     def handle_begin_editing(self) -> None:
@@ -200,7 +201,8 @@ class VerticalPhysicalFrame(EditableFrame):
         # Handle saving the new data or returning to the old data
         if save:
             if self.check():
-                self.updateTankPhysical.emit(self.get_tank())
+                # TODO: Only emit updates that actually change state
+                self.update_tank()
             else:
                 return warn_mandatory_fields(self)
         else:
