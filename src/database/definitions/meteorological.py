@@ -17,7 +17,7 @@ class MeteorologicalSite(MappedAsDataclass, OrmBase):
     atmospheric_pressure: Mapped[str]
 
     month_records: Mapped[dict[int, "MeteorologicalMonthRecord"]] = relationship(
-        collection_class=attribute_keyed_dict("id"),
+        collection_class=attribute_keyed_dict("month_id"),
         back_populates="site",
     )
 

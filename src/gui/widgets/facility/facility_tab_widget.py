@@ -43,7 +43,7 @@ class FacilityTabWidget(QTabWidget):
         self.current_facility_id = facility.id
 
         self.facility_info.load(facility)
-        self.facility_meteorological_info.load(facility.site)
+        self.facility_meteorological_info.load(facility)
         self.tanks_info.load(facility)
 
     @pyqtSlot(int)

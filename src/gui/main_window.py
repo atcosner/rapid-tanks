@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from sqlalchemy.orm import Session
 
@@ -7,6 +8,8 @@ from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.gui.modals.facility_selector import FacilitySelector
 from src.gui.widgets.facility.facility_tab_widget import FacilityTabWidget
+
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -44,9 +47,21 @@ class MainWindow(QMainWindow):
 
     def select_facility(self, allow_new: bool) -> None:
         result = FacilitySelector.select_facility(self, allow_new=allow_new)
-        self.load_facility(result if result else None)
+        logger.info(f'Select facility result: {result}')
+
+        if result > 0:
+            # Load facility by id
+            self.load_facility(result)
+        elif result == -1:
+            # Create new facility
+            self.load_facility(None)
+        elif result == 0:
+            # User closed dialog before selection
+            pass
 
     def load_facility(self, facility_id: int | None) -> None:
+        logger.info(f'Loading facility: {facility_id}')
+
         # Load the facility
         with Session(DB_ENGINE) as session:
             if facility_id:
@@ -58,7 +73,11 @@ class MainWindow(QMainWindow):
                         f'Could not load facility!\nID {facility_id} did not exist.',
                     )
             else:
-                facility = Facility(name='New Facility', description=f'Created {datetime.now():%d/%m/%y %H:%M:%S}')
+                facility = Facility(
+                    name=f'New Facility ({session.query(Facility.id).count()})',
+                    description=f'Created {datetime.now():%d/%m/%y %H:%M:%S}',
+                    company='',
+                )
                 session.add(facility)
                 session.commit()
 

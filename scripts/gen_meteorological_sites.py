@@ -14771,10 +14771,10 @@ with (directory / 'test1.py').open('w') as file:
         file.write(f"                gps_latitude='{latitude}',\n")
         file.write(f"                gps_longitude='{longitude}',\n")
         file.write(f"                atmospheric_pressure='{pressure}',\n")
-        file.write(f"                month_records=[\n")
+        file.write(f"                month_records={{\n")
         for record in records:
-            file.write(f"                    MeteorologicalMonthRecord(month_id='{record[0]}', average_temp_min='{record[1]}',"
+            file.write(f"                    {record[0]}: MeteorologicalMonthRecord(month_id={record[0]}, average_temp_min='{record[1]}',"
                        f"average_temp_max='{record[2]}', average_wind_speed='{record[3]}', average_daily_insolation='{record[4]}'),\n")
-        file.write(f"                ],\n")
+        file.write(f"                }},\n")
         file.write(f"            )\n")
         file.write(f"        )\n")

@@ -1,11 +1,18 @@
+from sqlalchemy.orm import Session
+import logging
+
 from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QSplitter, QHBoxLayout
 
+from src.database import DB_ENGINE
+from src.database.definitions.facility import Facility
 from src.database.definitions.meteorological import MeteorologicalSite
 from src.gui.widgets.meteorological.meteorological_info_frame import MeteorologicalInfoFrame
 from src.gui.widgets.meteorological.meteorological_selection_frame import MeteorologicalSelectionFrame
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
+
+logger = logging.getLogger(__name__)
 
 
 class FacilityMeteorologicalFrame(EditableFrame):
@@ -13,6 +20,7 @@ class FacilityMeteorologicalFrame(EditableFrame):
 
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
+        self.current_facility_id: int | None = None
 
         self.selection_frame = MeteorologicalSelectionFrame(self)
         self.info_frame = MeteorologicalInfoFrame(self)
@@ -52,9 +60,24 @@ class FacilityMeteorologicalFrame(EditableFrame):
         # Save the ID of the current site if we have one to allow for trivial is_dirty logic
         return self.info_frame.get_site_id()
 
-    def load(self, site: MeteorologicalSite | None) -> None:
-        if site is not None:
-            self.info_frame.handle_site_selected(site.id)
+    def load(self, identifier: Facility | int) -> None:
+        if isinstance(identifier, Facility):
+            logger.info(f'Loading site: {identifier.site}')
+            self.current_facility_id = identifier.id
+            if identifier.site is not None:
+                self.info_frame.handle_site_selected(identifier.site.id)
+        elif isinstance(identifier, int):
+            logger.info(f'Loading site: {identifier}')
+            self.info_frame.handle_site_selected(identifier)
+
+    def update_site(self) -> int:
+        with Session(DB_ENGINE) as session:
+            facility = session.get(Facility, self.current_facility_id)
+            site = session.get(MeteorologicalSite, self.get_current_values())
+            facility.site = site
+            session.commit()
+
+        return self.current_facility_id
 
     def check(self) -> bool:
         # Ensure a site is selected
@@ -73,10 +96,12 @@ class FacilityMeteorologicalFrame(EditableFrame):
     def handle_end_editing(self, save: bool) -> None:
         # Handle if we need to save the new data or reload the old data
         if save:
+            current_values = self.get_current_values()
             if self.check():
                 # Only emit updates that actually change state
-                if self.previous_values != self.get_current_values():
-                    self.meteorologicalSiteChanged.emit(self.get_current_values())
+                if self.previous_values != current_values:
+                    logger.info(f'Signalling that the site changed. New: {current_values}, Old: {self.previous_values}')
+                    self.meteorologicalSiteChanged.emit(self.update_site())
             else:
                 return warn_mandatory_fields(self)
         else:
@@ -84,7 +109,7 @@ class FacilityMeteorologicalFrame(EditableFrame):
             if self.is_dirty() and not confirm_dirty_cancel(self):
                 return
 
-            self.load(self.previous_site)
+            self.load(self.previous_values)
 
         super().handle_end_editing()
 
