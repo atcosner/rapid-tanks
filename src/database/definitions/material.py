@@ -9,7 +9,7 @@ class Petrochemical(MappedAsDataclass, OrmBase):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
     cas_number: Mapped[str]
-    molecular_weight: Mapped[str]
+    molecular_weight: Mapped[str]  # g/mol
     liquid_density: Mapped[str]  # lb/gal
     true_vapor_pressure: Mapped[str]  # @ 60 degF, psia
     vapor_constant_a: Mapped[str]  # dimensionless

@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.gui.modals.facility_selector import FacilitySelector
+from src.gui.modals.material_browser import MaterialBrowser
 from src.gui.widgets.facility.facility_tab_widget import FacilityTabWidget
 
 logger = logging.getLogger(__name__)
@@ -40,10 +41,10 @@ class MainWindow(QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction('Exit').triggered.connect(self.close)
 
-        # # Create the menu for materials options
-        # materials_menu = self.menuBar().addMenu('Materials')
-        # materials_menu.addAction('Create Custom Material')
-        # materials_menu.addSeparator()
+        # Create the menu for materials options
+        materials_menu = self.menuBar().addMenu('Materials')
+        materials_menu.addAction('Material Browser').triggered.connect(lambda: MaterialBrowser(self).exec())
+        materials_menu.addSeparator()
 
     def select_facility(self, allow_new: bool) -> None:
         result = FacilitySelector.select_facility(self, allow_new=allow_new)
