@@ -5,8 +5,8 @@ Revises: c4d3f45b53f2
 Create Date: 2024-02-04 12:28:22.778022
 
 """
-from typing import Sequence
 from alembic import op
+from typing import Sequence
 
 from src.database.definitions import OrmBase
 from src.database.definitions.meteorological import MeteorologicalSite, MeteorologicalMonthRecord
