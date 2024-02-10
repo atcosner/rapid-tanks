@@ -1,19 +1,11 @@
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
-from PyQt5 import QtCore
-from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout, QTabWidget, QHBoxLayout
 
-from src.database import DB_ENGINE
 from src.gui.widgets.material.petrochemical_info_frame import PetrochemicalInfoFrame
 from src.gui.widgets.material.petrochemical_list import PetrochemicalList
 from src.gui.widgets.util.search_bar import SearchBar
 
 
 class MaterialSelectionFrame(QFrame):
-    siteSelected = pyqtSignal(int)
-
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)

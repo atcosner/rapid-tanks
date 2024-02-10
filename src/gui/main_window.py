@@ -8,6 +8,7 @@ from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.gui.modals.facility_selector import FacilitySelector
 from src.gui.modals.material_browser import MaterialBrowser
+from src.gui.modals.mixture_browser import MixtureBrowser
 from src.gui.widgets.facility.facility_tab_widget import FacilityTabWidget
 
 logger = logging.getLogger(__name__)
@@ -44,6 +45,7 @@ class MainWindow(QMainWindow):
         # Create the menu for materials options
         materials_menu = self.menuBar().addMenu('Materials')
         materials_menu.addAction('Material Browser').triggered.connect(lambda: MaterialBrowser(self).exec())
+        materials_menu.addAction('Mixture Browser').triggered.connect(lambda: MixtureBrowser(self).exec())
         materials_menu.addSeparator()
 
     def select_facility(self, allow_new: bool) -> None:
