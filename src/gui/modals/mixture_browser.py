@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout
 
+from src.gui.widgets.mixture.mixture_info_frame import MixtureInfoFrame
 from src.gui.widgets.mixture.mixture_selection_frame import MixtureSelectionFrame
 from src.gui.widgets.util.dialog import Dialog
 
@@ -11,6 +12,9 @@ class MixtureBrowser(Dialog):
 
         self.create_mixture = QPushButton('Create Mixture', self)
         self.selection_frame = MixtureSelectionFrame(self)
+        self.info_frame = MixtureInfoFrame(self)
+
+        self.selection_frame.mixtureSelected.connect(self.info_frame.handle_mixture_selected)
 
         self._initial_setup()
 
@@ -23,3 +27,5 @@ class MixtureBrowser(Dialog):
 
         select_layout.addWidget(self.create_mixture)
         select_layout.addWidget(self.selection_frame)
+
+        layout.addWidget(self.info_frame)
