@@ -24,6 +24,8 @@ class MixtureList(QListWidget):
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
 
+        self.itemClicked.connect(self.handle_item_clicked)
+
         self.populate()
 
     def populate(self) -> None:

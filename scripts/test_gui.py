@@ -10,7 +10,9 @@ from src.util.logging import configure_root_logger
 def main() -> int:
     qt_app = QApplication([])
 
-    tanks_main_window = MainWindow()
+    from src.gui.modals.mixture_browser import MixtureBrowser
+
+    tanks_main_window = MixtureBrowser(None)
     tanks_main_window.show()
 
     return qt_app.exec()

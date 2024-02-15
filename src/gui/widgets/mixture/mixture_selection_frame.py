@@ -27,3 +27,6 @@ class MixtureSelectionFrame(QFrame):
 
         layout.addWidget(self.search_bar)
         layout.addWidget(self.mixture_list)
+
+    def reload(self) -> None:
+        self.mixture_list.populate()
