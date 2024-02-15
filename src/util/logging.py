@@ -1,5 +1,7 @@
 import logging
 from contextlib import contextmanager
+from types import TracebackType
+from typing import Type
 
 LOG_WIDTH = 120
 
@@ -25,3 +27,11 @@ def configure_root_logger() -> None:
         format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
         level=logging.DEBUG,
     )
+
+
+def log_uncaught_exception(exc_type, exc_value: Type[Exception], exc_traceback: TracebackType) -> None:
+    # Log the exception
+    logger.critical('Uncaught exception', exc_info=(exc_type, exc_value, exc_traceback))
+
+    # Pass the exception to the default handler
+    sys.__excepthook__(exc_type, exc_value, exc_traceback)
