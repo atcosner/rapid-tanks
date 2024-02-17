@@ -46,3 +46,11 @@ class MixtureList(QListWidget):
     @pyqtSlot(QListWidgetItem)
     def handle_item_clicked(self, item: QListWidgetItem) -> None:
         self.mixtureSelected.emit(item.get_id())
+
+    def update_mixture_name(self, mixture_id: int, mixture_name: str) -> None:
+        for child in self.findItems('*', QtCore.Qt.MatchWildcard):
+            if child.get_id() == mixture_id:
+                child.setText(mixture_name)
+                return None
+
+        # TODO: Log an error

@@ -1,4 +1,4 @@
-from PyQt5.Qt import pyqtSignal
+from PyQt5.Qt import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout
 
 from src.gui.widgets.mixture.mixture_list import MixtureList
@@ -30,3 +30,7 @@ class MixtureSelectionFrame(QFrame):
 
     def reload(self) -> None:
         self.mixture_list.populate()
+
+    @pyqtSlot(int, str)
+    def handle_update_mixture_name(self, mixture_id: int, mixture_name: str) -> None:
+        self.mixture_list.update_mixture_name(mixture_id, mixture_name)

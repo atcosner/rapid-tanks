@@ -1,12 +1,12 @@
 from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSlot, QPoint
-from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QMenu, QPushButton
+from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QMenu
 
 from src.components.mixture import MixtureMakeup
+from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
 
 from .material_property_model import MaterialPropertyModel
 from .table_combo_box import TableComboBox
-from .util import TableCellDataType
 
 
 class MixtureComponentsTable(QTableWidget):
@@ -27,6 +27,28 @@ class MixtureComponentsTable(QTableWidget):
         # Build the horizontal headers
         self.setHorizontalHeaderItem(0, QTableWidgetItem('Material'))
         self.setHorizontalHeaderItem(1, self.makeup_value_header)
+
+    def load(self, mixture: PetrochemicalMixture) -> None:
+        self.setRowCount(0)
+
+        self.material_data_model.reload()
+
+        for component in mixture.components:
+            self.add_material_row(component)
+
+        self.resizeColumnsToContents()
+
+    def add_material_row(self, component: PetrochemicalAssociation | None) -> None:
+        row_count = self.rowCount()
+        self.setRowCount(row_count + 1)
+
+        material_combo_box = TableComboBox(self, self.material_data_model)
+        self.setCellWidget(row_count, 0, material_combo_box)
+
+        # Set data if we have a material
+        if component is not None:
+            material_combo_box.setCurrentText(f'{component.material.name} [{component.material.cas_number}]')
+            self.setItem(row_count, 1, QTableWidgetItem(component.percent))
 
     @pyqtSlot(QPoint)
     def show_context_menu(self, point: QPoint) -> None:
@@ -51,14 +73,18 @@ class MixtureComponentsTable(QTableWidget):
 
     @pyqtSlot()
     def handle_add_material(self) -> None:
-        row_count = self.rowCount()
-        self.setRowCount(self.rowCount() + 1)
-
         self.material_data_model.reload()
-
-        # Add the custom widgets to the row
-        self.setCellWidget(row_count, 0, TableComboBox(self, self.material_data_model))
+        self.add_material_row(component=None)
 
         self.resizeColumnsToContents()
 
         # TODO: Add constraints (validator?) to the column 3 cell for the value
+
+    def get_current_values(self) -> list[tuple[int, str]]:
+        values = []
+
+        for row_idx in range(self.rowCount()):
+            combo_box = self.cellWidget(row_idx, 0)
+            values.append((combo_box.currentData(), self.item(row_idx, 1).text()))
+
+        return values

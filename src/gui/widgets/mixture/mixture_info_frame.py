@@ -1,17 +1,21 @@
 from sqlalchemy.orm import Session
 
-from PyQt5.Qt import pyqtSlot
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit
+from PyQt5.Qt import pyqtSlot, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QLabel
 
 from src.database import DB_ENGINE
-from src.database.definitions.mixture import PetrochemicalMixture
+from src.database.definitions.material import Petrochemical
+from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
 from src.gui.widgets.mixture.table.mixture_components_table import MixtureComponentsTable
 from src.gui.widgets.mixture.mixture_makeup_type_box import MixtureMakeupTypeBox
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.labels import SubSectionHeader
+from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
 
 
 class MixtureInfoFrame(EditableFrame):
+    mixtureNameChanged = pyqtSignal(int, str)
+
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.current_mixture_id: int | None = None
@@ -19,6 +23,8 @@ class MixtureInfoFrame(EditableFrame):
         self.mixture_name = self.register_control(QLineEdit(self))
         self.mixture_makeup_type = self.register_control(MixtureMakeupTypeBox(self))
         self.mixture_components_table = self.register_control(MixtureComponentsTable(self))
+
+        self.mixture_total = QLabel('0')
 
         # Connect signals
         self.mixture_makeup_type.mixtureMakeupChanged.connect(self.mixture_components_table.handle_makeup_type_change)
@@ -45,11 +51,46 @@ class MixtureInfoFrame(EditableFrame):
         name_layout.addWidget(self.mixture_name)
         name_layout.addStretch()
 
+        total_layout = QHBoxLayout()
+        total_layout.addStretch()
+        total_layout.addWidget(SubSectionHeader('Total: '))
+        total_layout.addWidget(self.mixture_total)
+
         builder_layout.addLayout(name_layout)
         builder_layout.addWidget(self.mixture_makeup_type)
         builder_layout.addWidget(self.mixture_components_table)
+        builder_layout.addLayout(total_layout)
 
         layout.addLayout(self.edit_button_layout)
+
+    def check(self) -> bool:
+        # TODO: Ensure we have a valid name and at least 1 material
+        return True
+
+    def get_current_values(self) -> list[tuple[int, str]]:
+        values = [(0, self.mixture_name.text())]
+        values.extend(self.mixture_components_table.get_current_values())
+        return values
+
+    def reload(self, values: list[tuple[int, str]]) -> None:
+        self.mixture_name.setText(values[0][1])
+
+        # TODO: Reload material components
+
+    def update_mixture(self) -> None:
+        with Session(DB_ENGINE) as session:
+            mixture = session.get(PetrochemicalMixture, self.current_mixture_id)
+            mixture.name = self.mixture_name.text()
+
+            components = []
+            for material_id, value in self.mixture_components_table.get_current_values():
+                material = session.get(Petrochemical, material_id)
+                components.append(PetrochemicalAssociation(percent=value, material=material))
+            mixture.components = components
+
+            session.commit()
+
+        return self.current_mixture_id
 
     @pyqtSlot(int)
     def handle_mixture_selected(self, mixture_id: int) -> None:
@@ -61,8 +102,7 @@ class MixtureInfoFrame(EditableFrame):
         with Session(DB_ENGINE) as session:
             mixture = session.get(PetrochemicalMixture, mixture_id)
             self.mixture_name.setText(mixture.name)
-
-            # Add rows for each material
+            self.mixture_components_table.load(mixture)
 
     @pyqtSlot()
     def handle_begin_editing(self) -> None:
@@ -70,8 +110,26 @@ class MixtureInfoFrame(EditableFrame):
         if self.current_mixture_id is None:
             return None
 
+        self.previous_values = self.get_current_values()
         super().handle_begin_editing()
 
     @pyqtSlot(bool)
     def handle_end_editing(self, save: bool) -> None:
+        # Handle saving the new data or returning to the old data
+        if save:
+            if self.check():
+                # Only emit updates that actually change state
+                if self.previous_values != self.get_current_values():
+                    self.update_mixture()
+                    if self.mixture_name.text() != self.previous_values[0][1]:
+                        self.mixtureNameChanged.emit(self.current_mixture_id, self.mixture_name.text())
+            else:
+                return warn_mandatory_fields(self)
+        else:
+            # Prompt the user to confirm they are deleting unsaved data
+            if self.is_dirty() and not confirm_dirty_cancel(self):
+                return
+
+            self.reload(self.previous_values)
+
         super().handle_end_editing()

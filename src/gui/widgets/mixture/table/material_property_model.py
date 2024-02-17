@@ -8,21 +8,19 @@ from PyQt5.QtCore import QAbstractItemModel, QModelIndex
 from src.database import DB_ENGINE
 from src.database.definitions.material import Petrochemical
 
-from .util import TableCellDataType
-
 
 class MaterialPropertyModel(QAbstractItemModel):
     def __init__(self) -> None:
         super().__init__(None)
 
-        self.values: list[str] = []
+        self.values: list[tuple[int, str]] = []
 
     def reload(self) -> None:
         self.layoutAboutToBeChanged.emit()
 
         with Session(DB_ENGINE) as session:
-            results = session.execute(select(Petrochemical.name, Petrochemical.cas_number)).all()
-            self.values = [f'{name} [{cas}]' for name, cas in results]
+            results = session.execute(select(Petrochemical.id, Petrochemical.name, Petrochemical.cas_number)).all()
+            self.values = [(id, f'{name} [{cas}]') for id, name, cas in results]
 
         self.layoutChanged.emit()
 
@@ -39,8 +37,9 @@ class MaterialPropertyModel(QAbstractItemModel):
         return 1
 
     def data(self, index: QModelIndex, role: int | None = None) -> Any | None:
-        # Only handle the DisplayRole role
-        if role != QtCore.Qt.DisplayRole:
+        if role in [QtCore.Qt.DisplayRole, QtCore.Qt.EditRole]:
+            return self.values[index.row()][1]
+        elif role == QtCore.Qt.UserRole:
+            return self.values[index.row()][0]
+        else:
             return None
-
-        return self.values[index.row()]

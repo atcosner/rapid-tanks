@@ -22,4 +22,4 @@ class PetrochemicalMixture(MappedAsDataclass, OrmBase):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
 
-    components: Mapped[list["PetrochemicalAssociation"]] = relationship(init=False)
+    components: Mapped[list["PetrochemicalAssociation"]] = relationship(init=False, cascade="all, delete-orphan")

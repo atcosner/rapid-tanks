@@ -18,12 +18,15 @@ class MixtureBrowser(Dialog):
         self.selection_frame = MixtureSelectionFrame(self)
         self.info_frame = MixtureInfoFrame(self)
 
+        self.info_frame.mixtureNameChanged.connect(self.selection_frame.handle_update_mixture_name)
         self.selection_frame.mixtureSelected.connect(self.info_frame.handle_mixture_selected)
-        self.create_mixture_button.pressed.connect(self.create_mixture)
+        self.create_mixture_button.clicked.connect(self.create_mixture)
 
         self._initial_setup()
 
     def _initial_setup(self) -> None:
+        self.create_mixture_button.setAutoDefault(False)
+
         layout = QHBoxLayout()
         self.setLayout(layout)
 
