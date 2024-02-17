@@ -11,7 +11,7 @@ class PetrochemicalAssociation(OrmBase):
     mixture_id: Mapped[int] = mapped_column(ForeignKey("petrochemical_mixture.id"), primary_key=True)
     material_id: Mapped[int] = mapped_column(ForeignKey("petrochemical.id"), primary_key=True)
 
-    percent: Mapped[str]
+    value: Mapped[str]
 
     material: Mapped["Petrochemical"] = relationship()
 
@@ -21,5 +21,6 @@ class PetrochemicalMixture(MappedAsDataclass, OrmBase):
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
+    makeup_type_id: Mapped[int]
 
     components: Mapped[list["PetrochemicalAssociation"]] = relationship(init=False, cascade="all, delete-orphan")

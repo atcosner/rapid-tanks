@@ -36,3 +36,16 @@ class MixtureMakeupTypeBox(QGroupBox):
         if checked and self.current_makeup != makeup:
             self.current_makeup = makeup
             self.mixtureMakeupChanged.emit(makeup)
+
+    def get_current_makeup(self) -> MixtureMakeup:
+        return self.current_makeup
+
+    def set_makeup(self, makeup: MixtureMakeup | int) -> None:
+        if makeup == MixtureMakeup.WEIGHT:
+            self.weight_button.setChecked(True)
+        elif makeup == MixtureMakeup.VOLUME:
+            self.volume_button.setChecked(True)
+        elif makeup == MixtureMakeup.MOLE_PERCENT:
+            self.molar_percent_button.setChecked(True)
+        else:
+            raise RuntimeError(f'Unknown makeup type: {makeup}')

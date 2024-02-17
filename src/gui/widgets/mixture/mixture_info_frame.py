@@ -68,25 +68,32 @@ class MixtureInfoFrame(EditableFrame):
         return True
 
     def get_current_values(self) -> list[tuple[int, str]]:
-        values = [(0, self.mixture_name.text())]
+        values = [self.mixture_name.text(), self.mixture_makeup_type.get_current_makeup()]
         values.extend(self.mixture_components_table.get_current_values())
         return values
 
     def reload(self, values: list[tuple[int, str]]) -> None:
-        self.mixture_name.setText(values[0][1])
+        self.mixture_name.setText(values[0])
+        self.mixture_makeup_type.set_makeup(values[1])
 
         # TODO: Reload material components
 
     def update_mixture(self) -> None:
+        current_materials = self.get_current_values()[2:]
+        previous_materials = self.previous_values[2:]
+
         with Session(DB_ENGINE) as session:
             mixture = session.get(PetrochemicalMixture, self.current_mixture_id)
             mixture.name = self.mixture_name.text()
+            mixture.makeup_type_id = self.mixture_makeup_type.get_current_makeup().value
 
-            components = []
-            for material_id, value in self.mixture_components_table.get_current_values():
-                material = session.get(Petrochemical, material_id)
-                components.append(PetrochemicalAssociation(percent=value, material=material))
-            mixture.components = components
+            if current_materials != previous_materials:
+                # TODO: This breaks if some materials do not change
+                components = []
+                for material_id, value in self.mixture_components_table.get_current_values():
+                    material = session.get(Petrochemical, material_id)
+                    components.append(PetrochemicalAssociation(value=value, material=material))
+                mixture.components = components
 
             session.commit()
 
@@ -102,6 +109,7 @@ class MixtureInfoFrame(EditableFrame):
         with Session(DB_ENGINE) as session:
             mixture = session.get(PetrochemicalMixture, mixture_id)
             self.mixture_name.setText(mixture.name)
+            self.mixture_makeup_type.set_makeup(mixture.makeup_type_id)
             self.mixture_components_table.load(mixture)
 
     @pyqtSlot()

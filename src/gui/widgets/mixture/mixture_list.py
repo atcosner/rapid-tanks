@@ -54,3 +54,19 @@ class MixtureList(QListWidget):
                 return None
 
         # TODO: Log an error
+
+    def delete_selected_mixture(self) -> None:
+        # Ensure something is selected
+        current_item = self.currentItem()
+        if current_item is None:
+            return None
+
+        # TODO: Confirm the delete
+
+        # Delete from the DB
+        with Session(DB_ENGINE) as session:
+            session.delete(session.get(PetrochemicalMixture, current_item.get_id()))
+            session.commit()
+
+        # Remove the current item
+        self.takeItem(self.row(current_item))

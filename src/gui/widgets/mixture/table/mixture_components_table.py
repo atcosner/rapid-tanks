@@ -48,7 +48,7 @@ class MixtureComponentsTable(QTableWidget):
         # Set data if we have a material
         if component is not None:
             material_combo_box.setCurrentText(f'{component.material.name} [{component.material.cas_number}]')
-            self.setItem(row_count, 1, QTableWidgetItem(component.percent))
+            self.setItem(row_count, 1, QTableWidgetItem(component.value))
 
     @pyqtSlot(QPoint)
     def show_context_menu(self, point: QPoint) -> None:

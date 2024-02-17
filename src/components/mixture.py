@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 from decimal import Decimal
-from enum import Enum
+from enum import IntEnum
 from pint import Quantity
 
 from src import unit_registry
@@ -10,7 +10,7 @@ from src.constants.material import Material, Petrochemical, PetroleumLiquid
 logger = logging.getLogger(__name__)
 
 
-class MixtureMakeup(Enum):
+class MixtureMakeup(IntEnum):
     WEIGHT = 1
     VOLUME = 2
     MOLE_PERCENT = 3
