@@ -76,6 +76,9 @@ class NumericDataRow(QWidget):
         if default is not None:
             self.set(default)
 
+    def set_read_only(self, read_only: bool) -> None:
+        self.data_box.setReadOnly(read_only)
+
     def set(self, value: Quantity | str) -> None:
         if isinstance(value, str):
             self.data_box.setText(value)

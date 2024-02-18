@@ -187,7 +187,7 @@ class VerticalPhysicalFrame(EditableFrame):
 
     def get_current_values(self) -> FixedRoofTank:
         # TODO: Implement this
-        return FixedRoofTank()
+        return FixedRoofTank(name='TEST')
 
     @pyqtSlot()
     def handle_begin_editing(self) -> None:

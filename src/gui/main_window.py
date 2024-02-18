@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         # Create the menu for materials options
         materials_menu = self.menuBar().addMenu('Materials')
         materials_menu.addAction('Material Browser').triggered.connect(lambda: MaterialBrowser(self).exec())
-        materials_menu.addAction('Mixture Browser').triggered.connect(lambda: MixtureBrowser(self).exec())
+        materials_menu.addAction('Mixture Browser').triggered.connect(lambda: MixtureBrowser.browse_mixture(self))
         materials_menu.addSeparator()
 
     def select_facility(self, allow_new: bool) -> None:
