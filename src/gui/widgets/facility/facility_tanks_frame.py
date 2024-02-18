@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum, auto
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from PyQt5 import QtCore
@@ -10,7 +11,8 @@ from PyQt5.QtWidgets import (
 
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.paint import PaintColor, PaintCondition
+from src.database.definitions.tank import FixedRoofTank, FixedRoofType
 from src.gui.widgets.tank.tank_tab_widget import TankTabWidget
 from src.gui.widgets.util.search_bar import SearchBar
 
@@ -164,15 +166,24 @@ class TankSelect(QWidget):
 
     def create_tank(self, tank_type: TankType) -> None:
         with Session(DB_ENGINE) as session:
+            default_paint_color = session.scalar(select(PaintColor).where(PaintColor.name == 'White'))
+            default_paint_condition = session.scalar(select(PaintCondition).where(PaintCondition.name == 'New'))
+            default_roof_type = session.scalar(select(FixedRoofType).where(FixedRoofType.name == 'Cone'))
+
             facility = session.get(Facility, self.current_facility_id)
             if tank_type in [TankType.VERTICAL_FIXED_ROOF, TankType.HORIZONTAL_FIXED_ROOF]:
-                facility.fixed_roof_tanks.append(
-                    FixedRoofTank(
-                        name='New Fixed Roof Tank',
-                        description=f'Created {datetime.now():%d/%m/%y %H:%M:%S}',
-                        is_vertical=tank_type is TankType.VERTICAL_FIXED_ROOF,
-                    )
+                new_tank = FixedRoofTank(
+                    name='New Fixed Roof Tank',
+                    description=f'Created {datetime.now():%d/%m/%y %H:%M:%S}',
+                    is_vertical=tank_type is TankType.VERTICAL_FIXED_ROOF,
+                    shell_paint_color=default_paint_color,
+                    shell_paint_condition=default_paint_condition,
+                    roof_type=default_roof_type,
+                    roof_paint_color=default_paint_color,
+                    roof_paint_condition=default_paint_condition,
                 )
+                facility.fixed_roof_tanks.append(new_tank)
+
             session.commit()
 
             self.tank_tree.load(facility)

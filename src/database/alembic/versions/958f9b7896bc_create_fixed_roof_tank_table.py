@@ -5,11 +5,12 @@ Revises: 812a6802979b
 Create Date: 2024-02-04 12:53:23.694012
 
 """
-from typing import Sequence
 from alembic import op
+from typing import Sequence
+from sqlalchemy.orm.session import Session
 
 from src.database.definitions import OrmBase
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.tank import FixedRoofTank, FixedRoofType
 
 
 # revision identifiers, used by Alembic.
@@ -20,8 +21,14 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    OrmBase.metadata.create_all(bind=op.get_bind(), tables=[FixedRoofTank.__table__])
+    OrmBase.metadata.create_all(bind=op.get_bind(), tables=[FixedRoofTank.__table__, FixedRoofType.__table__])
+
+    # Populate the 2 types of fixed roofs
+    with Session(bind=op.get_bind()) as session:
+        session.add(FixedRoofType(name='Cone'))
+        session.add(FixedRoofType(name='Dome'))
+        session.commit()
 
 
 def downgrade() -> None:
-    OrmBase.metadata.drop_all(bind=op.get_bind(), tables=[FixedRoofTank.__table__])
+    OrmBase.metadata.drop_all(bind=op.get_bind(), tables=[FixedRoofTank.__table__, FixedRoofType.__table__])

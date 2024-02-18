@@ -1,13 +1,14 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QGridLayout, QVBoxLayout
 
 from src.database import DB_ENGINE
-from src.database.definitions.tank import FixedRoofTank
-from src.gui.widgets.util.data_entry_rows import (
-    NumericDataRow, CheckBoxDataRow, ComboBoxDataRow, ComboBoxDataType,
-)
+from src.database.definitions.paint import PaintColor, PaintCondition
+from src.database.definitions.tank import FixedRoofTank, FixedRoofType
+from src.gui.widgets.util.data_entry.combo_box_data_row import ComboBoxDataRow, ComboBoxDataType
+from src.gui.widgets.util.data_entry_rows import NumericDataRow, CheckBoxDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.labels import SubSectionHeader
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
@@ -35,7 +36,7 @@ class VerticalPhysicalFrame(EditableFrame):
         # Roof Characteristics
         self.roof_color = self.register_control(ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, start_read_only))
         self.roof_condition = self.register_control(ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only))
-        self.roof_type = self.register_control(ComboBoxDataRow('Roof Type', ['Cone', 'Dome'], start_read_only))
+        self.roof_type = self.register_control(ComboBoxDataRow('Roof Type', ComboBoxDataType.ROOF_TYPES, start_read_only))
         self.roof_height = self.register_control(NumericDataRow('Roof Height', 'ft', start_read_only))
         self.roof_radius = self.register_control(NumericDataRow('Radius', 'ft', start_read_only))
         self.roof_slope = self.register_control(NumericDataRow('Slope', 'ft/ft', start_read_only, default='0.0625'))
@@ -61,7 +62,7 @@ class VerticalPhysicalFrame(EditableFrame):
 
         # Set up the dynamic nature of the roof type
         self.roof_type.selectionChanged.connect(self.handle_roof_type_change)
-        self.handle_roof_type_change(self.roof_type.get_selected())
+        self.handle_roof_type_change(self.roof_type.get_selected_text())
 
         if start_read_only:
             super().handle_end_editing()
@@ -147,25 +148,25 @@ class VerticalPhysicalFrame(EditableFrame):
 
         self.shell_height.set(tank.shell_height)
         self.shell_diameter.set(tank.shell_diameter)
-        # self.max_liquid_height = NumericDataRow('Maximum Liquid Height', 'ft', start_read_only)
-        # self.avg_liquid_height = NumericDataRow('Average Liquid Height', 'ft', start_read_only)
-        # self.working_volume = NumericDataRow('Working Volume', 'gal', start_read_only)
-        # self.turnovers_per_year = NumericDataRow('Turnovers Per Year', 'dimensionless', start_read_only)
-        # self.net_throughput = NumericDataRow('Net Throughput', 'gal/yr', start_read_only)
-        # self.is_heated = CheckBoxDataRow('Is Heated?', start_read_only)
+        self.max_liquid_height.set(tank.maximum_liquid_height)
+        self.avg_liquid_height.set(tank.average_liquid_height)
+        self.working_volume.set(tank.working_volume)
+        self.turnovers_per_year.set(tank.turnovers_per_year)
+        self.net_throughput.set(tank.net_throughput)
+        self.is_heated.set(tank.is_heated)
 
-        # self.shell_color = ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, start_read_only)
-        # self.shell_condition = ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only)
-        #
-        # self.roof_color = ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, start_read_only)
-        # self.roof_condition = ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only)
-        # self.roof_type = ComboBoxDataRow('Roof Type', ['Cone', 'Dome'], start_read_only)
+        self.shell_color.set_from_db(tank.shell_color_id)
+        self.shell_condition.set_from_db(tank.shell_condition_id)
+
+        self.roof_color.set_from_db(tank.roof_color_id)
+        self.roof_condition.set_from_db(tank.roof_condition_id)
+        self.roof_type.set_from_db(tank.roof_type_id)
         self.roof_height.set(tank.roof_height)
         self.roof_radius.set(tank.roof_radius)
         self.roof_slope.set(tank.roof_slope)
 
-        # self.vacuum_setting.set()
-        # self.pressure_setting.set()
+        self.vacuum_setting.set(tank.vent_vacuum_setting)
+        self.pressure_setting.set(tank.vent_breather_setting)
 
     def check(self) -> bool:
         # TODO: Check for some valid data
@@ -177,12 +178,28 @@ class VerticalPhysicalFrame(EditableFrame):
 
             tank.shell_height = self.shell_height.get()
             tank.shell_diameter = self.shell_diameter.get()
-            tank.roof_height = self.roof_height.get(),
-            tank.roof_slope = self.roof_slope.get(),
-            tank.roof_radius = self.roof_radius.get(),
-            # TODO: Reconcile the other parameters that we need
+            tank.maximum_liquid_height = self.max_liquid_height.get()
+            tank.average_liquid_height = self.avg_liquid_height.get()
+            tank.working_volume = self.working_volume.get()
+            tank.turnovers_per_year = self.turnovers_per_year.get()
+            tank.net_throughput = self.net_throughput.get()
+            tank.is_heated = self.is_heated.get()
+
+            tank.shell_paint_color = session.scalar(select(PaintColor).where(PaintColor.id == self.shell_color.get_selected_db_id()))
+            tank.shell_paint_condition = session.scalar(select(PaintCondition).where(PaintCondition.id == self.shell_condition.get_selected_db_id()))
+
+            tank.roof_paint_color = session.scalar(select(PaintColor).where(PaintColor.id == self.roof_color.get_selected_db_id()))
+            tank.roof_paint_condition = session.scalar(select(PaintCondition).where(PaintCondition.id == self.roof_condition.get_selected_db_id()))
+            tank.roof_type = session.scalar(select(FixedRoofType).where(FixedRoofType.id == self.roof_type.get_selected_db_id()))
+            tank.roof_height = self.roof_height.get()
+            tank.roof_radius = self.roof_radius.get()
+            tank.roof_slope = self.roof_slope.get()
+
+            tank.vent_vacuum_setting = self.vacuum_setting.get()
+            tank.vent_breather_setting = self.pressure_setting.get()
 
             session.commit()
+
         return self.current_tank_id
 
     def get_current_values(self) -> FixedRoofTank:

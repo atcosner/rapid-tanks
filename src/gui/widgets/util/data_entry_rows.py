@@ -1,25 +1,16 @@
-from collections.abc import Iterable
 from decimal import Decimal
-from enum import Enum, auto
 from pint import Quantity
 
 from PyQt5 import QtCore
-from PyQt5.Qt import pyqtSignal
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QComboBox, QTextEdit,
+    QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QTextEdit,
 )
 
-from src import unit_registry
 from src.util.units import to_human_readable
 
 from .validators import NonZeroDoubleValidator, DoubleValidator
 
 DEFAULT_MARGINS = [2, 2, 2, 2]
-
-
-class ComboBoxDataType(Enum):
-    PAINT_COLORS = auto()
-    PAINT_CONDITIONS = auto()
 
 
 class DataEntryLineEdit(QLineEdit):
@@ -90,10 +81,9 @@ class NumericDataRow(QWidget):
             quantized_value = converted_value.magnitude.quantize(Decimal(f'1.{"0" * self.precision}'))
             self.data_box.setText(str(quantized_value))
 
-    def get(self) -> Quantity:
-        # TODO: How should we handle errors in the conversion?
-        string_value = self.data_box.text()
-        return unit_registry.Quantity(Decimal(string_value), self.unit)
+    def get(self) -> str:
+        # TODO: Would this be better as a quantity?
+        return self.data_box.text()
 
 
 class CheckBoxDataRow(QWidget):
@@ -111,46 +101,11 @@ class CheckBoxDataRow(QWidget):
 
         main_layout.setContentsMargins(*DEFAULT_MARGINS)
 
+    def set(self, value: bool) -> None:
+        self.check_box.setChecked(value)
 
-class ComboBoxDataRow(QWidget):
-    selectionChanged = pyqtSignal(str)
-
-    def __init__(
-            self,
-            label_string: str,
-            values: ComboBoxDataType | Iterable,
-            read_only: bool,
-    ) -> None:
-        super().__init__(None)
-        self.combo_box = QComboBox(None)
-        self.combo_box.currentTextChanged.connect(self.selectionChanged)
-
-        # Set up our layout
-        main_layout = QHBoxLayout()
-        self.setLayout(main_layout)
-        main_layout.addWidget(QLabel(label_string))
-        main_layout.addStretch()
-        main_layout.addWidget(self.combo_box)
-
-        main_layout.setContentsMargins(*DEFAULT_MARGINS)
-
-        # Enforce read only
-        self.combo_box.setDisabled(read_only)
-
-        # Load the possible values into the combo box
-        self._load_data(values)
-
-    def _load_data(self, values: ComboBoxDataType | Iterable) -> None:
-        # Handle if we got a simple iterable first
-        if isinstance(values, Iterable):
-            self.combo_box.addItems(values)
-        elif isinstance(values, ComboBoxDataType):
-            pass
-        else:
-            raise RuntimeError(f'Invalid type for "values": {type(values)}')
-
-    def get_selected(self) -> str:
-        return self.combo_box.currentText()
+    def get(self) -> bool:
+        return self.check_box.isChecked()
 
 
 class TextLineDataRow(QWidget):
