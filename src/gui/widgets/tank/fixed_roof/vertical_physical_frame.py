@@ -8,7 +8,8 @@ from src.database import DB_ENGINE
 from src.database.definitions.paint import PaintColor, PaintCondition
 from src.database.definitions.tank import FixedRoofTank, FixedRoofType
 from src.gui.widgets.util.data_entry.combo_box_data_row import ComboBoxDataRow, ComboBoxDataType
-from src.gui.widgets.util.data_entry_rows import NumericDataRow, CheckBoxDataRow
+from src.gui.widgets.util.data_entry.numeric_data_row import NumericDataRow
+from src.gui.widgets.util.data_entry_rows import CheckBoxDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.labels import SubSectionHeader
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
@@ -155,12 +156,12 @@ class VerticalPhysicalFrame(EditableFrame):
         self.net_throughput.set(tank.net_throughput)
         self.is_heated.set(tank.is_heated)
 
-        self.shell_color.set_from_db(tank.shell_color_id)
-        self.shell_condition.set_from_db(tank.shell_condition_id)
+        self.shell_color.set_from_db(tank.shell_paint_color.id)
+        self.shell_condition.set_from_db(tank.shell_paint_condition.id)
 
-        self.roof_color.set_from_db(tank.roof_color_id)
-        self.roof_condition.set_from_db(tank.roof_condition_id)
-        self.roof_type.set_from_db(tank.roof_type_id)
+        self.roof_color.set_from_db(tank.roof_paint_color.id)
+        self.roof_condition.set_from_db(tank.roof_paint_condition.id)
+        self.roof_type.set_from_db(tank.roof_type.id)
         self.roof_height.set(tank.roof_height)
         self.roof_radius.set(tank.roof_radius)
         self.roof_slope.set(tank.roof_slope)
@@ -172,10 +173,10 @@ class VerticalPhysicalFrame(EditableFrame):
         # TODO: Check for some valid data
         return True
 
-    def update_tank(self) -> int:
-        with Session(DB_ENGINE) as session:
-            tank = session.get(FixedRoofTank, self.current_tank_id)
+    def update_tank(self, existing_tank: FixedRoofTank | None) -> FixedRoofTank:
+        tank = existing_tank if existing_tank is not None else FixedRoofTank(name='test')
 
+        with Session(DB_ENGINE) as session:
             tank.shell_height = self.shell_height.get()
             tank.shell_diameter = self.shell_diameter.get()
             tank.maximum_liquid_height = self.max_liquid_height.get()
@@ -198,13 +199,18 @@ class VerticalPhysicalFrame(EditableFrame):
             tank.vent_vacuum_setting = self.vacuum_setting.get()
             tank.vent_breather_setting = self.pressure_setting.get()
 
+        return tank
+
+    def write_tank_to_db(self) -> int:
+        with Session(DB_ENGINE) as session:
+            tank = session.get(FixedRoofTank, self.current_tank_id)
+            self.update_tank(existing_tank=tank)
             session.commit()
 
         return self.current_tank_id
 
     def get_current_values(self) -> FixedRoofTank:
-        # TODO: Implement this
-        return FixedRoofTank(name='TEST')
+        return self.update_tank(existing_tank=None)
 
     @pyqtSlot()
     def handle_begin_editing(self) -> None:
@@ -218,8 +224,8 @@ class VerticalPhysicalFrame(EditableFrame):
         # Handle saving the new data or returning to the old data
         if save:
             if self.check():
-                # TODO: Only emit updates that actually change state
-                self.update_tank()
+                if self.previous_values != self.get_current_values():
+                    self.write_tank_to_db()
             else:
                 return warn_mandatory_fields(self)
         else:

@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout, QLabel, QHBoxLayout
 
 from src.database import DB_ENGINE
 from src.database.definitions.material import Petrochemical
-from src.gui.widgets.util.data_entry_rows import NumericDataRow
+from src.gui.widgets.util.data_entry.numeric_data_row import NumericDataRow
 
 from src.gui.widgets.util.labels import SubSectionHeader
 

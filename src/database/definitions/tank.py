@@ -1,21 +1,21 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclass
 
 from . import OrmBase
 from .paint import PaintColor, PaintCondition, SolarAbsorptance
 
 
-class FixedRoofType(OrmBase):
+class FixedRoofType(MappedAsDataclass, OrmBase):
     __tablename__ = "fixed_roof_type"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
 
 
-class FixedRoofTank(OrmBase):
+class FixedRoofTank(MappedAsDataclass, OrmBase):
     __tablename__ = "fixed_roof_tank"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
     description: Mapped[str] = mapped_column(default='')
     facility_id = mapped_column(ForeignKey("facility.id"))
@@ -45,21 +45,23 @@ class FixedRoofTank(OrmBase):
 
     # Relationships
 
-    facility: Mapped["Facility"] = relationship(back_populates="fixed_roof_tanks")
-    roof_type: Mapped[FixedRoofType] = relationship()
+    facility: Mapped["Facility"] = relationship(init=False, back_populates="fixed_roof_tanks")
+    roof_type: Mapped[FixedRoofType] = relationship(init=False)
 
-    shell_paint_color: Mapped[PaintColor] = relationship(foreign_keys=shell_color_id)
-    shell_paint_condition: Mapped[PaintCondition] = relationship(foreign_keys=shell_condition_id)
+    shell_paint_color: Mapped[PaintColor] = relationship(init=False, foreign_keys=shell_color_id)
+    shell_paint_condition: Mapped[PaintCondition] = relationship(init=False, foreign_keys=shell_condition_id)
     shell_solar_absorptance: Mapped[SolarAbsorptance] = relationship(
+        init=False,
         foreign_keys=[shell_color_id, shell_condition_id],
         primaryjoin="and_(FixedRoofTank.shell_color_id==SolarAbsorptance.color_id,"
                     "FixedRoofTank.shell_condition_id==SolarAbsorptance.condition_id)",
         viewonly=True,
     )
 
-    roof_paint_color: Mapped[PaintColor] = relationship(foreign_keys=roof_color_id)
-    roof_paint_condition: Mapped[PaintCondition] = relationship(foreign_keys=roof_condition_id)
+    roof_paint_color: Mapped[PaintColor] = relationship(init=False, foreign_keys=roof_color_id)
+    roof_paint_condition: Mapped[PaintCondition] = relationship(init=False, foreign_keys=roof_condition_id)
     roof_solar_absorptance: Mapped[SolarAbsorptance] = relationship(
+        init=False,
         foreign_keys=[roof_color_id, roof_condition_id],
         primaryjoin="and_(FixedRoofTank.roof_color_id==SolarAbsorptance.color_id,"
                     "FixedRoofTank.roof_condition_id==SolarAbsorptance.condition_id)",
