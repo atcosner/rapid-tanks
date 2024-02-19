@@ -41,6 +41,10 @@ class MonthlyUsageDataRow(QWidget):
         self.checkbox.setDisabled(read_only)
         self.select_button.setDisabled(read_only)
 
+    def clear(self) -> None:
+        self.checkbox.setChecked(False)
+        self.material_name.setText('')
+
 
 class TankUsageFrame(EditableFrame):
     def __init__(
@@ -49,6 +53,8 @@ class TankUsageFrame(EditableFrame):
             start_read_only: bool,
     ) -> None:
         super().__init__(parent)
+
+        self.current_tank_id: int | None = None
 
         self.month_lines: list[MonthlyUsageDataRow] = []
         for month in MONTH_NAMES:
@@ -78,6 +84,14 @@ class TankUsageFrame(EditableFrame):
 
         main_layout.addLayout(months_layout)
         main_layout.addLayout(self.edit_button_layout)
+
+    def unload(self) -> None:
+        self.current_tank_id = None
+
+        for month in self.month_lines:
+            month.clear()
+
+        super().handle_end_editing()
 
     @pyqtSlot()
     def handle_begin_editing(self) -> None:

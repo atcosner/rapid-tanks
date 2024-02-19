@@ -14,6 +14,7 @@ class FacilityTanksFrame(QSplitter):
         self.tank_tabs = TankTabWidget(self, read_only=True)
 
         self.tank_select.tankSelected.connect(self.tank_tabs.load_tank)
+        self.tank_select.tankDeleted.connect(self.tank_tabs.handle_tank_deleted)
 
         self._initial_setup()
 

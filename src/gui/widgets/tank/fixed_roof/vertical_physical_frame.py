@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from types import SimpleNamespace
 
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QGridLayout, QVBoxLayout
@@ -168,6 +169,19 @@ class VerticalPhysicalFrame(EditableFrame):
 
         self.vacuum_setting.set(tank.vent_vacuum_setting)
         self.pressure_setting.set(tank.vent_breather_setting)
+
+    def unload(self) -> None:
+        self.current_tank_id = None
+
+        dummy_tank = FixedRoofTank(name='')
+        dummy_tank.shell_paint_color = SimpleNamespace(id=1)
+        dummy_tank.shell_paint_condition = SimpleNamespace(id=1)
+        dummy_tank.roof_paint_color = SimpleNamespace(id=1)
+        dummy_tank.roof_paint_condition = SimpleNamespace(id=1)
+        dummy_tank.roof_type = SimpleNamespace(id=1)
+        self.load(dummy_tank)
+
+        super().handle_end_editing()
 
     def check(self) -> bool:
         # TODO: Check for some valid data

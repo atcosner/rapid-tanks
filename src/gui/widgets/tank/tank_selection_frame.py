@@ -4,8 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from PyQt5 import QtCore
-from PyQt5.Qt import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QToolButton, QMenu, QFrame
+from PyQt5.Qt import pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QToolButton, QMenu, QFrame, QPushButton, QHBoxLayout
 
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
@@ -24,20 +24,27 @@ class TankType(Enum):
 
 class TankSelectionFrame(QFrame):
     tankSelected = pyqtSignal(int)
+    tankDeleted = pyqtSignal(int)
 
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setFrameStyle(QFrame.Box)
 
         self.current_facility_id: int | None = None
+        self.selected_tank_id: int | None = None
 
         self.create_tank_dropdown = QToolButton(self)
+        self.delete_tank_button = QPushButton('Delete', self)
         self.search_bar = SearchBar(self)
         self.tank_tree = TankTree(self)
 
         self.search_bar.textChanged.connect(self.tank_tree.handle_search)
-        self.tank_tree.tankSelected.connect(self.tankSelected)
+        self.tank_tree.tankSelected.connect(self.handle_tank_selected)
+        self.delete_tank_button.clicked.connect(self.delete_tank)
 
+        self._initial_setup()
+
+    def _initial_setup(self) -> None:
         self.tank_menu = QMenu()
         self.tank_menu.addAction('Horizontal Fixed Roof').triggered.connect(
             lambda: self.create_tank(TankType.HORIZONTAL_FIXED_ROOF)
@@ -57,8 +64,16 @@ class TankSelectionFrame(QFrame):
         self.create_tank_dropdown.setPopupMode(QToolButton.MenuButtonPopup)
         self.create_tank_dropdown.setMenu(self.tank_menu)
 
+        self.delete_tank_button.setDefault(False)
+        self.delete_tank_button.setAutoDefault(False)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(self.create_tank_dropdown)
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(self.delete_tank_button)
+
         layout = QVBoxLayout()
-        layout.addWidget(self.create_tank_dropdown)
+        layout.addLayout(buttons_layout)
         layout.addWidget(self.search_bar)
         layout.addWidget(self.tank_tree)
         self.setLayout(layout)
@@ -66,6 +81,11 @@ class TankSelectionFrame(QFrame):
     def load(self, facility: Facility) -> None:
         self.current_facility_id = facility.id
         self.tank_tree.load(facility)
+
+    @pyqtSlot(int)
+    def handle_tank_selected(self, tank_id: int) -> None:
+        self.selected_tank_id = tank_id
+        self.tankSelected.emit(tank_id)
 
     def create_tank(self, tank_type: TankType) -> None:
         with Session(DB_ENGINE) as session:
@@ -90,3 +110,13 @@ class TankSelectionFrame(QFrame):
             session.commit()
 
             self.tank_tree.load(facility)
+
+    @pyqtSlot()
+    def delete_tank(self) -> None:
+        self.tank_tree.delete_selected_tank()
+
+        if self.selected_tank_id is not None:
+            self.tankDeleted.emit(self.selected_tank_id)
+
+        if (tank_id := self.tank_tree.get_selected()) is not None:
+            self.tankSelected.emit(tank_id)

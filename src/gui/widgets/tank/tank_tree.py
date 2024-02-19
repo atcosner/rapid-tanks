@@ -1,7 +1,10 @@
+from sqlalchemy.orm import Session
+
 from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTreeWidget, QTreeWidgetItem
 
+from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.database.definitions.tank import FixedRoofTank
 
@@ -101,3 +104,20 @@ class TankTree(QTreeWidget):
         # Ensure a child item was selected
         if isinstance(item, TankItem):
             self.tankSelected.emit(item.get_tank_id())
+
+    def delete_selected_tank(self) -> None:
+        # Ensure something is selected
+        if (current_id := self.get_selected()) is None:
+            return None
+
+        # TODO: Confirm the delete
+
+        # Delete from the DB
+        # TODO: Other types of tanks
+        with Session(DB_ENGINE) as session:
+            session.delete(session.get(FixedRoofTank, current_id))
+            session.commit()
+
+        # Remove the current item
+        current_item = self.currentItem()
+        current_item.parent().removeChild(current_item)

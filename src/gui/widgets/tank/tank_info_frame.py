@@ -59,6 +59,14 @@ class TankInfoFrame(EditableFrame):
         if hasattr(tank, 'id'):
             self.current_tank_id = tank.id
 
+    def unload(self) -> None:
+        self.current_tank_id = None
+
+        self.tank_name.set('')
+        self.tank_description.set('')
+
+        super().handle_end_editing()
+
     def check(self) -> bool:
         return bool(self.tank_name.get())
 
