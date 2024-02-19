@@ -70,3 +70,9 @@ class MixtureList(QListWidget):
 
         # Remove the current item
         self.takeItem(self.row(current_item))
+
+    def get_selected_mixture(self) -> int | None:
+        if item := self.currentItem():
+            return item.get_id()
+        else:
+            return None

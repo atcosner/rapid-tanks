@@ -1,15 +1,23 @@
+import logging
+from decimal import Decimal, InvalidOperation
+
 from PyQt5 import QtCore
-from PyQt5.Qt import pyqtSlot, QPoint
-from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QMenu
+from PyQt5.Qt import pyqtSlot, QPoint, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QMenu, QLineEdit
 
 from src.components.mixture import MixtureMakeup
 from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
+from src.gui.widgets.util.validators import PositiveDoubleValidator
 
 from .material_property_model import MaterialPropertyModel
 from .table_combo_box import TableComboBox
 
+logger = logging.getLogger(__name__)
+
 
 class MixtureComponentsTable(QTableWidget):
+    updateTotal = pyqtSignal(Decimal)
+
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setColumnCount(2)
@@ -24,19 +32,20 @@ class MixtureComponentsTable(QTableWidget):
         self._initial_setup()
 
     def _initial_setup(self) -> None:
-        # Build the horizontal headers
         self.setHorizontalHeaderItem(0, QTableWidgetItem('Material'))
         self.setHorizontalHeaderItem(1, self.makeup_value_header)
+
+        self.resizeColumnsToContents()
 
     def load(self, mixture: PetrochemicalMixture) -> None:
         self.setRowCount(0)
 
-        self.material_data_model.reload()
-
         for component in mixture.components:
             self.add_material_row(component)
 
+        # Resize and recalculate the total
         self.resizeColumnsToContents()
+        self.handle_makeup_value_change()
 
     def add_material_row(self, component: PetrochemicalAssociation | None) -> None:
         row_count = self.rowCount()
@@ -45,10 +54,16 @@ class MixtureComponentsTable(QTableWidget):
         material_combo_box = TableComboBox(self, self.material_data_model)
         self.setCellWidget(row_count, 0, material_combo_box)
 
+        makeup_value_edit = QLineEdit()
+        makeup_value_edit.setFrame(False)
+        makeup_value_edit.setValidator(PositiveDoubleValidator(4))
+        makeup_value_edit.editingFinished.connect(self.handle_makeup_value_change)
+        self.setCellWidget(row_count, 1, makeup_value_edit)
+
         # Set data if we have a material
         if component is not None:
-            material_combo_box.setCurrentText(f'{component.material.name} [{component.material.cas_number}]')
-            self.setItem(row_count, 1, QTableWidgetItem(component.value))
+            material_combo_box.set_from_db(component.material.id)
+            makeup_value_edit.setText(component.value)
 
     @pyqtSlot(QPoint)
     def show_context_menu(self, point: QPoint) -> None:
@@ -69,22 +84,40 @@ class MixtureComponentsTable(QTableWidget):
         else:
             raise RuntimeError(f'Unknown makeup type: {makeup}')
 
-        # TODO: Handle existing data values
-
     @pyqtSlot()
     def handle_add_material(self) -> None:
-        self.material_data_model.reload()
         self.add_material_row(component=None)
 
         self.resizeColumnsToContents()
 
-        # TODO: Add constraints (validator?) to the column 3 cell for the value
+    @pyqtSlot()
+    def handle_remove_material(self) -> None:
+        rows = set([index.row() for index in self.selectedIndexes()])
+
+        # Remove rows
+        # (Reverse order to ensure previous deletions do not affect row indexes
+        for index in sorted(list(rows), reverse=True):
+            self.removeRow(index)
+
+    @pyqtSlot()
+    def handle_makeup_value_change(self) -> None:
+        total = Decimal('0.0')
+
+        for row_idx in range(self.rowCount()):
+            if value_str := self.cellWidget(row_idx, 1).text():
+                try:
+                    total += Decimal(value_str)
+                except InvalidOperation:
+                    logger.exception(f'Failed to convert value in row {row_idx} ("{value_str}")')
+
+        self.updateTotal.emit(total)
 
     def get_current_values(self) -> list[tuple[int, str]]:
         values = []
 
         for row_idx in range(self.rowCount()):
             combo_box = self.cellWidget(row_idx, 0)
-            values.append((combo_box.currentData(), self.item(row_idx, 1).text()))
+            values.append((combo_box.currentData(), self.cellWidget(row_idx, 1).text()))
 
+        logger.debug(f'get_current_values: {values}')
         return values

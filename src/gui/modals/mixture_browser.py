@@ -7,7 +7,7 @@ from src.gui.widgets.util.dialog import Dialog
 
 
 class MixtureBrowser(Dialog):
-    def __init__(self, parent: QWidget, select_mode: bool) -> None:
+    def __init__(self, parent: QWidget | None, select_mode: bool) -> None:
         super().__init__(parent)
         self.select_mode = select_mode
         self.setWindowTitle('Mixture Browser')
@@ -20,31 +20,44 @@ class MixtureBrowser(Dialog):
 
         self.select_button = QPushButton('Select')
         self.cancel_button = QPushButton('Cancel')
+        self.close_button = QPushButton('Cancel')
 
         self.info_frame.mixtureNameChanged.connect(self.selection_frame.handle_update_mixture_name)
         self.selection_frame.mixtureSelected.connect(self.info_frame.handle_mixture_selected)
         self.selection_frame.mixtureSelected.connect(self.handle_mixture_selected)
+        self.selection_frame.mixtureDeleted.connect(self.info_frame.handle_mixture_deleted)
 
         self.select_button.pressed.connect(lambda: self.done(self.current_mixture_id))
         self.cancel_button.pressed.connect(self.reject)
+        self.close_button.pressed.connect(self.reject)
 
         self._initial_setup()
 
     def _initial_setup(self) -> None:
+        self.select_button.setDefault(False)
+        self.cancel_button.setDefault(False)
+        self.close_button.setDefault(False)
+        self.select_button.setAutoDefault(False)
+        self.cancel_button.setAutoDefault(False)
+        self.close_button.setAutoDefault(False)
+
         self.splitter.addWidget(self.selection_frame)
         self.splitter.addWidget(self.info_frame)
 
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.splitter)
 
         # Add in the selection button if we are in select mode
-        if self.select_mode:
-            select_button_layout = QVBoxLayout()
-            select_button_layout.addStretch()
-            select_button_layout.addWidget(self.select_button)
-            select_button_layout.addWidget(self.cancel_button)
+        footer_buttons = QHBoxLayout()
+        footer_buttons.addStretch()
 
-            layout.addLayout(select_button_layout)
+        if self.select_mode:
+            footer_buttons.addWidget(self.select_button)
+            footer_buttons.addWidget(self.cancel_button)
+        else:
+            footer_buttons.addWidget(self.close_button)
+
+        layout.addLayout(footer_buttons)
 
         self.setLayout(layout)
 

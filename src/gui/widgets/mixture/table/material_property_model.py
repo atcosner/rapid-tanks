@@ -15,7 +15,9 @@ class MaterialPropertyModel(QAbstractItemModel):
 
         self.values: list[tuple[int, str]] = []
 
-    def reload(self) -> None:
+        self._load()
+
+    def _load(self) -> None:
         self.layoutAboutToBeChanged.emit()
 
         with Session(DB_ENGINE) as session:

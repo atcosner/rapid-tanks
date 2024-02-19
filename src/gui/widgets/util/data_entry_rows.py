@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
 
 from src.util.units import to_human_readable
 
-from .validators import NonZeroDoubleValidator, DoubleValidator
+from .validators import PositiveDoubleValidator, DoubleValidator
 
 DEFAULT_MARGINS = [2, 2, 2, 2]
 
@@ -31,7 +31,7 @@ class DataEntryLineEdit(QLineEdit):
         if allow_negative:
             self.setValidator(DoubleValidator(precision))
         else:
-            self.setValidator(NonZeroDoubleValidator(precision))
+            self.setValidator(PositiveDoubleValidator(precision))
 
 
 class NumericDataRow(QWidget):

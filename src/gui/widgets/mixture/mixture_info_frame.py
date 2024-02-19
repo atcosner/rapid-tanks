@@ -1,16 +1,19 @@
+import logging
 from sqlalchemy.orm import Session
 
 from PyQt5.Qt import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QLabel
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QLabel, QPushButton
 
 from src.database import DB_ENGINE
 from src.database.definitions.material import Petrochemical
 from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
 from src.gui.widgets.mixture.table.mixture_components_table import MixtureComponentsTable
-from src.gui.widgets.mixture.mixture_makeup_type_box import MixtureMakeupTypeBox
+from src.gui.widgets.mixture.mixture_makeup_type_box import MixtureMakeupTypeBox, MixtureMakeup
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.labels import SubSectionHeader
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
+
+logger = logging.getLogger(__name__)
 
 
 class MixtureInfoFrame(EditableFrame):
@@ -22,12 +25,19 @@ class MixtureInfoFrame(EditableFrame):
 
         self.mixture_name = self.register_control(QLineEdit(self))
         self.mixture_makeup_type = self.register_control(MixtureMakeupTypeBox(self))
+        self.mixture_add_material_button = self.register_control(QPushButton('Add', self))
+        self.mixture_delete_material_button = self.register_control(QPushButton('Delete', self))
         self.mixture_components_table = self.register_control(MixtureComponentsTable(self))
 
-        self.mixture_total = QLabel('0')
+        self.mixture_total = SubSectionHeader('Total Weight (lbs): ')
+        self.mixture_total_value = QLabel('0.0')
 
         # Connect signals
         self.mixture_makeup_type.mixtureMakeupChanged.connect(self.mixture_components_table.handle_makeup_type_change)
+        self.mixture_components_table.updateTotal.connect(lambda total: self.mixture_total_value.setText(str(total)))
+
+        self.mixture_add_material_button.clicked.connect(self.mixture_components_table.handle_add_material)
+        self.mixture_delete_material_button.clicked.connect(self.mixture_components_table.handle_remove_material)
 
         self.register_edit_handlers(
             begin_func=self.handle_begin_editing,
@@ -51,13 +61,19 @@ class MixtureInfoFrame(EditableFrame):
         name_layout.addWidget(self.mixture_name)
         name_layout.addStretch()
 
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(self.mixture_add_material_button)
+        buttons_layout.addWidget(self.mixture_delete_material_button)
+        buttons_layout.addStretch()
+
         total_layout = QHBoxLayout()
         total_layout.addStretch()
-        total_layout.addWidget(SubSectionHeader('Total: '))
         total_layout.addWidget(self.mixture_total)
+        total_layout.addWidget(self.mixture_total_value)
 
         builder_layout.addLayout(name_layout)
         builder_layout.addWidget(self.mixture_makeup_type)
+        builder_layout.addLayout(buttons_layout)
         builder_layout.addWidget(self.mixture_components_table)
         builder_layout.addLayout(total_layout)
 
@@ -76,7 +92,10 @@ class MixtureInfoFrame(EditableFrame):
         self.mixture_name.setText(values[0])
         self.mixture_makeup_type.set_makeup(values[1])
 
-        # TODO: Reload material components
+        # TODO: Should we not use the DB to reload?
+        with Session(DB_ENGINE) as session:
+            mixture = session.get(PetrochemicalMixture, self.current_mixture_id)
+            self.mixture_components_table.load(mixture)
 
     def update_mixture(self) -> None:
         current_materials = self.get_current_values()[2:]
@@ -87,17 +106,26 @@ class MixtureInfoFrame(EditableFrame):
             mixture.name = self.mixture_name.text()
             mixture.makeup_type_id = self.mixture_makeup_type.get_current_makeup().value
 
-            if current_materials != previous_materials:
-                # TODO: This breaks if some materials do not change
-                components = []
-                for material_id, value in self.mixture_components_table.get_current_values():
-                    material = session.get(Petrochemical, material_id)
-                    components.append(PetrochemicalAssociation(value=value, material=material))
-                mixture.components = components
+            components = []
+            for material_id, value in self.mixture_components_table.get_current_values():
+                material = session.get(Petrochemical, material_id)
+                components.append(PetrochemicalAssociation(value=value, material=material))
+            mixture.components = components
 
             session.commit()
 
         return self.current_mixture_id
+
+    @pyqtSlot(MixtureMakeup)
+    def handle_makeup_type_change(self, makeup: MixtureMakeup) -> None:
+        if makeup == MixtureMakeup.WEIGHT:
+            self.mixture_total.setText('Total Weight (lbs): ')
+        elif makeup == MixtureMakeup.VOLUME:
+            self.mixture_total.setText('Total Volume (gal): ')
+        elif makeup == MixtureMakeup.MOLE_PERCENT:
+            self.mixture_total.setText('Total Mole Percent: ')
+        else:
+            raise RuntimeError(f'Unknown makeup type: {makeup}')
 
     @pyqtSlot(int)
     def handle_mixture_selected(self, mixture_id: int) -> None:
@@ -111,6 +139,22 @@ class MixtureInfoFrame(EditableFrame):
             self.mixture_name.setText(mixture.name)
             self.mixture_makeup_type.set_makeup(mixture.makeup_type_id)
             self.mixture_components_table.load(mixture)
+
+    @pyqtSlot(int)
+    def handle_mixture_deleted(self, mixture_id: int) -> None:
+        if mixture_id != self.current_mixture_id:
+            logger.info(f'Ignoring delete for mixture {mixture_id}, not currently displayed')
+            return None
+
+        self.current_mixture_id = None
+
+        # Clear our widgets
+        self.mixture_name.setText('')
+        self.mixture_makeup_type.set_makeup(MixtureMakeup.WEIGHT)
+        self.mixture_components_table.setRowCount(0)
+
+        # Cancel an edit in progress
+        super().handle_end_editing()
 
     @pyqtSlot()
     def handle_begin_editing(self) -> None:

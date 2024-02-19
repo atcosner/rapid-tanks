@@ -7,7 +7,7 @@ class DoubleValidator(QDoubleValidator):
         self.setDecimals(precision)
 
 
-class NonZeroDoubleValidator(QDoubleValidator):
+class PositiveDoubleValidator(QDoubleValidator):
     def __init__(self, precision: int) -> None:
         super().__init__(None)
         self.setBottom(0.0)

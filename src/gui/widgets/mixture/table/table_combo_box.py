@@ -32,3 +32,10 @@ class TableComboBox(QComboBox):
 
         self.completer_widget = ComboBoxCompleter(parent, data_model)
         self.setCompleter(self.completer_widget)
+
+    def set_from_db(self, db_id: int) -> None:
+        result = self.findData(db_id)
+        if result == -1:
+            raise RuntimeError(f'Could not find element with DB id: {db_id}')
+        else:
+            self.setCurrentIndex(result)

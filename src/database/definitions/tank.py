@@ -54,6 +54,7 @@ class FixedRoofTank(OrmBase):
         foreign_keys=[shell_color_id, shell_condition_id],
         primaryjoin="and_(FixedRoofTank.shell_color_id==SolarAbsorptance.color_id,"
                     "FixedRoofTank.shell_condition_id==SolarAbsorptance.condition_id)",
+        viewonly=True,
     )
 
     roof_paint_color: Mapped[PaintColor] = relationship(foreign_keys=roof_color_id)
@@ -62,4 +63,5 @@ class FixedRoofTank(OrmBase):
         foreign_keys=[roof_color_id, roof_condition_id],
         primaryjoin="and_(FixedRoofTank.roof_color_id==SolarAbsorptance.color_id,"
                     "FixedRoofTank.roof_condition_id==SolarAbsorptance.condition_id)",
+        viewonly=True,
     )
