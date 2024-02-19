@@ -20,7 +20,7 @@ class MixtureBrowser(Dialog):
 
         self.select_button = QPushButton('Select')
         self.cancel_button = QPushButton('Cancel')
-        self.close_button = QPushButton('Cancel')
+        self.close_button = QPushButton('Close')
 
         self.info_frame.mixtureNameChanged.connect(self.selection_frame.handle_update_mixture_name)
         self.selection_frame.mixtureSelected.connect(self.info_frame.handle_mixture_selected)

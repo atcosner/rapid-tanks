@@ -2,11 +2,13 @@ import logging
 from sqlalchemy.orm import Session
 
 from PyQt5.Qt import pyqtSlot, pyqtSignal
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QLabel, QPushButton
 
 from src.database import DB_ENGINE
 from src.database.definitions.material import Petrochemical
 from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
+from src.gui import RESOURCE_DIR
 from src.gui.widgets.mixture.table.mixture_components_table import MixtureComponentsTable
 from src.gui.widgets.mixture.mixture_makeup_type_box import MixtureMakeupTypeBox, MixtureMakeup
 from src.gui.widgets.util.editable_frame import EditableFrame
@@ -25,8 +27,8 @@ class MixtureInfoFrame(EditableFrame):
 
         self.mixture_name = self.register_control(QLineEdit(self))
         self.mixture_makeup_type = self.register_control(MixtureMakeupTypeBox(self))
-        self.mixture_add_material_button = self.register_control(QPushButton('Add', self))
-        self.mixture_delete_material_button = self.register_control(QPushButton('Delete', self))
+        self.mixture_add_material_button = self.register_control(QPushButton(self))
+        self.mixture_delete_material_button = self.register_control(QPushButton(self))
         self.mixture_components_table = self.register_control(MixtureComponentsTable(self))
 
         self.mixture_total = SubSectionHeader('Total Weight (lbs): ')
@@ -50,6 +52,12 @@ class MixtureInfoFrame(EditableFrame):
         super().handle_end_editing()  # Start in the read-only mode
 
     def _initial_setup(self) -> None:
+        self.mixture_add_material_button.setIcon(QIcon(str(RESOURCE_DIR / 'add.png')))
+        self.mixture_add_material_button.setMaximumSize(65, 65)
+
+        self.mixture_delete_material_button.setIcon(QIcon(str(RESOURCE_DIR / 'remove.png')))
+        self.mixture_delete_material_button.setMaximumSize(65, 65)
+
         layout = QHBoxLayout()
         self.setLayout(layout)
 
