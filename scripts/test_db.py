@@ -1,10 +1,15 @@
+from datetime import date
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from src.components.mixture import MixtureMakeup
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
+from src.database.definitions.material import Petrochemical
 from src.database.definitions.meteorological import MeteorologicalSite
+from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
 from src.database.definitions.paint import PaintColor, PaintCondition
+from src.database.definitions.service_record import ServiceRecord
 from src.database.definitions.tank import FixedRoofTank, FixedRoofType
 
 
@@ -14,6 +19,18 @@ with Session(DB_ENGINE) as session:
     white_paint = session.scalar(select(PaintColor).where(PaintColor.name == 'White'))
     average_condition = session.scalar(select(PaintCondition).where(PaintCondition.name == 'Average'))
     cone_roof = session.scalar(select(FixedRoofType).where(FixedRoofType.name == 'Cone'))
+
+    benzene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Benzene'))
+    toluene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Toluene'))
+    cyclohexane = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Cyclohexane'))
+
+    sc1_mixture = PetrochemicalMixture(
+        name='SC #1 Mixture',
+        makeup_type_id=MixtureMakeup.WEIGHT,
+    )
+    sc1_mixture.components.append(PetrochemicalAssociation(value='2812', material=benzene))
+    sc1_mixture.components.append(PetrochemicalAssociation(value='258', material=toluene))
+    sc1_mixture.components.append(PetrochemicalAssociation(value='101', material=cyclohexane))
 
     sc1_tank = FixedRoofTank(
         name='Tank 1',
@@ -30,6 +47,21 @@ with Session(DB_ENGINE) as session:
     sc1_tank.roof_paint_color = white_paint
     sc1_tank.roof_paint_condition = average_condition
     sc1_tank.roof_type = cone_roof
+
+    sc1_tank.service_records.append(
+        ServiceRecord(
+            mixture=sc1_mixture,
+            start_date=date(year=2024, month=1, day=1),
+            end_date=date(year=2024, month=1, day=31),
+        )
+    )
+    sc1_tank.service_records.append(
+        ServiceRecord(
+            mixture=sc1_mixture,
+            start_date=date(year=2024, month=2, day=1),
+            end_date=date(year=2024, month=2, day=29),
+        )
+    )
 
     sc1_facility = Facility(
         name='Sample Calculation #1',

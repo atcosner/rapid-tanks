@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclas
 
 from . import OrmBase
 from .paint import PaintColor, PaintCondition, SolarAbsorptance
+from .service_record import ServiceRecord
 
 
 class FixedRoofType(MappedAsDataclass, OrmBase):
@@ -67,3 +68,5 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
                     "FixedRoofTank.roof_condition_id==SolarAbsorptance.condition_id)",
         viewonly=True,
     )
+
+    service_records: Mapped[list[ServiceRecord]] = relationship(init=False, back_populates="tank", cascade="all, delete-orphan")
