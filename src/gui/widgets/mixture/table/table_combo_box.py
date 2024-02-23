@@ -1,20 +1,7 @@
-from PyQt5 import QtCore
 from PyQt5.QtCore import QAbstractItemModel
-from PyQt5.QtWidgets import QComboBox, QWidget, QCompleter
+from PyQt5.QtWidgets import QComboBox, QWidget
 
-
-class ComboBoxCompleter(QCompleter):
-    def __init__(
-            self,
-            parent: QWidget,
-            data_model: QAbstractItemModel,
-    ) -> None:
-        super().__init__(data_model, parent)
-
-        # Set up our basic properties
-        self.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self.setFilterMode(QtCore.Qt.MatchContains)
-        self.setCompletionRole(QtCore.Qt.DisplayRole)
+from src.gui.widgets.util.combo_boxes import MixtureComboBoxCompleter
 
 
 class TableComboBox(QComboBox):
@@ -30,7 +17,7 @@ class TableComboBox(QComboBox):
         self.setEditable(True)
         self.setInsertPolicy(QComboBox.NoInsert)
 
-        self.completer_widget = ComboBoxCompleter(parent, data_model)
+        self.completer_widget = MixtureComboBoxCompleter(parent, data_model)
         self.setCompleter(self.completer_widget)
 
     def set_from_db(self, db_id: int) -> None:

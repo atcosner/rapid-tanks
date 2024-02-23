@@ -1,49 +1,13 @@
+from decimal import Decimal
+
 from PyQt5.Qt import pyqtSlot
-from PyQt5.QtWidgets import QWidget, QCheckBox, QLineEdit, QHBoxLayout, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGridLayout, QLabel
 
 from src.gui.widgets.util.constants import MONTH_NAMES
-from src.gui.widgets.util.data_entry_rows import DEFAULT_MARGINS
+from src.gui.widgets.util.data_entry.monthly_usage_data_row import MonthlyUsageDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
-
-
-class MonthlyUsageDataRow(QWidget):
-    def __init__(
-            self,
-            month: str,
-            read_only: bool,
-    ) -> None:
-        super().__init__(None)
-
-        self.checkbox = QCheckBox(month)
-        self.material_name = QLineEdit()
-        self.select_button = QPushButton('Select')
-
-        # Defaults
-        self.checkbox.setFixedWidth(100)
-        self.material_name.setReadOnly(True)
-        self.material_name.setMaximumWidth(200)
-
-        self._setup_layout()
-        self.set_read_only(read_only)
-
-    def _setup_layout(self) -> None:
-        layout = QHBoxLayout()
-        self.setLayout(layout)
-
-        layout.addWidget(self.checkbox)
-        layout.addStretch()
-        layout.addWidget(self.material_name)
-        layout.addWidget(self.select_button)
-
-        layout.setContentsMargins(*DEFAULT_MARGINS)
-
-    def set_read_only(self, read_only: bool) -> None:
-        self.checkbox.setDisabled(read_only)
-        self.select_button.setDisabled(read_only)
-
-    def clear(self) -> None:
-        self.checkbox.setChecked(False)
-        self.material_name.setText('')
+from src.gui.widgets.util.labels import SubSectionHeader
+from src.gui.widgets.util.models.mixture_model import MixtureModel
 
 
 class TankUsageFrame(EditableFrame):
@@ -55,10 +19,14 @@ class TankUsageFrame(EditableFrame):
         super().__init__(parent)
 
         self.current_tank_id: int | None = None
+        self.mixture_model = MixtureModel()
 
+        self.throughput_total = QLabel('0.0')
         self.month_lines: list[MonthlyUsageDataRow] = []
         for month in MONTH_NAMES:
-            self.month_lines.append(self.register_control(MonthlyUsageDataRow(month, start_read_only)))
+            month_row = self.register_control(MonthlyUsageDataRow(month, start_read_only, self.mixture_model))
+            month_row.throughputUpdated.connect(self.handle_throughput_updated)
+            self.month_lines.append(month_row)
 
         if start_read_only:
             super().handle_end_editing()
@@ -78,9 +46,21 @@ class TankUsageFrame(EditableFrame):
         main_layout = QHBoxLayout()
         self.setLayout(main_layout)
 
-        months_layout = QVBoxLayout()
-        for month in self.month_lines:
-            months_layout.addWidget(month)
+        total_layout = QHBoxLayout()
+        total_layout.addWidget(SubSectionHeader('Total (gal/yr): '))
+        total_layout.addWidget(self.throughput_total)
+        total_layout.addStretch()
+
+        # The month data rows have layouts, but we manually use a grid since we have lots of elements to align
+        months_layout = QGridLayout()
+        months_layout.setColumnStretch(1, 1)
+        months_layout.addWidget(SubSectionHeader('Throughput (gal/yr)'), 0, 2)
+        months_layout.addWidget(SubSectionHeader('Mixture'), 0, 3)
+        for idx, month in enumerate(self.month_lines):
+            months_layout.addWidget(month.checkbox, idx + 1, 0)
+            months_layout.addWidget(month.throughput, idx + 1, 2)
+            months_layout.addWidget(month.mixture, idx + 1, 3)
+        months_layout.addLayout(total_layout, len(months_layout) + 2, 2)
 
         main_layout.addLayout(months_layout)
         main_layout.addLayout(self.edit_button_layout)
@@ -92,6 +72,16 @@ class TankUsageFrame(EditableFrame):
             month.clear()
 
         super().handle_end_editing()
+
+    @pyqtSlot()
+    def handle_throughput_updated(self) -> None:
+        total = Decimal('0.0')
+
+        for month in self.month_lines:
+            if (month_throughput := month.get_throughput()) is not None:
+                total += month_throughput
+
+        self.throughput_total.setText(str(total))
 
     @pyqtSlot()
     def handle_begin_editing(self) -> None:
