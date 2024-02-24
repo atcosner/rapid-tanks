@@ -12174,7 +12174,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='LaGuardia Airport',
+                name='New York City (LaGuardia Airport)',
                 state='New York',
                 station_identifier='725030',
                 gps_latitude='N40 47',
@@ -19824,7 +19824,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='MOSES LAKE GRANT COUNT',
+                name='Moses Lake',
                 state='Washington',
                 station_identifier='727827',
                 gps_latitude='N47 12',
@@ -19849,7 +19849,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='LEWISTON NEZ PERCE CNT',
+                name='Lewiston',
                 state='Idaho',
                 station_identifier='727830',
                 gps_latitude='N46 22',
@@ -19874,7 +19874,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='COEUR D`ALENE(AWOS)',
+                name="Coeur d'Alene",
                 state='Idaho',
                 station_identifier='727834',
                 gps_latitude='N47 46',
@@ -19899,7 +19899,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='HANFORD',
+                name='Hanford',
                 state='Washington',
                 station_identifier='727840',
                 gps_latitude='N46 34',
@@ -19924,7 +19924,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='PASCO',
+                name='Pasco',
                 state='Washington',
                 station_identifier='727845',
                 gps_latitude='N46 16',
@@ -19949,7 +19949,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='WALLA WALLA CITY COUNT',
+                name='Walla Walla',
                 state='Washington',
                 station_identifier='727846',
                 gps_latitude='N46 6',
@@ -19974,7 +19974,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='SPOKANE INTERNATIONAL',
+                name='Spokane',
                 state='Washington',
                 station_identifier='727850',
                 gps_latitude='N47 29',
@@ -19999,7 +19999,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='FAIRCHILD AFB',
+                name='Fairchild AFB',
                 state='Washington',
                 station_identifier='727855',
                 gps_latitude='N47 38',
@@ -20024,7 +20024,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='FELTS FLD',
+                name='Spokane (Felts Field)',
                 state='Washington',
                 station_identifier='727856',
                 gps_latitude='N47 41',
@@ -20049,7 +20049,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='PULLMAN/MOSCOW RGNL',
+                name='Pullman',
                 state='Washington',
                 station_identifier='727857',
                 gps_latitude='N46 45',
@@ -20074,7 +20074,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='ASTORIA REGIONAL AIRPO',
+                name='Astoria',
                 state='Oregon',
                 station_identifier='727910',
                 gps_latitude='N46 9',
@@ -20099,7 +20099,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='OLYMPIA AIRPORT',
+                name='Olympia',
                 state='Washington',
                 station_identifier='727920',
                 gps_latitude='N46 58',
@@ -20124,7 +20124,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='HOQUIAM AP',
+                name='Hoquiam',
                 state='Washington',
                 station_identifier='727923',
                 gps_latitude='N46 59',
@@ -20149,7 +20149,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='KELSO WB AP',
+                name='Kelso',
                 state='Washington',
                 station_identifier='727924',
                 gps_latitude='N46 8',
@@ -20174,7 +20174,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='BREMERTON NATIONAL',
+                name='Bremerton',
                 state='Washington',
                 station_identifier='727928',
                 gps_latitude='N47 29',
@@ -20199,7 +20199,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='SEATTLE SEATTLE-TACOMA',
+                name='Seattle',
                 state='Washington',
                 station_identifier='727930',
                 gps_latitude='N47 28',
@@ -20224,7 +20224,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='RENTON MUNI',
+                name='Renton',
                 state='Washington',
                 station_identifier='727934',
                 gps_latitude='N47 29',
@@ -20249,7 +20249,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='SEATTLE BOEING FIELD [',
+                name='Seattle (Boeing Field)',
                 state='Washington',
                 station_identifier='727935',
                 gps_latitude='N47 41',
@@ -20274,7 +20274,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='SNOHOMISH CO',
+                name='Seattle (Paine Field)',
                 state='Washington',
                 station_identifier='727937',
                 gps_latitude='N47 54',
@@ -20299,7 +20299,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='TACOMA NARROWS',
+                name='Tacoma',
                 state='Washington',
                 station_identifier='727938',
                 gps_latitude='N47 16',
@@ -20324,7 +20324,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='QUILLAYUTE STATE AIRPO',
+                name='Forks',
                 state='Washington',
                 station_identifier='727970',
                 gps_latitude='N47 56',
@@ -20349,7 +20349,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='BELLINGHAM INTL AP',
+                name='Bellingham',
                 state='Washington',
                 station_identifier='727976',
                 gps_latitude='N48 48',
@@ -20374,7 +20374,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='TACOMA MCCHORD AFB',
+                name='Tacoma (McChord AFB)',
                 state='Washington',
                 station_identifier='742060',
                 gps_latitude='N47 9',
@@ -20399,7 +20399,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='MILES CITY MUNICIPAL A',
+                name='Miles City',
                 state='Montana',
                 station_identifier='742300',
                 gps_latitude='N46 26',
@@ -20424,7 +20424,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='FORT DRUM/WHEELER-S',
+                name='Fort Drum',
                 state='New York',
                 station_identifier='743700',
                 gps_latitude='N44 3',
@@ -20449,7 +20449,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='NAVAL AIR STATION',
+                name='Brunswick',
                 state='Maine',
                 station_identifier='743920',
                 gps_latitude='N43 54',
@@ -20474,7 +20474,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='MANCHESTER AIRPORT',
+                name='Manchester',
                 state='New Hampshire',
                 station_identifier='743945',
                 gps_latitude='N42 56',
@@ -20524,7 +20524,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='NEW YORK J F KENNEDY I',
+                name='New York City (JFK Airport)',
                 state='New York',
                 station_identifier='744860',
                 gps_latitude='N40 39',
@@ -20549,7 +20549,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='REPUBLIC',
+                name='Farmingdale',
                 state='New York',
                 station_identifier='744864',
                 gps_latitude='N40 43',
@@ -20574,7 +20574,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='WESTHAMPTON GABRESKI A',
+                name='Westhampton Beach',
                 state='New York',
                 station_identifier='744865',
                 gps_latitude='N40 51',
@@ -20599,7 +20599,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='LAWRENCE MUNI',
+                name='Lawrence',
                 state='Massachusetts',
                 station_identifier='744904',
                 gps_latitude='N42 43',
@@ -20624,7 +20624,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='CHICOPEE FALLS WESTO',
+                name='Chicopee',
                 state='Massachusetts',
                 station_identifier='744910',
                 gps_latitude='N42 12',
@@ -20649,7 +20649,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='WESTFIELD BARNES MUNI',
+                name='Westfield',
                 state='Massachusetts',
                 station_identifier='744915',
                 gps_latitude='N42 9',
@@ -20674,7 +20674,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='MOUNTAIN VIEW MOFFETT',
+                name='Mountain View',
                 state='California',
                 station_identifier='745090',
                 gps_latitude='N37 24',
@@ -20699,7 +20699,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='TRAVIS FIELD AFB',
+                name='Travis AFB',
                 state='California',
                 station_identifier='745160',
                 gps_latitude='N38 16',
@@ -20724,7 +20724,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='USAF ACADEMY AF',
+                name='Colorado Springs (USAF Academy)',
                 state='Colorado',
                 station_identifier='745310',
                 gps_latitude='N38 58',
@@ -20774,7 +20774,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='ANDREWS AFB',
+                name='Andrews AFB',
                 state='Maryland',
                 station_identifier='745940',
                 gps_latitude='N38 49',
@@ -20799,7 +20799,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='LANGLEY AFB',
+                name='Langley AFB',
                 state='Virginia',
                 station_identifier='745980',
                 gps_latitude='N37 5',
@@ -20824,7 +20824,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='CHINA LAKE NAF',
+                name='Ridgecrest',
                 state='California',
                 station_identifier='746120',
                 gps_latitude='N35 41',
@@ -20849,7 +20849,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='FORT CAMPBELL AAF',
+                name='Fort Campbell',
                 state='Kentucky',
                 station_identifier='746710',
                 gps_latitude='N36 40',
@@ -20874,7 +20874,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='BOWLING GREEN WARREN C',
+                name='Bowling Green',
                 state='Kentucky',
                 station_identifier='746716',
                 gps_latitude='N36 59',
@@ -20899,7 +20899,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='FORT BRAGG SIMMONS AAF',
+                name='Fayetteville (Fort Bragg)',
                 state='North Carolina',
                 station_identifier='746930',
                 gps_latitude='N35 8',
@@ -20924,7 +20924,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='LEMOORE REEVES NAS',
+                name='Lemoore',
                 state='California',
                 station_identifier='747020',
                 gps_latitude='N36 20',
@@ -21024,7 +21024,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='HOLLOMAN AFB',
+                name='Holloman AFB',
                 state='New Mexico',
                 station_identifier='747320',
                 gps_latitude='N32 51',
@@ -21049,7 +21049,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='GULFPORT BILOXI INT',
+                name='Gulfport',
                 state='Mississippi',
                 station_identifier='747685',
                 gps_latitude='N30 24',
@@ -21074,7 +21074,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='KEESLER AFB',
+                name='Keesler AFB',
                 state='Mississippi',
                 station_identifier='747686',
                 gps_latitude='N30 25',
@@ -21099,7 +21099,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='TYNDALL AFB',
+                name='Tyndall AFB',
                 state='Florida',
                 station_identifier='747750',
                 gps_latitude='N30 4',
@@ -21124,7 +21124,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='VALPARAISO HURLBURT',
+                name='Valparaiso',
                 state='Florida',
                 station_identifier='747770',
                 gps_latitude='N30 25',
@@ -21149,7 +21149,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='HUNTER AAF',
+                name='Savannah (Hunter Airfield)',
                 state='Georgia',
                 station_identifier='747804',
                 gps_latitude='N32 0',
@@ -21199,7 +21199,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='MACDILL AFB',
+                name='MacDill AFB',
                 state='Florida',
                 station_identifier='747880',
                 gps_latitude='N27 51',
@@ -21224,7 +21224,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='SUMTER SHAW AFB',
+                name='Sumter Shaw AFB',
                 state='South Carolina',
                 station_identifier='747900',
                 gps_latitude='N33 58',
@@ -21249,7 +21249,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='MYRTLE BEACH AFB',
+                name='Myrtle Beach',
                 state='South Carolina',
                 station_identifier='747910',
                 gps_latitude='N33 41',
@@ -21274,7 +21274,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='NORTH MYRTLE BEACH GRA',
+                name='North Myrtle Beach',
                 state='South Carolina',
                 station_identifier='747915',
                 gps_latitude='N33 49',
@@ -21299,7 +21299,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='COCOA BEACH PATRICK AF',
+                name='Cocoa Beach',
                 state='Florida',
                 station_identifier='747950',
                 gps_latitude='N28 14',
@@ -21324,7 +21324,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='AQUADILLA/BORINQUEN',
+                name='Aguadilla',
                 state='Puerto Rico',
                 station_identifier='785140',
                 gps_latitude='N18 30',
@@ -21349,7 +21349,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='MERCEDITA',
+                name='Ponce',
                 state='Puerto Rico',
                 station_identifier='785203',
                 gps_latitude='N18 0',
@@ -21374,7 +21374,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='SAN JUAN INTL ARPT',
+                name='San Juan',
                 state='Puerto Rico',
                 station_identifier='785260',
                 gps_latitude='N18 25',
@@ -21399,7 +21399,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='CHARLOTTE AMALIE HARRY',
+                name='Charlotte Amalie',
                 state='U.S. Virgin Islands',
                 station_identifier='785430',
                 gps_latitude='N18 21',
@@ -21424,7 +21424,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='LIHUE AIRPORT',
+                name='Lihue',
                 state='Hawaii',
                 station_identifier='911650',
                 gps_latitude='N21 59',
@@ -21449,7 +21449,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='WHEELER AFB 810.1',
+                name='Wheeler AFB',
                 state='Hawaii',
                 station_identifier='911700',
                 gps_latitude='N21 29',
@@ -21474,7 +21474,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='KANEOHE BAY MCAS',
+                name='Kailua',
                 state='Hawaii',
                 station_identifier='911760',
                 gps_latitude='N21 27',
@@ -21499,7 +21499,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='BARBERS POINT NAS',
+                name='Kapolei',
                 state='Hawaii',
                 station_identifier='911780',
                 gps_latitude='N21 19',
@@ -21549,7 +21549,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='MOLOKAI (AMOS)',
+                name="Ho'olehua",
                 state='Hawaii',
                 station_identifier='911860',
                 gps_latitude='N21 9',
@@ -21574,7 +21574,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='KAHULUI AIRPORT',
+                name='Kahului',
                 state='Hawaii',
                 station_identifier='911900',
                 gps_latitude='N20 54',
@@ -21649,7 +21649,7 @@ def upgrade() -> None:
         )
         session.add(
             MeteorologicalSite(
-                name='GUAM WFO',
+                name='Barrigada',
                 state='Guam',
                 station_identifier='912120',
                 gps_latitude='N13 29',
