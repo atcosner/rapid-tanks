@@ -50,14 +50,13 @@ with Session(DB_ENGINE) as session:
     sc1_tank.roof_type = cone_roof
 
     for idx, name in enumerate(MONTH_NAMES):
-        sc1_tank.service_records.append(
-            ServiceRecord(
-                mixture=sc1_mixture,
-                start_date=date(year=2024, month=idx + 1, day=1),
-                end_date=date(year=2024, month=idx + 1, day=2),
-                throughput='704.17',
-            )
+        record = ServiceRecord(
+            start_date=date(year=2024, month=idx + 1, day=1),
+            end_date=date(year=2024, month=idx + 1, day=2),
+            throughput='704.17',
         )
+        record.mixture = sc1_mixture
+        sc1_tank.service_records.append(record)
 
     sc1_facility = Facility(
         name='Sample Calculation #1',
