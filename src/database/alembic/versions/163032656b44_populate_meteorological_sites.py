@@ -7068,7 +7068,7 @@ def upgrade() -> None:
                     10: MeteorologicalMonthRecord(month_id=10, average_temp_min='53.1',average_temp_max='74.4', average_wind_speed='6.0', average_daily_insolation='1171.0'),
                     11: MeteorologicalMonthRecord(month_id=11, average_temp_min='42.9',average_temp_max='62.1', average_wind_speed='7.2', average_daily_insolation='814.0'),
                     12: MeteorologicalMonthRecord(month_id=12, average_temp_min='35.0',average_temp_max='52.3', average_wind_speed='7.6', average_daily_insolation='656.0'),
-                    13: MeteorologicalMonthRecord(month_id=13, average_temp_min='53.2',avvvverage_temp_max='72.5', average_wind_speed='7.2', average_daily_insolation='1380.0'),
+                    13: MeteorologicalMonthRecord(month_id=13, average_temp_min='53.2',average_temp_max='72.5', average_wind_speed='7.2', average_daily_insolation='1380.0'),
                 },
             )
         )

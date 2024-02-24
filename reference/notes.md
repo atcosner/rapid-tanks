@@ -21,3 +21,7 @@
   * Remove the builtin/custom specialization for materials
     * Just add an extra column for custom vs builtin
   * Figure out a better relationship for tanks and facilities
+
+
+* Future Ideas
+  * Should the values in the DB be strings or a fixed point number?

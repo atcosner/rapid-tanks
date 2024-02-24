@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import NamedTuple
 
-from PyQt5.Qt import pyqtSlot, pyqtSignal
+from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
 from src.components.tank import Tank

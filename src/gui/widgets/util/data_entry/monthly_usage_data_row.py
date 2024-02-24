@@ -22,6 +22,8 @@ class MonthlyUsageDataRow(QWidget):
         super().__init__(None)
         self.logger = logging.getLogger(f'{__name__}.{month}')
 
+        self.current_mixture_id: int | None = None
+
         self.checkbox = QCheckBox(month)
         self.throughput = QLineEdit()
         self.mixture = QComboBox(None)
@@ -40,6 +42,7 @@ class MonthlyUsageDataRow(QWidget):
 
         # Signals
         self.throughput.editingFinished.connect(self.throughputUpdated)
+        self.checkbox.stateChanged.connect(lambda: self.throughputUpdated.emit())
 
         self._setup_layout()
         self.set_read_only(read_only)
@@ -55,9 +58,12 @@ class MonthlyUsageDataRow(QWidget):
 
         layout.setContentsMargins(*DEFAULT_MARGINS)
 
+    def is_enabled(self) -> bool:
+        return self.checkbox.isChecked()
+
     def set_read_only(self, read_only: bool) -> None:
         self.checkbox.setDisabled(read_only)
-        self.throughput.setReadOnly(read_only)
+        self.throughput.setDisabled(read_only)
         self.mixture.setDisabled(read_only)
 
     def clear(self) -> None:
@@ -70,3 +76,18 @@ class MonthlyUsageDataRow(QWidget):
         except InvalidOperation:
             self.logger.exception(f'Failed to convert text to Decimal ("{self.throughput.text()}")')
             return None
+
+    def load(self, enabled: bool, throughput: str, mixture_id: int) -> None:
+        self.checkbox.setChecked(enabled)
+        self.throughput.setText(throughput)
+
+        result = self.mixture.findData(mixture_id)
+        if result == -1:
+            raise RuntimeError(f'Could not find element with DB id: {mixture_id}')
+        else:
+            self.mixture.setCurrentIndex(result)
+
+        self.throughputUpdated.emit()
+
+    def get_mixture_id(self) -> int:
+        return self.mixture.currentData()

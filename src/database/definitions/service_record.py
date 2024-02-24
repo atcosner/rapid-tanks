@@ -15,6 +15,7 @@ class ServiceRecord(MappedAsDataclass, OrmBase):
 
     start_date: Mapped[date]
     end_date: Mapped[date]
+    throughput: Mapped[str]
 
     tank: Mapped["FixedRoofTank"] = relationship(init=False, back_populates="service_records")
-    mixture: Mapped[PetrochemicalMixture] = relationship()
+    mixture: Mapped[PetrochemicalMixture] = relationship(init=False)

@@ -11,6 +11,7 @@ from src.database.definitions.mixture import PetrochemicalMixture, Petrochemical
 from src.database.definitions.paint import PaintColor, PaintCondition
 from src.database.definitions.service_record import ServiceRecord
 from src.database.definitions.tank import FixedRoofTank, FixedRoofType
+from src.gui.widgets.util.constants import MONTH_NAMES
 
 
 with Session(DB_ENGINE) as session:
@@ -48,20 +49,15 @@ with Session(DB_ENGINE) as session:
     sc1_tank.roof_paint_condition = average_condition
     sc1_tank.roof_type = cone_roof
 
-    sc1_tank.service_records.append(
-        ServiceRecord(
-            mixture=sc1_mixture,
-            start_date=date(year=2024, month=1, day=1),
-            end_date=date(year=2024, month=1, day=31),
+    for idx, name in enumerate(MONTH_NAMES):
+        sc1_tank.service_records.append(
+            ServiceRecord(
+                mixture=sc1_mixture,
+                start_date=date(year=2024, month=idx + 1, day=1),
+                end_date=date(year=2024, month=idx + 1, day=2),
+                throughput='704.17',
+            )
         )
-    )
-    sc1_tank.service_records.append(
-        ServiceRecord(
-            mixture=sc1_mixture,
-            start_date=date(year=2024, month=2, day=1),
-            end_date=date(year=2024, month=2, day=29),
-        )
-    )
 
     sc1_facility = Facility(
         name='Sample Calculation #1',

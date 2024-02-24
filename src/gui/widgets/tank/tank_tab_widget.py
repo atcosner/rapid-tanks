@@ -54,6 +54,7 @@ class TankTabWidget(QTabWidget):
             tank = session.get(FixedRoofTank, tank_id)
             self.tank_info.load(tank)
             self.physical_properties.load(tank)
+            self.tank_usage.load(tank)
 
             # TODO: Load the usage frame
 
