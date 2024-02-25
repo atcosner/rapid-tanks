@@ -52,9 +52,9 @@ class MainWindow(QMainWindow):
         materials_menu.addSeparator()
 
         reports_menu = self.menuBar().addMenu('Reports')
-        reports_menu.addAction('New Report').triggered.connect(lambda: ReportBuilder(self).exec())
-        reports_menu.addSeparator()
-        reports_menu.addAction('Settings')
+        reports_menu.addAction('New Report').triggered.connect(lambda: ReportBuilder(self, self.current_facility_id).exec())
+        # reports_menu.addSeparator()
+        # reports_menu.addAction('Settings')
 
     def select_facility(self, allow_new: bool) -> None:
         result = FacilitySelector.select_facility(self, allow_new=allow_new)
