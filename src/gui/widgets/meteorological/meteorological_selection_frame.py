@@ -58,7 +58,7 @@ class MeteorologicalSiteTree(QTreeWidget):
 
         # Load all facilities into the list
         with Session(DB_ENGINE) as session:
-            for site in session.scalars(select(MeteorologicalSite)).all():
+            for site in session.scalars(select(MeteorologicalSite).order_by(MeteorologicalSite.name)).all():
                 state_item = self.state_items[site.state]
                 MeteorologicalSiteItem(state_item, site.name, site.state, site.id)
 

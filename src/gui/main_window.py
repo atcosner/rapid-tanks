@@ -9,6 +9,7 @@ from src.database.definitions.facility import Facility
 from src.gui.modals.facility_selector import FacilitySelector
 from src.gui.modals.material_browser import MaterialBrowser
 from src.gui.modals.mixture_browser import MixtureBrowser
+from src.gui.modals.report_builder import ReportBuilder
 from src.gui.widgets.facility.facility_tab_widget import FacilityTabWidget
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__(None)
         self.facility_tabs = FacilityTabWidget(self)
+
+        self.current_facility_id: int | None = None
 
         # TODO: Show a slash screen and do any long running operations
 
@@ -47,6 +50,11 @@ class MainWindow(QMainWindow):
         materials_menu.addAction('Material Browser').triggered.connect(lambda: MaterialBrowser(self).exec())
         materials_menu.addAction('Mixture Browser').triggered.connect(lambda: MixtureBrowser.browse_mixture(self))
         materials_menu.addSeparator()
+
+        reports_menu = self.menuBar().addMenu('Reports')
+        reports_menu.addAction('New Report').triggered.connect(lambda: ReportBuilder(self).exec())
+        reports_menu.addSeparator()
+        reports_menu.addAction('Settings')
 
     def select_facility(self, allow_new: bool) -> None:
         result = FacilitySelector.select_facility(self, allow_new=allow_new)
@@ -83,6 +91,8 @@ class MainWindow(QMainWindow):
                 )
                 session.add(facility)
                 session.commit()
+
+            self.current_facility_id = facility.id
 
             # Change our title
             self.setWindowTitle(f'Rapid Tanks | {facility.name}')
