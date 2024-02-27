@@ -118,5 +118,6 @@ class TankSelectionFrame(QFrame):
         if self.selected_tank_id is not None:
             self.tankDeleted.emit(self.selected_tank_id)
 
-        if (tank_id := self.tank_tree.get_selected()) is not None:
+        if (selected_tank := self.tank_tree.get_selected()) is not None:
+            tank_type, tank_id = selected_tank
             self.tankSelected.emit(tank_id)
