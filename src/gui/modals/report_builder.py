@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 
+from src.calculations.simple_report import SimpleReport
+from src.calculations.util import ReportOutputType
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.gui.widgets.reports.reporting_period_box import ReportingPeriodBox
@@ -58,4 +60,16 @@ class ReportBuilder(Dialog):
 
     @pyqtSlot()
     def handle_build_report(self) -> None:
-        pass
+        # TODO: Show a progress bar while we calculate
+
+        # TODO: Check for at least one tank
+
+        # TODO: Other types of reports
+        report = SimpleReport(
+            facility_id=self.facility_id,
+            tanks=self.tank_selection_box.get_selected_tanks(),
+            reporting_period=self.reporting_period_box.get_selected_details(),
+        )
+        report.calculate(ReportOutputType.PDF)
+
+        # self.close()

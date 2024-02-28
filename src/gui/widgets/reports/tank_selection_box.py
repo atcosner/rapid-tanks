@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 
+from src.components.tank import TankType
 from src.database.definitions.facility import Facility
 from src.gui.widgets.tank.tank_tree import TankTree
 from src.gui.widgets.util.search_bar import SearchBar
@@ -68,3 +69,6 @@ class TankSelectionBox(QGroupBox):
 
     def handle_remove_tank(self) -> None:
         self.selected_tanks.hide_selected_tank()
+
+    def get_selected_tanks(self) -> list[tuple[TankType, int]]:
+        return self.selected_tanks.get_all_tanks(include_hidden=False)

@@ -1,8 +1,9 @@
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (
-    QWidget, QGroupBox, QRadioButton, QGridLayout, QComboBox, QDateEdit, QHBoxLayout, QLabel,
+    QWidget, QGroupBox, QRadioButton, QGridLayout, QComboBox, QHBoxLayout, QLabel,
 )
 
+from src.constants.time import ReportingTimeFrame, ReportingPeriodDetails
 from src.gui.widgets.util.constants import MONTH_NAMES
 from src.gui.widgets.util.date_edit import DatePicker
 
@@ -52,3 +53,18 @@ class ReportingPeriodBox(QGroupBox):
         self.month_combo_box.setDisabled(False if self.month_button.isChecked() else True)
         self.custom_start_date.setDisabled(False if self.custom_button.isChecked() else True)
         self.custom_end_date.setDisabled(False if self.custom_button.isChecked() else True)
+
+    def get_selected_details(self) -> ReportingPeriodDetails:
+        if self.year_button.isChecked():
+            return ReportingPeriodDetails(time_frame=ReportingTimeFrame.ANNUAL)
+        elif self.month_button.isChecked():
+            return ReportingPeriodDetails(
+                time_frame=ReportingTimeFrame.MONTH,
+                month_id=self.month_combo_box.currentIndex() + 1,
+            )
+        else:
+            return ReportingPeriodDetails(
+                time_frame=ReportingTimeFrame.CUSTOM,
+                custom_start_date=self.custom_start_date.date(),
+                custom_end_date=self.custom_end_date.date(),
+            )
