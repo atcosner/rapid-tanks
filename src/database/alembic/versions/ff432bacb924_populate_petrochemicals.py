@@ -107,8 +107,8 @@ def upgrade() -> None:
                 vapor_constant_a='11.293',
                 vapor_constant_b='3939.9',
                 vapor_constant_c='273.16',
-                min_valid_temperature='None',
-                max_valid_temperature='None',
+                min_valid_temperature=None,
+                max_valid_temperature=None,
                 normal_boiling_point='379',
             )
         )
@@ -207,7 +207,7 @@ def upgrade() -> None:
                 name='Benz[a]anthracene',
                 cas_number='00056-55-3',
                 molecular_weight='228.29',
-                liquid_density='None',
+                liquid_density=None,
                 true_vapor_pressure='7.92E-10',
                 vapor_constant_a='11.528',
                 vapor_constant_b='5461',
@@ -222,7 +222,7 @@ def upgrade() -> None:
                 name='Benzo[a]pyrene',
                 cas_number='00050-32-8',
                 molecular_weight='252.31',
-                liquid_density='None',
+                liquid_density=None,
                 true_vapor_pressure='2.29E-11',
                 vapor_constant_a='12.482',
                 vapor_constant_b='6181',
@@ -237,14 +237,14 @@ def upgrade() -> None:
                 name='Benzo[ghi]perylene',
                 cas_number='00191-24-2',
                 molecular_weight='276.33',
-                liquid_density='None',
+                liquid_density=None,
                 true_vapor_pressure='2.07E-13',
                 vapor_constant_a='11.820',
                 vapor_constant_b='6580',
                 vapor_constant_c='273.15',
                 min_valid_temperature='391',
                 max_valid_temperature='513',
-                normal_boiling_point='None',
+                normal_boiling_point=None,
             )
         )
         session.add(
@@ -677,8 +677,8 @@ def upgrade() -> None:
                 vapor_constant_a='6.921',
                 vapor_constant_b='1121.8',
                 vapor_constant_c='223.45',
-                min_valid_temperature='None',
-                max_valid_temperature='None',
+                min_valid_temperature=None,
+                max_valid_temperature=None,
                 normal_boiling_point='111',
             )
         )
@@ -1157,8 +1157,8 @@ def upgrade() -> None:
                 vapor_constant_a='8.229',
                 vapor_constant_b='2086.8',
                 vapor_constant_c='273.16',
-                min_valid_temperature='None',
-                max_valid_temperature='None',
+                min_valid_temperature=None,
+                max_valid_temperature=None,
                 normal_boiling_point='241',
             )
         )
@@ -1167,7 +1167,7 @@ def upgrade() -> None:
                 name='Ethane',
                 cas_number='00074-84-0',
                 molecular_weight='30.07',
-                liquid_density='None',
+                liquid_density=None,
                 true_vapor_pressure='472',
                 vapor_constant_a='6.813',
                 vapor_constant_b='659.7',
@@ -1412,8 +1412,8 @@ def upgrade() -> None:
                 vapor_constant_a='6.884',
                 vapor_constant_b='1043.0',
                 vapor_constant_c='236.88',
-                min_valid_temperature='None',
-                max_valid_temperature='None',
+                min_valid_temperature=None,
+                max_valid_temperature=None,
                 normal_boiling_point='75',
             )
         )
@@ -1862,8 +1862,8 @@ def upgrade() -> None:
                 vapor_constant_a='6.924',
                 vapor_constant_b='1486.9',
                 vapor_constant_c='202.40',
-                min_valid_temperature='None',
-                max_valid_temperature='None',
+                min_valid_temperature=None,
+                max_valid_temperature=None,
                 normal_boiling_point='329',
             )
         )
@@ -1909,7 +1909,7 @@ def upgrade() -> None:
                 vapor_constant_c='240.70',
                 min_valid_temperature='34',
                 max_valid_temperature='106',
-                normal_boiling_point='None',
+                normal_boiling_point=None,
             )
         )
         session.add(
@@ -2417,8 +2417,8 @@ def upgrade() -> None:
                 vapor_constant_a='8.208',
                 vapor_constant_b='2085.9',
                 vapor_constant_c='203.54',
-                min_valid_temperature='None',
-                max_valid_temperature='None',
+                min_valid_temperature=None,
+                max_valid_temperature=None,
                 normal_boiling_point='368',
             )
         )
@@ -2687,8 +2687,8 @@ def upgrade() -> None:
                 vapor_constant_a='6.825',
                 vapor_constant_b='1294.9',
                 vapor_constant_c='218.42',
-                min_valid_temperature='None',
-                max_valid_temperature='None',
+                min_valid_temperature=None,
+                max_valid_temperature=None,
                 normal_boiling_point='230',
             )
         )
@@ -2702,8 +2702,8 @@ def upgrade() -> None:
                 vapor_constant_a='6.844',
                 vapor_constant_b='1328.1',
                 vapor_constant_c='220.38',
-                min_valid_temperature='None',
-                max_valid_temperature='None',
+                min_valid_temperature=None,
+                max_valid_temperature=None,
                 normal_boiling_point='238',
             )
         )
@@ -2817,6 +2817,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # TODO: This needs to only delete the chemicals above not everything in the table
     with Session(bind=op.get_bind()) as session:
         for site in session.scalars(select(Petrochemical)).all():
             session.delete(site)

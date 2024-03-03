@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 
-from src.reports.calculations.fixed_roof_losses import FixedRoofLosses
+from src.reports.calculations.fixed_roof import FixedRoofLosses
 from src.components.mixture import Mixture
 from src.components.facility import Facility
 from src.constants.paint import PaintColor, PaintCondition

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass
 
 from . import OrmBase
+from.util import PintQuantity
 
 
 class Petrochemical(MappedAsDataclass, OrmBase):
@@ -9,13 +10,13 @@ class Petrochemical(MappedAsDataclass, OrmBase):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
     cas_number: Mapped[str]
-    molecular_weight: Mapped[str]  # g/mol
-    liquid_density: Mapped[str]  # lb/gal
-    true_vapor_pressure: Mapped[str]  # @ 60 degF, psia
-    vapor_constant_a: Mapped[str]  # dimensionless
-    vapor_constant_b: Mapped[str]  # degC
-    vapor_constant_c: Mapped[str]  # degC
-    min_valid_temperature: Mapped[str]  # degF
-    max_valid_temperature: Mapped[str]  # degF
-    normal_boiling_point: Mapped[str]  # degF
-    working_loss_product_factor: Mapped[str] = mapped_column(default='1')  # dimensionless
+    molecular_weight: Mapped[PintQuantity] = mapped_column(PintQuantity('g/mol'))
+    liquid_density: Mapped[PintQuantity] = mapped_column(PintQuantity('lb/gal'), nullable=True)
+    true_vapor_pressure: Mapped[PintQuantity] = mapped_column(PintQuantity('psia'))  # @ 60 degF
+    vapor_constant_a: Mapped[PintQuantity] = mapped_column(PintQuantity('dimensionless'))
+    vapor_constant_b: Mapped[PintQuantity] = mapped_column(PintQuantity('degC'))
+    vapor_constant_c: Mapped[PintQuantity] = mapped_column(PintQuantity('degC'))
+    min_valid_temperature: Mapped[PintQuantity] = mapped_column(PintQuantity('degF'), nullable=True)
+    max_valid_temperature: Mapped[PintQuantity] = mapped_column(PintQuantity('degF'), nullable=True)
+    normal_boiling_point: Mapped[PintQuantity] = mapped_column(PintQuantity('degF'), nullable=True)
+    working_loss_product_factor: Mapped[PintQuantity] = mapped_column(PintQuantity('dimensionless'), default='1')

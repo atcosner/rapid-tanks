@@ -1,44 +1,44 @@
 import logging
+from dataclasses import dataclass
 from decimal import Decimal
 from pint import Quantity
 
 from src import unit_registry
-from src.components.fixed_roof_tank import FixedRoofTank
-from src.components.facility import Facility
 from src.components.tank import Insulation
+from src.database.definitions.meteorological import MeteorologicalSite
+from src.database.definitions.tank import FixedRoofTank
 from src.util.logging import log_block
 from src.util.errors import CalculationError
 
 logger = logging.getLogger(__name__)
 
 
-class FixedRoofLosses:
-    def __init__(self, site: Facility, tank: FixedRoofTank) -> None:
-        self.site = site
-        self.tank = tank
+@dataclass
+class FixedRoofEmissions:
+    site: MeteorologicalSite
+    tank: FixedRoofTank
+    total_losses: Quantity | None = None
 
-        self.total_losses: Quantity | None = None
+    # Standing loss components
+    vapor_space_volume: Quantity | None = None
+    stock_vapor_density: Quantity | None = None
+    vapor_space_expansion_factor: Quantity | None = None
 
-        # Standing loss components
-        self.vapor_space_volume: Quantity | None = None
-        self.stock_vapor_density: Quantity | None = None
-        self.vapor_space_expansion_factor: Quantity | None = None
+    # Working loss components
+    net_working_loss_throughput: Quantity | None = None
+    working_loss_turnover_factor: Quantity | None = None
 
-        # Working loss components
-        self.net_working_loss_throughput: Quantity | None = None
-        self.working_loss_turnover_factor: Quantity | None = None
-
-        # Store intermediate reports here
-        self.vapor_space_outage: Quantity | None = None
-        self.average_ambient_temperature: Quantity | None = None
-        self.average_ambient_temperature_range: Quantity | None = None
-        self.liquid_bulk_temperature: Quantity | None = None
-        self.average_daily_liquid_surface_temperature: Quantity | None = None
-        self.mixture_vapor_pressure: Quantity | None = None
-        self.mixture_molecular_weight: Quantity | None = None
-        self.average_vapor_temperature: Quantity | None = None
-        self.average_daily_vapor_temperature_range: Quantity | None = None
-        self.average_daily_vapor_pressure_range: Quantity | None = None
+    # Store intermediate reports here
+    vapor_space_outage: Quantity | None = None
+    average_ambient_temperature: Quantity | None = None
+    average_ambient_temperature_range: Quantity | None = None
+    liquid_bulk_temperature: Quantity | None = None
+    average_daily_liquid_surface_temperature: Quantity | None = None
+    mixture_vapor_pressure: Quantity | None = None
+    mixture_molecular_weight: Quantity | None = None
+    average_vapor_temperature: Quantity | None = None
+    average_daily_vapor_temperature_range: Quantity | None = None
+    average_daily_vapor_pressure_range: Quantity | None = None
 
     def _calculate_average_daily_ambient_temperature(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-30
