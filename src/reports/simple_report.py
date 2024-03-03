@@ -31,4 +31,6 @@ class SimpleReport:
                     self.fixed_roof_tanks.append(session.get(FixedRoofTank, tank_id))
 
     def calculate(self, output_type: ReportOutputType) -> None:
-        pass
+        # Loop through each tank and calculate the emissions
+        for fixed_tank in self.fixed_roof_tanks:
+            logger.info(f'Starting calculations on tank: {fixed_tank.name}')

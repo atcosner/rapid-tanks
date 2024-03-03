@@ -28,7 +28,7 @@ class FixedRoofLosses:
         self.net_working_loss_throughput: Quantity | None = None
         self.working_loss_turnover_factor: Quantity | None = None
 
-        # Store intermediate calculations here
+        # Store intermediate reports here
         self.vapor_space_outage: Quantity | None = None
         self.average_ambient_temperature: Quantity | None = None
         self.average_ambient_temperature_range: Quantity | None = None

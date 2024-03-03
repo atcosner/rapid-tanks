@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 
-from src.calculations.simple_report import SimpleReport
-from src.calculations.util import ReportOutputType
+from src.reports.simple_report import SimpleReport
+from src.reports.util import ReportOutputType
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.gui.widgets.reports.reporting_period_box import ReportingPeriodBox
