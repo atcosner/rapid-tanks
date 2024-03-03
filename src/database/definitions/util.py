@@ -15,7 +15,7 @@ class PintQuantity(types.TypeDecorator):
         self.impl.length = 100
         self.default_units = default_units
 
-    def process_bind_param(self, value: Any | None, dialect) -> str:
+    def process_bind_param(self, value: Any | None, dialect) -> str | None:
         # Incoming strings are assumed to be in the correct units already
         if isinstance(value, Quantity):
             value = value.to(self.default_units)
@@ -29,4 +29,5 @@ class PintQuantity(types.TypeDecorator):
         if value is not None:
             # Turn strings into quantities of the default units
             value = unit_registry.Quantity(Decimal(value), self.default_units)
+
         return value

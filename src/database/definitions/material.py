@@ -12,7 +12,7 @@ class Petrochemical(MappedAsDataclass, OrmBase):
     cas_number: Mapped[str]
     molecular_weight: Mapped[PintQuantity] = mapped_column(PintQuantity('g/mol'))
     liquid_density: Mapped[PintQuantity] = mapped_column(PintQuantity('lb/gal'), nullable=True)
-    true_vapor_pressure: Mapped[PintQuantity] = mapped_column(PintQuantity('psia'))  # @ 60 degF
+    true_vapor_pressure: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'))  # @ 60 degF (Absolute PSI)
     vapor_constant_a: Mapped[PintQuantity] = mapped_column(PintQuantity('dimensionless'))
     vapor_constant_b: Mapped[PintQuantity] = mapped_column(PintQuantity('degC'))
     vapor_constant_c: Mapped[PintQuantity] = mapped_column(PintQuantity('degC'))

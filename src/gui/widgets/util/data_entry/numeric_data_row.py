@@ -1,8 +1,10 @@
+from pint import Quantity
+
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit
 
 from src.gui.widgets.util.validators import PositiveDoubleValidator, DoubleValidator
-from src.util.units import to_human_readable
+from src.util.units import to_human_readable, sanitize_unit
 
 from . import DEFAULT_MARGINS
 
@@ -43,7 +45,7 @@ class NumericDataRow(QWidget):
         self.precision = precision
 
         self.label = QLabel(
-            f'{label_string} ({to_human_readable(unit)})'
+            f'{label_string} ({to_human_readable(self.unit)})'
             if unit != 'dimensionless' else
             label_string
         )
@@ -64,7 +66,12 @@ class NumericDataRow(QWidget):
     def set_read_only(self, read_only: bool) -> None:
         self.data_box.setReadOnly(read_only)
 
-    def set(self, value: str) -> None:
+    def set(self, value: str | Quantity) -> None:
+        # Convert quantities to our units before we string-ify
+        if isinstance(value, Quantity):
+            value = value.to(sanitize_unit(self.unit))
+            value = str(value.magnitude)
+
         self.data_box.setText(value)
 
     def get(self) -> str:

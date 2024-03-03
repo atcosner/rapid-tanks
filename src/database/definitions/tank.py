@@ -35,8 +35,8 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
     roof_slope: Mapped[PintQuantity] = mapped_column(PintQuantity('ft/ft'), default='0.0625')
     roof_radius: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
 
-    vent_vacuum_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psig'), default='-0.3')
-    vent_breather_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psig'), default='0.3')
+    vent_vacuum_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'), default='-0.3')  # Gauge PSI
+    vent_breather_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'), default='0.3')  # Gauge PSI
 
     maximum_liquid_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
     average_liquid_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')

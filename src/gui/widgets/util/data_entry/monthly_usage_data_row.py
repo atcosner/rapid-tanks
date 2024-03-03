@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal, InvalidOperation
+from pint import Quantity
 
 from PyQt5.QtCore import QAbstractItemModel, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QCheckBox, QLineEdit, QHBoxLayout, QPushButton, QComboBox
@@ -77,9 +78,11 @@ class MonthlyUsageDataRow(QWidget):
             self.logger.exception(f'Failed to convert text to Decimal ("{self.throughput.text()}")')
             return None
 
-    def load(self, enabled: bool, throughput: str, mixture_id: int) -> None:
+    def load(self, enabled: bool, throughput: Quantity, mixture_id: int) -> None:
         self.checkbox.setChecked(enabled)
-        self.throughput.setText(throughput)
+
+        throughput = throughput.to('gal/yr')
+        self.throughput.setText(str(throughput.magnitude))
 
         result = self.mixture.findData(mixture_id)
         if result == -1:

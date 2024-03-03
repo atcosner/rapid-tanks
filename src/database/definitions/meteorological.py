@@ -15,7 +15,7 @@ class MeteorologicalSite(MappedAsDataclass, OrmBase):
     station_identifier: Mapped[str]
     gps_latitude: Mapped[str]
     gps_longitude: Mapped[str]
-    atmospheric_pressure: Mapped[PintQuantity] = mapped_column(PintQuantity('psia'))
+    atmospheric_pressure: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'))  # psia (Absolute PSI)
 
     month_records: Mapped[dict[int, "MeteorologicalMonthRecord"]] = relationship(
         collection_class=attribute_keyed_dict("month_id"),
@@ -31,7 +31,7 @@ class MeteorologicalMonthRecord(MappedAsDataclass, OrmBase):
     month_id: Mapped[int]
     average_temp_min: Mapped[PintQuantity] = mapped_column(PintQuantity('degF'))
     average_temp_max: Mapped[PintQuantity] = mapped_column(PintQuantity('degF'))
-    average_wind_speed: Mapped[PintQuantity] = mapped_column(PintQuantity('mi/hr'))
+    average_wind_speed: Mapped[PintQuantity] = mapped_column(PintQuantity('mph'))
     average_daily_insolation: Mapped[PintQuantity] = mapped_column(PintQuantity('dimensionless'))  # btu/(ft^2 day)
 
     site: Mapped[MeteorologicalSite] = relationship(init=False, back_populates="month_records")
