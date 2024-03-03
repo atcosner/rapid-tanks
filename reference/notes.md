@@ -25,3 +25,7 @@
 
 * Future Ideas
   * Should the values in the DB be strings or a fixed point number?
+
+* Overall TODO
+  * The DB definition for a tank should not have default values?
+    * Since we have defaults, we have to use '0.0' as a non-set value which is not ideal

@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclass
 
@@ -5,6 +6,8 @@ from . import OrmBase
 from .paint import PaintColor, PaintCondition, SolarAbsorptance
 from .service_record import ServiceRecord
 from .util import PintQuantity
+
+logger = logging.getLogger(__name__)
 
 
 class FixedRoofType(MappedAsDataclass, OrmBase):
@@ -35,8 +38,8 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
     roof_slope: Mapped[PintQuantity] = mapped_column(PintQuantity('ft/ft'), default='0.0625')
     roof_radius: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
 
-    vent_vacuum_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'), default='-0.3')  # Gauge PSI
-    vent_breather_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'), default='0.3')  # Gauge PSI
+    vent_vacuum_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'), default='-0.03')  # Gauge PSI
+    vent_breather_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'), default='0.03')  # Gauge PSI
 
     maximum_liquid_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
     average_liquid_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')

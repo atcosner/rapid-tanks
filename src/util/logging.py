@@ -1,7 +1,10 @@
 import logging
+import sys
 from contextlib import contextmanager
 from types import TracebackType
 from typing import Type
+
+logger = logging.getLogger(__name__)
 
 LOG_WIDTH = 120
 
@@ -12,14 +15,14 @@ class NamedLoggerAdapter(logging.LoggerAdapter):
 
 
 @contextmanager
-def log_block(logger: logging.Logger, name: str):
+def log_block(log: logging.Logger, name: str):
     half_width = (LOG_WIDTH - len(name) - 2) // 2
-    logger.info(f'{"-" * half_width} {name} {"-" * half_width}')
+    log.info(f'{"-" * half_width} {name} {"-" * half_width}')
     try:
         yield
     finally:
-        logger.info('-' * LOG_WIDTH)
-        logger.info('')
+        log.info('-' * LOG_WIDTH)
+        log.info('')
 
 
 def configure_root_logger() -> None:

@@ -3,6 +3,7 @@ from enum import Enum, auto
 
 
 class ReportOutputType(Enum):
+    LOG = auto()  # TODO: Remove once we can generate PDF reports
     PDF = auto()
     EXCEL = auto()
 
