@@ -2,6 +2,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from src.components.tank import TankType, FixedRoofTankShim
+from src.constants.meteorological import MeteorologicalSiteShim
 from src.constants.time import ReportingPeriodDetails
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
@@ -43,7 +44,7 @@ class SimpleReport:
             logger.info(f'Starting calculations on tank: {fixed_tank.name}')
             tank_emissions = FixedRoofEmissions(
                 facility_name=self.facility.name,
-                site=self.facility.site,
+                site=MeteorologicalSiteShim(self.facility.site),
                 tank=FixedRoofTankShim(fixed_tank),
                 reporting_period=self.reporting_period,
             )

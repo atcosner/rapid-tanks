@@ -5,6 +5,7 @@ from pint import Quantity
 
 from src import unit_registry
 from src.components.tank import FixedRoofTankShim
+from src.constants.meteorological import MeteorologicalSiteShim
 from src.constants.time import ReportingPeriodDetails
 from src.database.definitions.meteorological import MeteorologicalSite
 from src.util.logging import log_block
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FixedRoofEmissions:
     facility_name: str
-    site: MeteorologicalSite
+    site: MeteorologicalSiteShim
     tank: FixedRoofTankShim
     reporting_period: ReportingPeriodDetails
 
@@ -43,16 +44,6 @@ class FixedRoofEmissions:
     average_daily_vapor_temperature_range: Quantity | None = None
     average_daily_vapor_pressure_range: Quantity | None = None
 
-    # def _calculate_average_daily_ambient_temperature(self) -> Quantity:
-    #     # AP 42 Chapter 7 Equation 1-30
-    #
-    #     # Use the meteorological data from the site
-    #     # TODO: This needs to be adjusted for the time period we are calculating over
-    #     avg_max_temp_degR = self.site.meteorological_data.annual_data.average_daily_max_temp.to('degR')
-    #     avg_min_temp_degR = self.site.meteorological_data.annual_data.average_daily_min_temp.to('degR')
-    #
-    #     return (avg_max_temp_degR + avg_min_temp_degR) / 2
-    #
     # def _calculate_average_daily_ambient_temperature_range(self) -> Quantity:
     #     # AP 42 Chapter 7 Equation 1-11
     #
@@ -155,38 +146,38 @@ class FixedRoofEmissions:
     #         # TODO What?
     #         raise CalculationError(f'Unknown insulation: {self.tank.insulation}')
     #
-    # def _calculate_stock_density(self) -> Quantity:
-    #     # AP 42 Chapter 7 Equation 1-22
-    #
-    #     # Calculate the average daily ambient temperature
-    #     self.average_ambient_temperature = self._calculate_average_daily_ambient_temperature()
-    #     logger.debug(f'Average daily ambient temperature: {self.average_ambient_temperature}')
-    #
-    #     # Calculate the liquid bulk temperature
-    #     self.liquid_bulk_temperature = self._calculate_liquid_bulk_temperature()
-    #     logger.debug(f'Liquid bulk temperature: {self.liquid_bulk_temperature}')
-    #
-    #     # Calculate the average daily liquid surface temperature
-    #     self.average_daily_liquid_surface_temperature = self._calculate_average_daily_liquid_surface_temperature()
-    #     logger.debug(f'Average daily liquid surface temperature: {self.average_daily_liquid_surface_temperature}')
-    #
-    #     # Calculate the mixture vapor pressure
-    #     self.mixture_vapor_pressure = self.tank.mixture.calculate_vapor_pressure(self.average_daily_liquid_surface_temperature)
-    #     logger.debug(f'Mixture vapor pressure: {self.mixture_vapor_pressure}')
-    #
-    #     # Calculate the mixture vapor molecular weight
-    #     self.mixture_molecular_weight = self.tank.mixture.calculate_vapor_molecular_weight(self.average_daily_liquid_surface_temperature)
-    #     logger.debug(f'Mixture vapor molecular weight: {self.mixture_molecular_weight}')
-    #
-    #     # Calculate the average vapor temperature
-    #     self.average_vapor_temperature = self._calculate_average_vapor_temperature()
-    #     logger.debug(f'Average vapor temperature: {self.average_vapor_temperature}')
-    #
-    #     # W_V = (M_V * P_VA) / (R * T_V)
-    #     term1 = self.mixture_molecular_weight.magnitude * self.mixture_vapor_pressure.magnitude
-    #     term2 = Decimal('10.731') * self.average_vapor_temperature.magnitude
-    #     return unit_registry.Quantity(term1 / term2, 'dimensionless')
-    #
+    def _calculate_stock_density(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-22
+
+        # Calculate the average daily ambient temperature
+        self.average_ambient_temperature = self.site.get_average_daily_ambient_temperature(self.reporting_period)
+        logger.debug(f'Average daily ambient temperature: {self.average_ambient_temperature}')
+        #
+        # # Calculate the liquid bulk temperature
+        # self.liquid_bulk_temperature = self._calculate_liquid_bulk_temperature()
+        # logger.debug(f'Liquid bulk temperature: {self.liquid_bulk_temperature}')
+        #
+        # # Calculate the average daily liquid surface temperature
+        # self.average_daily_liquid_surface_temperature = self._calculate_average_daily_liquid_surface_temperature()
+        # logger.debug(f'Average daily liquid surface temperature: {self.average_daily_liquid_surface_temperature}')
+        #
+        # # Calculate the mixture vapor pressure
+        # self.mixture_vapor_pressure = self.tank.mixture.calculate_vapor_pressure(self.average_daily_liquid_surface_temperature)
+        # logger.debug(f'Mixture vapor pressure: {self.mixture_vapor_pressure}')
+        #
+        # # Calculate the mixture vapor molecular weight
+        # self.mixture_molecular_weight = self.tank.mixture.calculate_vapor_molecular_weight(self.average_daily_liquid_surface_temperature)
+        # logger.debug(f'Mixture vapor molecular weight: {self.mixture_molecular_weight}')
+        #
+        # # Calculate the average vapor temperature
+        # self.average_vapor_temperature = self._calculate_average_vapor_temperature()
+        # logger.debug(f'Average vapor temperature: {self.average_vapor_temperature}')
+        #
+        # # W_V = (M_V * P_VA) / (R * T_V)
+        # term1 = self.mixture_molecular_weight.magnitude * self.mixture_vapor_pressure.magnitude
+        # term2 = Decimal('10.731') * self.average_vapor_temperature.magnitude
+        # return unit_registry.Quantity(term1 / term2, 'dimensionless')
+
     # def _calculate_average_daily_vapor_temperature_range(self) -> Quantity:
     #     # AP 42 Chapter 7 Equation 1-6, 1-7, and 1-7
     #
@@ -296,9 +287,7 @@ class FixedRoofEmissions:
         # Get the vapor space outage from the tank
         self.vapor_space_outage = self.tank.calculate_vapor_space_outage()
         logger.debug(f'Vapor space outage: {self.vapor_space_outage}')
-
-        # # Get the vapor space volume from the tank
-        # return self.tank.calculate_vapor_space_volume()
+        return self.tank.calculate_vapor_space_volume()
 
     def _calculate_standing_losses(self) -> Quantity:
         logger.info(f'Calculating standing losses for "{self.tank.name}" at "{self.facility_name}"')
@@ -314,11 +303,11 @@ class FixedRoofEmissions:
             self.vapor_space_volume = self._calculate_vapor_space_volume()
             logger.info(f'Vapor space volume: {self.vapor_space_volume}')
 
-        # # Calculate the stock vapor density
-        # with log_block(logger, 'Vapor Stock Density'):
-        #     self.stock_vapor_density = self._calculate_stock_density()
-        #     logger.info(f'Vapor stock density: {self.stock_vapor_density}')
-        #
+        # Calculate the stock vapor density
+        with log_block(logger, 'Vapor Stock Density'):
+            self.stock_vapor_density = self._calculate_stock_density()
+            logger.info(f'Vapor stock density: {self.stock_vapor_density}')
+
         # # Calculate the vapor space expansion factor
         # with log_block(logger, 'Vapor Space Expansion Factor'):
         #     self.vapor_space_expansion_factor = self._calculate_vapor_space_expansion_factor()

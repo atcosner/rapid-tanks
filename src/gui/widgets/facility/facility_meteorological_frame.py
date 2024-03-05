@@ -62,12 +62,12 @@ class FacilityMeteorologicalFrame(EditableFrame):
 
     def load(self, identifier: Facility | int) -> None:
         if isinstance(identifier, Facility):
-            logger.info(f'Loading site: {identifier.site}')
+            logger.info(f'Loading site name: {identifier.site.name}')
             self.current_facility_id = identifier.id
             if identifier.site is not None:
                 self.info_frame.handle_site_selected(identifier.site.id)
         elif isinstance(identifier, int):
-            logger.info(f'Loading site: {identifier}')
+            logger.info(f'Loading site id: {identifier}')
             self.info_frame.handle_site_selected(identifier)
 
     def update_site(self) -> int:
