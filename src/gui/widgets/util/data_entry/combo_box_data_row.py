@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel
 
 from . import DEFAULT_MARGINS
 from src.database import DB_ENGINE
-from src.database.definitions.tank import FixedRoofType
+from src.database.definitions.tank import FixedRoofType, InsulationType
 from src.database.definitions.paint import PaintColor, PaintCondition
 
 
@@ -15,6 +15,7 @@ class ComboBoxDataType(Enum):
     ROOF_TYPES = auto()
     PAINT_COLORS = auto()
     PAINT_CONDITIONS = auto()
+    INSULATION_TYPE = auto()
 
 
 class ComboBoxDataRow(QWidget):
@@ -56,6 +57,10 @@ class ComboBoxDataRow(QWidget):
             with Session(DB_ENGINE) as session:
                 for roof_type in session.scalars(select(FixedRoofType)).all():
                     self.combo_box.addItem(roof_type.name, roof_type.id)
+        elif data_type == ComboBoxDataType.INSULATION_TYPE:
+            with Session(DB_ENGINE) as session:
+                for insulation_type in session.scalars(select(InsulationType)).all():
+                    self.combo_box.addItem(insulation_type.name, insulation_type.id)
         else:
             raise RuntimeError(f'Invalid data_type: {data_type}')
 

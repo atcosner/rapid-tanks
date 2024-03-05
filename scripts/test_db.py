@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.components.mixture import MixtureMakeup
+from src.components.tank import Insulation
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.database.definitions.material import Petrochemical
@@ -10,7 +11,7 @@ from src.database.definitions.meteorological import MeteorologicalSite
 from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
 from src.database.definitions.paint import PaintColor, PaintCondition
 from src.database.definitions.service_record import ServiceRecord
-from src.database.definitions.tank import FixedRoofTank, FixedRoofType
+from src.database.definitions.tank import FixedRoofTank, FixedRoofType, InsulationType
 from src.gui.widgets.util.constants import MONTH_NAMES
 
 
@@ -20,6 +21,7 @@ with Session(DB_ENGINE) as session:
     white_paint = session.scalar(select(PaintColor).where(PaintColor.name == 'White'))
     average_condition = session.scalar(select(PaintCondition).where(PaintCondition.name == 'Average'))
     cone_roof = session.scalar(select(FixedRoofType).where(FixedRoofType.name == 'Cone'))
+    uninsulated = session.scalar(select(InsulationType).where(InsulationType.name == Insulation.NONE))
 
     benzene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Benzene'))
     toluene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Toluene'))
@@ -48,6 +50,7 @@ with Session(DB_ENGINE) as session:
     sc1_tank.roof_paint_color = white_paint
     sc1_tank.roof_paint_condition = average_condition
     sc1_tank.roof_type = cone_roof
+    sc1_tank.insulation = uninsulated
 
     for idx, name in enumerate(MONTH_NAMES):
         record = ServiceRecord(

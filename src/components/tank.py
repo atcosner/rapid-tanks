@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from enum import Enum, auto
+from enum import Enum, auto, StrEnum
 from functools import lru_cache
 from pint import Quantity
 
@@ -23,10 +23,10 @@ class TankType(Enum):
     INTERNAL_FLOATING_ROOF = auto()
 
 
-class Insulation(Enum):
-    NONE = auto()
-    PARTIAL = auto()  # TODO: Per AP 42 Chapter 7, this means the shell is insulated. Can it ever be only the roof?
-    FULL = auto()
+class Insulation(StrEnum):
+    NONE = 'None'
+    PARTIAL = 'Partial'  # TODO: Per AP 42 Chapter 7, this means the shell is insulated. Can it ever be only the roof?
+    FULL = 'Full'
 
 
 @dataclass

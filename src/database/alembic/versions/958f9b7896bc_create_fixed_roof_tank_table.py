@@ -9,8 +9,9 @@ from alembic import op
 from typing import Sequence
 from sqlalchemy.orm.session import Session
 
+from src.components.tank import Insulation
 from src.database.definitions import OrmBase
-from src.database.definitions.tank import FixedRoofTank, FixedRoofType
+from src.database.definitions.tank import FixedRoofTank, FixedRoofType, InsulationType
 
 
 # revision identifiers, used by Alembic.
@@ -21,7 +22,10 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    OrmBase.metadata.create_all(bind=op.get_bind(), tables=[FixedRoofTank.__table__, FixedRoofType.__table__])
+    OrmBase.metadata.create_all(
+        bind=op.get_bind(),
+        tables=[FixedRoofTank.__table__, FixedRoofType.__table__, InsulationType.__table__],
+    )
 
     # Populate the 2 types of fixed roofs
     with Session(bind=op.get_bind()) as session:
@@ -29,6 +33,16 @@ def upgrade() -> None:
         session.add(FixedRoofType(name='Dome'))
         session.commit()
 
+    # Populate the 3 types of insulation
+    with Session(bind=op.get_bind()) as session:
+        session.add(InsulationType(name=Insulation.NONE))
+        session.add(InsulationType(name=Insulation.PARTIAL))
+        session.add(InsulationType(name=Insulation.FULL))
+        session.commit()
+
 
 def downgrade() -> None:
-    OrmBase.metadata.drop_all(bind=op.get_bind(), tables=[FixedRoofTank.__table__, FixedRoofType.__table__])
+    OrmBase.metadata.drop_all(
+        bind=op.get_bind(),
+        tables=[FixedRoofTank.__table__, FixedRoofType.__table__, InsulationType.__table__],
+    )

@@ -4,7 +4,7 @@ from decimal import Decimal
 from pint import Quantity
 
 from src import unit_registry
-from src.components.tank import FixedRoofTankShim
+from src.components.tank import FixedRoofTankShim, Insulation
 from src.constants.meteorological import MeteorologicalSiteShim
 from src.constants.time import ReportingPeriodDetails
 from src.database.definitions.meteorological import MeteorologicalSite
@@ -53,52 +53,60 @@ class FixedRoofEmissions:
     #     avg_min_temp_degR = self.site.meteorological_data.annual_data.average_daily_min_temp.to('degR')
     #     return avg_max_temp_degR - avg_min_temp_degR
     #
-    # def _calculate_liquid_bulk_temperature(self) -> Quantity:
-    #     # AP 42 Chapter 7 Equation 1-31
-    #     bulk_temp = self.average_ambient_temperature.to('degR').magnitude \
-    #                 + (Decimal('0.003')
-    #                    * self.tank.shell_solar_absorption
-    #                    * self.site.meteorological_data.annual_data.average_solar_insolation)
-    #
-    #     return bulk_temp.magnitude * unit_registry.degR
-    #
-    # def _calculate_average_daily_liquid_surface_temperature(self) -> Quantity:
-    #     # AP 42 Chapter 7 Equation 1-27, 1-28, and 1-29
-    #
-    #     # This is based on which type of insulation the tank has
-    #     if self.tank.insulation is Insulation.NONE:
-    #         # Do not make assumptions and use equation 1-28, just use equation 1-27
-    #         term1 = self.average_ambient_temperature.to('degR').magnitude \
-    #                 * (Decimal('0.5') - (Decimal('0.8') / (Decimal('4.4') * (self.tank.height / self.tank.diameter) + Decimal('3.8'))))
-    #
-    #         term2 = self.liquid_bulk_temperature.to('degR').magnitude \
-    #                 * (Decimal('0.5') + (Decimal('0.8') / (Decimal('4.4') * (self.tank.height / self.tank.diameter) + Decimal('3.8'))))
-    #
-    #         term3 = (
-    #                     (Decimal('0.021') * self.tank.roof_solar_absorption * self.site.meteorological_data.annual_data.average_solar_insolation)
-    #                     + (Decimal('0.013') * (self.tank.height / self.tank.diameter) * self.tank.shell_solar_absorption * self.site.meteorological_data.annual_data.average_solar_insolation)
-    #                 ) / (
-    #                     Decimal('4.4') * (self.tank.height / self.tank.diameter) + Decimal('3.8')
-    #                 )
-    #
-    #         return (term1.magnitude + term2.magnitude + term3.magnitude) * unit_registry.degR
-    #
-    #     elif self.tank.insulation is Insulation.PARTIAL:
-    #         # Equation 1-29
-    #         return (Decimal('0.3') * self.average_ambient_temperature.to('degR')) \
-    #                + (Decimal('0.7') * self.liquid_bulk_temperature.to('degR')) \
-    #                + (Decimal('0.005')
-    #                   * self.tank.get_average_solar_absorption()
-    #                   * self.site.meteorological_data.annual_data.average_solar_insolation)
-    #
-    #     elif self.tank.insulation is Insulation.FULL:
-    #         # Assume average liquid surface temperature equal to average liquid bulk temperature
-    #         return self.liquid_bulk_temperature.to('degR')
-    #
-    #     else:
-    #         # TODO What?
-    #         raise CalculationError(f'Unknown insulation: {self.tank.insulation}')
-    #
+    def _calculate_liquid_bulk_temperature(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-31
+        bulk_temp = self.average_ambient_temperature.to('degR').magnitude \
+                    + (Decimal('0.003')
+                       * self.tank.shell_solar_absorptance.coefficient
+                       * self.site.get_annual_data().average_daily_insolation)
+
+        return bulk_temp.magnitude * unit_registry.degR
+
+    def _calculate_average_daily_liquid_surface_temperature(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-27, 1-28, and 1-29
+
+        # This is based on which type of insulation the tank has
+        if self.tank.insulation.name == Insulation.NONE:
+            # Do not make assumptions and use equation 1-28, just use equation 1-27
+            term1 = self.average_ambient_temperature.to('degR').magnitude \
+                    * (Decimal('0.5') - (Decimal('0.8') / (Decimal('4.4') * (self.tank.shell_height / self.tank.shell_diameter) + Decimal('3.8'))))
+
+            term2 = self.liquid_bulk_temperature.to('degR').magnitude \
+                    * (Decimal('0.5') + (Decimal('0.8') / (Decimal('4.4') * (self.tank.shell_height / self.tank.shell_diameter) + Decimal('3.8'))))
+
+            term3 = (
+                        (
+                            Decimal('0.021')
+                            * self.tank.roof_solar_absorptance.coefficient
+                            * self.site.get_annual_data().average_daily_insolation
+                        ) + (
+                            Decimal('0.013')
+                            * (self.tank.shell_height / self.tank.shell_diameter)
+                            * self.tank.shell_solar_absorptance.coefficient
+                            * self.site.get_annual_data().average_daily_insolation
+                        )
+                    ) / (
+                        Decimal('4.4') * (self.tank.shell_height / self.tank.shell_diameter) + Decimal('3.8')
+                    )
+
+            return (term1.magnitude + term2.magnitude + term3.magnitude) * unit_registry.degR
+
+        elif self.tank.insulation == Insulation.PARTIAL:
+            # Equation 1-29
+            return (Decimal('0.3') * self.average_ambient_temperature.to('degR')) \
+                   + (Decimal('0.7') * self.liquid_bulk_temperature.to('degR')) \
+                   + (Decimal('0.005')
+                      * self.tank.get_average_solar_absorption()
+                      * self.site.meteorological_data.annual_data.average_solar_insolation)
+
+        elif self.tank.insulation is Insulation.FULL:
+            # Assume average liquid surface temperature equal to average liquid bulk temperature
+            return self.liquid_bulk_temperature.to('degR')
+
+        else:
+            # TODO What?
+            raise CalculationError(f'Unknown insulation: {self.tank.insulation}')
+
     # def _calculate_average_vapor_temperature(self) -> Quantity:
     #     # AP 42 Chapter 7 Equation 1-32, 1-33, and 1-34
     #
@@ -152,15 +160,15 @@ class FixedRoofEmissions:
         # Calculate the average daily ambient temperature
         self.average_ambient_temperature = self.site.get_average_daily_ambient_temperature(self.reporting_period)
         logger.debug(f'Average daily ambient temperature: {self.average_ambient_temperature}')
-        #
-        # # Calculate the liquid bulk temperature
-        # self.liquid_bulk_temperature = self._calculate_liquid_bulk_temperature()
-        # logger.debug(f'Liquid bulk temperature: {self.liquid_bulk_temperature}')
-        #
-        # # Calculate the average daily liquid surface temperature
-        # self.average_daily_liquid_surface_temperature = self._calculate_average_daily_liquid_surface_temperature()
-        # logger.debug(f'Average daily liquid surface temperature: {self.average_daily_liquid_surface_temperature}')
-        #
+
+        # Calculate the liquid bulk temperature
+        self.liquid_bulk_temperature = self._calculate_liquid_bulk_temperature()
+        logger.debug(f'Liquid bulk temperature: {self.liquid_bulk_temperature}')
+
+        # Calculate the average daily liquid surface temperature
+        self.average_daily_liquid_surface_temperature = self._calculate_average_daily_liquid_surface_temperature()
+        logger.debug(f'Average daily liquid surface temperature: {self.average_daily_liquid_surface_temperature}')
+
         # # Calculate the mixture vapor pressure
         # self.mixture_vapor_pressure = self.tank.mixture.calculate_vapor_pressure(self.average_daily_liquid_surface_temperature)
         # logger.debug(f'Mixture vapor pressure: {self.mixture_vapor_pressure}')

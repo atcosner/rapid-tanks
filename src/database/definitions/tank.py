@@ -10,6 +10,13 @@ from .util import PintQuantity
 logger = logging.getLogger(__name__)
 
 
+class InsulationType(MappedAsDataclass, OrmBase):
+    __tablename__ = "insulation_type"
+
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    name: Mapped[str]
+
+
 class FixedRoofType(MappedAsDataclass, OrmBase):
     __tablename__ = "fixed_roof_type"
 
@@ -25,6 +32,7 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
     description: Mapped[str] = mapped_column(default='')
     facility_id = mapped_column(ForeignKey("facility.id"))
     is_vertical: Mapped[bool] = mapped_column(default=True)
+    insulation_type_id = mapped_column(ForeignKey("insulation_type.id"))
 
     shell_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
     shell_diameter: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
@@ -52,6 +60,7 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
 
     facility: Mapped["Facility"] = relationship(init=False, back_populates="fixed_roof_tanks")
     roof_type: Mapped[FixedRoofType] = relationship(init=False)
+    insulation: Mapped[InsulationType] = relationship(init=False)
 
     shell_paint_color: Mapped[PaintColor] = relationship(init=False, foreign_keys=shell_color_id)
     shell_paint_condition: Mapped[PaintCondition] = relationship(init=False, foreign_keys=shell_condition_id)
