@@ -10,7 +10,8 @@ from src.database.definitions.material import Petrochemical
 from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
 from src.gui import RESOURCE_DIR
 from src.gui.widgets.mixture.table.mixture_components_table import MixtureComponentsTable
-from src.gui.widgets.mixture.mixture_makeup_type_box import MixtureMakeupTypeBox, MixtureMakeup
+from src.gui.widgets.mixture.mixture_makeup_type_box import MixtureMakeupTypeBox
+from src.util.enums import MixtureMakeupType
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.labels import SubSectionHeader
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
@@ -124,13 +125,13 @@ class MixtureInfoFrame(EditableFrame):
 
         return self.current_mixture_id
 
-    @pyqtSlot(MixtureMakeup)
-    def handle_makeup_type_change(self, makeup: MixtureMakeup) -> None:
-        if makeup == MixtureMakeup.WEIGHT:
+    @pyqtSlot(MixtureMakeupType)
+    def handle_makeup_type_change(self, makeup: MixtureMakeupType) -> None:
+        if makeup == MixtureMakeupType.WEIGHT:
             self.mixture_total.setText('Total Weight (lbs): ')
-        elif makeup == MixtureMakeup.VOLUME:
+        elif makeup == MixtureMakeupType.VOLUME:
             self.mixture_total.setText('Total Volume (gal): ')
-        elif makeup == MixtureMakeup.MOLE_PERCENT:
+        elif makeup == MixtureMakeupType.MOLE_PERCENT:
             self.mixture_total.setText('Total Mole Percent: ')
         else:
             raise RuntimeError(f'Unknown makeup type: {makeup}')
@@ -158,7 +159,7 @@ class MixtureInfoFrame(EditableFrame):
 
         # Clear our widgets
         self.mixture_name.setText('')
-        self.mixture_makeup_type.set_makeup(MixtureMakeup.WEIGHT)
+        self.mixture_makeup_type.set_makeup(MixtureMakeupType.WEIGHT)
         self.mixture_components_table.setRowCount(0)
 
         # Cancel an edit in progress

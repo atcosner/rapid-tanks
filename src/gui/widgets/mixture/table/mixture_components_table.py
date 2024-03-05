@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSlot, QPoint, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QMenu, QLineEdit
 
-from src.components.mixture import MixtureMakeup
+from src.util.enums import MixtureMakeupType
 from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
 from src.gui.widgets.util.validators import PositiveDoubleValidator
 
@@ -72,14 +72,14 @@ class MixtureComponentsTable(QTableWidget):
 
         context_menu.exec(self.viewport().mapToGlobal(point))
 
-    @pyqtSlot(MixtureMakeup)
-    def handle_makeup_type_change(self, makeup: MixtureMakeup) -> None:
+    @pyqtSlot(MixtureMakeupType)
+    def handle_makeup_type_change(self, makeup: MixtureMakeupType) -> None:
         # Change the column 1 label
-        if makeup == MixtureMakeup.WEIGHT:
+        if makeup == MixtureMakeupType.WEIGHT:
             self.makeup_value_header.setText('Weight (lbs)')
-        elif makeup == MixtureMakeup.VOLUME:
+        elif makeup == MixtureMakeupType.VOLUME:
             self.makeup_value_header.setText('Volume (gal)')
-        elif makeup == MixtureMakeup.MOLE_PERCENT:
+        elif makeup == MixtureMakeupType.MOLE_PERCENT:
             self.makeup_value_header.setText('Mole Percent')
         else:
             raise RuntimeError(f'Unknown makeup type: {makeup}')

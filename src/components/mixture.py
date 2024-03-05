@@ -1,19 +1,14 @@
 import logging
 from dataclasses import dataclass, field
 from decimal import Decimal
-from enum import IntEnum
 from pint import Quantity
 
 from src import unit_registry
-from src.constants.material import Material, Petrochemical, PetroleumLiquid
+from src.constants.material import Material, Petrochemical
+from src.database.definitions.material import Petrochemical
+from src.util.enums import MixtureMakeupType
 
 logger = logging.getLogger(__name__)
-
-
-class MixtureMakeup(IntEnum):
-    WEIGHT = 1
-    VOLUME = 2
-    MOLE_PERCENT = 3
 
 
 @dataclass
@@ -114,3 +109,19 @@ class Mixture:
         logger.info(f'Total material percent: {materials_sum}')
 
         return materials_sum == Decimal(1)
+
+
+@dataclass
+class MaterialShim:
+    material: Petrochemical
+    makeup_value: Decimal
+
+
+@dataclass
+class MixtureShim:
+    """
+    Shim to hold all the functions and intermediate calculations associated with a mixture and associated materials.
+    This is done to allow the DB definition class to not have all the complexity of the calculation equations.
+    """
+    makeup_type: MixtureMakeupType
+    materials: list[MaterialShim]

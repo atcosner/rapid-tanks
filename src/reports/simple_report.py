@@ -1,7 +1,8 @@
 import logging
 from sqlalchemy.orm import Session
 
-from src.components.tank import TankType, FixedRoofTankShim
+from src.components.tank import FixedRoofTankShim
+from ..util.enums import TankType
 from src.constants.meteorological import MeteorologicalSiteShim
 from src.constants.time import ReportingPeriodDetails
 from src.database import DB_ENGINE

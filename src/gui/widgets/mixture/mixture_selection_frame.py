@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from PyQt5.Qt import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout, QPushButton, QHBoxLayout
 
-from src.components.mixture import MixtureMakeup
+from src.util.enums import MixtureMakeupType
 from src.database import DB_ENGINE
 from src.database.definitions.mixture import PetrochemicalMixture
 from src.gui.widgets.mixture.mixture_list import MixtureList
@@ -67,7 +67,7 @@ class MixtureSelectionFrame(QFrame):
             session.add(
                 PetrochemicalMixture(
                     name=f'New Mixture ({session.query(PetrochemicalMixture.id).count()})',
-                    makeup_type_id=MixtureMakeup.WEIGHT.value,
+                    makeup_type_id=MixtureMakeupType.WEIGHT.value,
                 )
             )
             session.commit()

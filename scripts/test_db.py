@@ -2,8 +2,7 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.components.mixture import MixtureMakeup
-from src.components.tank import Insulation
+from src.util.enums import MixtureMakeupType, InsulationType
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.database.definitions.material import Petrochemical
@@ -11,7 +10,7 @@ from src.database.definitions.meteorological import MeteorologicalSite
 from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
 from src.database.definitions.paint import PaintColor, PaintCondition
 from src.database.definitions.service_record import ServiceRecord
-from src.database.definitions.tank import FixedRoofTank, FixedRoofType, InsulationType
+from src.database.definitions.tank import FixedRoofTank, FixedRoofType, TankInsulationType
 from src.gui.widgets.util.constants import MONTH_NAMES
 
 
@@ -21,7 +20,7 @@ with Session(DB_ENGINE) as session:
     white_paint = session.scalar(select(PaintColor).where(PaintColor.name == 'White'))
     average_condition = session.scalar(select(PaintCondition).where(PaintCondition.name == 'Average'))
     cone_roof = session.scalar(select(FixedRoofType).where(FixedRoofType.name == 'Cone'))
-    uninsulated = session.scalar(select(InsulationType).where(InsulationType.name == Insulation.NONE))
+    uninsulated = session.scalar(select(TankInsulationType).where(TankInsulationType.name == TankInsulationType.NONE))
 
     benzene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Benzene'))
     toluene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Toluene'))
@@ -29,7 +28,7 @@ with Session(DB_ENGINE) as session:
 
     sc1_mixture = PetrochemicalMixture(
         name='SC #1 Mixture',
-        makeup_type_id=MixtureMakeup.WEIGHT,
+        makeup_type_id=MixtureMakeupType.WEIGHT,
     )
     sc1_mixture.components.append(PetrochemicalAssociation(value='2812', material=benzene))
     sc1_mixture.components.append(PetrochemicalAssociation(value='258', material=toluene))

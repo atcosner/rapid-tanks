@@ -4,7 +4,7 @@ from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTreeWidget, QTreeWidgetItem
 
-from src.components.tank import TankType
+from src.util.enums import TankType
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.database.definitions.tank import FixedRoofTank

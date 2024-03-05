@@ -10,7 +10,7 @@ from .util import PintQuantity
 logger = logging.getLogger(__name__)
 
 
-class InsulationType(MappedAsDataclass, OrmBase):
+class TankInsulationType(MappedAsDataclass, OrmBase):
     __tablename__ = "insulation_type"
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
@@ -60,7 +60,7 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
 
     facility: Mapped["Facility"] = relationship(init=False, back_populates="fixed_roof_tanks")
     roof_type: Mapped[FixedRoofType] = relationship(init=False)
-    insulation: Mapped[InsulationType] = relationship(init=False)
+    insulation: Mapped[TankInsulationType] = relationship(init=False)
 
     shell_paint_color: Mapped[PaintColor] = relationship(init=False, foreign_keys=shell_color_id)
     shell_paint_condition: Mapped[PaintCondition] = relationship(init=False, foreign_keys=shell_condition_id)

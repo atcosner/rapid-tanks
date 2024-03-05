@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 
-from src.components.tank import TankType
+from src.util.enums import TankType
 from src.database.definitions.facility import Facility
 from src.gui.widgets.tank.tank_tree import TankTree
 from src.gui.widgets.util.search_bar import SearchBar

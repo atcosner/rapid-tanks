@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QVBoxLayout
 
 from src.database import DB_ENGINE
 from src.database.definitions.paint import PaintColor, PaintCondition
-from src.database.definitions.tank import FixedRoofTank, FixedRoofType, InsulationType
+from src.database.definitions.tank import FixedRoofTank, FixedRoofType, TankInsulationType
 from src.gui.widgets.util.data_entry.combo_box_data_row import ComboBoxDataRow, ComboBoxDataType
 from src.gui.widgets.util.data_entry.numeric_data_row import NumericDataRow
 from src.gui.widgets.util.data_entry_rows import CheckBoxDataRow
@@ -206,7 +206,7 @@ class VerticalPhysicalFrame(EditableFrame):
         tank.net_throughput = self.net_throughput.get()
 
         tank.is_heated = self.is_heated.get()
-        tank.insulation = session.scalar(select(InsulationType).where(InsulationType.id == self.insulation_type.get_selected_db_id()))
+        tank.insulation = session.scalar(select(TankInsulationType).where(TankInsulationType.id == self.insulation_type.get_selected_db_id()))
 
         tank.shell_paint_color = session.scalar(select(PaintColor).where(PaintColor.id == self.shell_color.get_selected_db_id()))
         tank.shell_paint_condition = session.scalar(select(PaintCondition).where(PaintCondition.id == self.shell_condition.get_selected_db_id()))

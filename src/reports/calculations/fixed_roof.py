@@ -4,7 +4,8 @@ from decimal import Decimal
 from pint import Quantity
 
 from src import unit_registry
-from src.components.tank import FixedRoofTankShim, Insulation
+from src.components.tank import FixedRoofTankShim
+from ...util.enums import InsulationType
 from src.constants.meteorological import MeteorologicalSiteShim
 from src.constants.time import ReportingPeriodDetails
 from src.database.definitions.meteorological import MeteorologicalSite
@@ -66,7 +67,7 @@ class FixedRoofEmissions:
         # AP 42 Chapter 7 Equation 1-27, 1-28, and 1-29
 
         # This is based on which type of insulation the tank has
-        if self.tank.insulation.name == Insulation.NONE:
+        if self.tank.insulation.name == InsulationType.NONE:
             # Do not make assumptions and use equation 1-28, just use equation 1-27
             term1 = self.average_ambient_temperature.to('degR').magnitude \
                     * (Decimal('0.5') - (Decimal('0.8') / (Decimal('4.4') * (self.tank.shell_height / self.tank.shell_diameter) + Decimal('3.8'))))
@@ -91,7 +92,7 @@ class FixedRoofEmissions:
 
             return (term1.magnitude + term2.magnitude + term3.magnitude) * unit_registry.degR
 
-        elif self.tank.insulation == Insulation.PARTIAL:
+        elif self.tank.insulation == InsulationType.PARTIAL:
             # Equation 1-29
             return (Decimal('0.3') * self.average_ambient_temperature.to('degR')) \
                    + (Decimal('0.7') * self.liquid_bulk_temperature.to('degR')) \
@@ -99,7 +100,7 @@ class FixedRoofEmissions:
                       * self.tank.get_average_solar_absorption()
                       * self.site.meteorological_data.annual_data.average_solar_insolation)
 
-        elif self.tank.insulation is Insulation.FULL:
+        elif self.tank.insulation is InsulationType.FULL:
             # Assume average liquid surface temperature equal to average liquid bulk temperature
             return self.liquid_bulk_temperature.to('degR')
 
