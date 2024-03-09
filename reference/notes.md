@@ -32,3 +32,17 @@
 * Overall TODO
   * The DB definition for a tank should not have default values?
     * Since we have defaults, we have to use '0.0' as a non-set value which is not ideal
+
+* Reporting Framework
+  1. How do we break up the overall reporting period into chunks?
+     * We should align with the tank service records
+     * Each chunk should span ONLY 1 service record to ensure we are only dealing with 1 mixture at a time
+       * We should also only span 1 month
+     * The logic should probably be to check if each service record is in the reporting range
+       * Then break the service record up if it also spans multiple months
+  2. Now that we have a chunk of days and the associated service record, we should get the meteorological data for the chunk
+     * We can pre-calculate all the site data based on the chunk range
+     * If we can handle month boundaries it makes the service record logic above easier
+  3. Next we should process the mixture and determine the makeup based on the makeup type
+     * We can figure out the percentages by weight/volume before we actually need them
+  4. Then we can start running the calculations
