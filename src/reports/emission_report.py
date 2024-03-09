@@ -53,8 +53,10 @@ class EmissionReport:
                 )
                 all_emissions.append(tank_emissions.calculate_total_emissions())
 
-            # Report on all the emissions we calculated
-            if output_type is ReportOutputType.LOG:
-                pass
+            # # Report on all the emissions we calculated
+            # if output_type is ReportOutputType.LOG:
+            #     pass
+
+            break
 
         self.session.close()

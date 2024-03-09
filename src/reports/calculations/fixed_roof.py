@@ -174,10 +174,10 @@ class FixedRoofEmissions:
         self.average_daily_liquid_surface_temperature = self._calculate_average_daily_liquid_surface_temperature()
         logger.debug(f'Average daily liquid surface temperature: {self.average_daily_liquid_surface_temperature}')
 
-        # # Calculate the mixture vapor pressure
-        # self.mixture_vapor_pressure = self.tank.mixture.calculate_vapor_pressure(self.average_daily_liquid_surface_temperature)
-        # logger.debug(f'Mixture vapor pressure: {self.mixture_vapor_pressure}')
-        #
+        # Calculate the mixture vapor pressure
+        self.mixture_vapor_pressure = self.tank.mixture.calculate_vapor_pressure(self.average_daily_liquid_surface_temperature)
+        logger.debug(f'Mixture vapor pressure: {self.mixture_vapor_pressure}')
+
         # # Calculate the mixture vapor molecular weight
         # self.mixture_molecular_weight = self.tank.mixture.calculate_vapor_molecular_weight(self.average_daily_liquid_surface_temperature)
         # logger.debug(f'Mixture vapor molecular weight: {self.mixture_molecular_weight}')
@@ -407,12 +407,21 @@ class FixedRoofEmissions:
     #
     #     return l_w * unit_registry.lb / unit_registry.year
 
-    def calculate_total_emissions(self) -> TankEmission:
+    def calculate_total_emissions(self) -> TankEmission | None:
         logger.info(f'Calculating total losses for "{self.tank.name}" at "{self.facility_name}"')
+        logger.info(f'Reporting chunk; start: {self.reporting_chunk.start_date}, end: {self.reporting_chunk.end_date}')
 
-        # Calculate standing losses
-        standing_losses = self._calculate_standing_losses()
-        logger.info(f'Standing losses: {standing_losses}')
+        # Build the mixture shim for the tank and reporting time
+        mixture_shim = self.tank.get_mixture(self.reporting_chunk)
+        if mixture_shim is None:
+            # TODO: This tank was not in service during the reporting chunk
+            return None
+
+        logger.info(f'Mixture "{mixture_shim.name}" overlaps with reporting chunk')
+
+        # # Calculate standing losses
+        # standing_losses = self._calculate_standing_losses()
+        # logger.info(f'Standing losses: {standing_losses}')
 
         # # Calculate working losses
         # working_losses = self._calculate_working_losses()

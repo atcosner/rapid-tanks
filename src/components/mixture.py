@@ -123,5 +123,6 @@ class MixtureShim:
     Shim to hold all the functions and intermediate calculations associated with a mixture and associated materials.
     This is done to allow the DB definition class to not have all the complexity of the calculation equations.
     """
+    name: str
     makeup_type: MixtureMakeupType
     materials: list[MaterialShim]
