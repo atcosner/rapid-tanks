@@ -35,8 +35,8 @@ class VerticalPhysicalFrame(EditableFrame):
         self.roof_color = self.register_control(ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, start_read_only))
         self.roof_condition = self.register_control(ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only))
         self.roof_type = self.register_control(ComboBoxDataRow('Roof Type', ComboBoxDataType.ROOF_TYPES, start_read_only))
-        self.roof_height = self.register_control(NumericDataRow('Roof Height', 'ft', start_read_only))
-        self.roof_radius = self.register_control(NumericDataRow('Radius', 'ft', start_read_only))
+        self.roof_height = self.register_control(NumericDataRow('Roof Height', 'ft', start_read_only, allow_autofill=True))
+        self.roof_radius = self.register_control(NumericDataRow('Radius', 'ft', start_read_only, allow_autofill=True))
         self.roof_slope = self.register_control(NumericDataRow('Slope', 'ft/ft', start_read_only, default='0.0625'))
 
         # Breather Vent Settings
