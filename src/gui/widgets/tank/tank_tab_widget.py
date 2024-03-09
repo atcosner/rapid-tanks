@@ -2,9 +2,8 @@ import logging
 from sqlalchemy.orm import Session
 
 from PyQt5.Qt import pyqtSlot
-from PyQt5.QtWidgets import QWidget, QTabWidget, QMessageBox
+from PyQt5.QtWidgets import QWidget, QTabWidget
 
-from src.components.tank import Tank
 from src.database import DB_ENGINE
 from src.database.definitions.tank import FixedRoofTank
 from src.gui.widgets.tank.fixed_roof.vertical_physical_frame import VerticalPhysicalFrame

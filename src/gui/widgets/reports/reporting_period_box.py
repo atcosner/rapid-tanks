@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QWidget, QGroupBox, QRadioButton, QGridLayout, QComboBox, QHBoxLayout, QLabel,
 )
 
-from src.constants.time import ReportingTimeFrame, ReportingPeriodDetails
+from src.constants.time import ReportingTimeFrame, ReportingPeriod
 from src.gui.widgets.util.constants import MONTH_NAMES
 from src.gui.widgets.util.date_edit import DatePicker
 
@@ -16,6 +16,8 @@ class ReportingPeriodBox(QGroupBox):
         self.month_button = QRadioButton('Month', self)
         self.custom_button = QRadioButton('Custom', self)
 
+        self.year_year_box = QComboBox(self)
+        self.month_year_box = QComboBox(self)
         self.month_combo_box = QComboBox(self)
 
         self.custom_start_date = DatePicker(self)
@@ -32,18 +34,37 @@ class ReportingPeriodBox(QGroupBox):
         self.year_button.setChecked(True)
         self.month_combo_box.insertItems(0, MONTH_NAMES)
 
+        # TODO: Dynamically fill this out
+        self.year_year_box.insertItems(0, ['2024'])
+        self.month_year_box.insertItems(0, ['2024'])
+
+        year_layout = QHBoxLayout()
+        year_layout.addStretch()
+        year_layout.addWidget(self.year_year_box)
+        year_layout.addStretch()
+
+        month_layout = QHBoxLayout()
+        month_layout.addStretch()
+        month_layout.addWidget(self.month_year_box)
+        month_layout.addWidget(QLabel(' - '))
+        month_layout.addWidget(self.month_combo_box)
+        month_layout.addStretch()
+
         custom_layout = QHBoxLayout()
+        custom_layout.addStretch()
         custom_layout.addWidget(self.custom_start_date)
         custom_layout.addWidget(QLabel(' - '))
         custom_layout.addWidget(self.custom_end_date)
+        custom_layout.addStretch()
 
         layout = QGridLayout()
         self.setLayout(layout)
 
         layout.addWidget(self.year_button, 0, 0)
+        layout.addLayout(year_layout, 0, 1)
 
         layout.addWidget(self.month_button, 1, 0)
-        layout.addWidget(self.month_combo_box, 1, 1)
+        layout.addLayout(month_layout, 1, 1)
 
         layout.addWidget(self.custom_button, 2, 0)
         layout.addLayout(custom_layout, 2, 1)
@@ -54,16 +75,20 @@ class ReportingPeriodBox(QGroupBox):
         self.custom_start_date.setDisabled(False if self.custom_button.isChecked() else True)
         self.custom_end_date.setDisabled(False if self.custom_button.isChecked() else True)
 
-    def get_selected_details(self) -> ReportingPeriodDetails:
+    def get_selected_details(self) -> ReportingPeriod:
         if self.year_button.isChecked():
-            return ReportingPeriodDetails(time_frame=ReportingTimeFrame.ANNUAL)
+            return ReportingPeriod(
+                time_frame=ReportingTimeFrame.ANNUAL,
+                year=int(self.year_year_box.currentText()),
+            )
         elif self.month_button.isChecked():
-            return ReportingPeriodDetails(
+            return ReportingPeriod(
                 time_frame=ReportingTimeFrame.MONTH,
-                month_id=self.month_combo_box.currentIndex() + 1,
+                year=int(self.month_year_box.currentText()),
+                month=self.month_combo_box.currentIndex() + 1,
             )
         else:
-            return ReportingPeriodDetails(
+            return ReportingPeriod(
                 time_frame=ReportingTimeFrame.CUSTOM,
                 custom_start_date=self.custom_start_date.date(),
                 custom_end_date=self.custom_end_date.date(),

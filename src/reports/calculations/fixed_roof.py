@@ -7,7 +7,7 @@ from src import unit_registry
 from src.components.tank import FixedRoofTankShim
 from ...util.enums import InsulationType
 from src.constants.meteorological import MeteorologicalSiteShim
-from src.constants.time import ReportingPeriodDetails
+from src.constants.time import ReportingPeriodChunk
 from src.database.definitions.meteorological import MeteorologicalSite
 from src.util.logging import log_block
 from src.util.errors import CalculationError
@@ -22,7 +22,7 @@ class FixedRoofEmissions:
     facility_name: str
     site: MeteorologicalSiteShim
     tank: FixedRoofTankShim
-    reporting_period: ReportingPeriodDetails
+    reporting_chunk: ReportingPeriodChunk
 
     # Standing loss components
     vapor_space_volume: Quantity | None = None
@@ -95,10 +95,14 @@ class FixedRoofEmissions:
         elif self.tank.insulation == InsulationType.PARTIAL:
             # Equation 1-29
             return (Decimal('0.3') * self.average_ambient_temperature.to('degR')) \
-                   + (Decimal('0.7') * self.liquid_bulk_temperature.to('degR')) \
-                   + (Decimal('0.005')
-                      * self.tank.get_average_solar_absorption()
-                      * self.site.meteorological_data.annual_data.average_solar_insolation)
+                   + (
+                        Decimal('0.7')
+                        * self.liquid_bulk_temperature.to('degR')) \
+                   + (
+                        Decimal('0.005')
+                        * self.tank.get_average_solar_absorption()
+                        * self.site.get_annual_data().average_daily_insolation
+                      )
 
         elif self.tank.insulation is InsulationType.FULL:
             # Assume average liquid surface temperature equal to average liquid bulk temperature
@@ -159,7 +163,7 @@ class FixedRoofEmissions:
         # AP 42 Chapter 7 Equation 1-22
 
         # Calculate the average daily ambient temperature
-        self.average_ambient_temperature = self.site.get_average_daily_ambient_temperature(self.reporting_period)
+        self.average_ambient_temperature = self.site.get_average_daily_ambient_temperature(self.reporting_chunk)
         logger.debug(f'Average daily ambient temperature: {self.average_ambient_temperature}')
 
         # Calculate the liquid bulk temperature
@@ -305,7 +309,7 @@ class FixedRoofEmissions:
         # L~S = 365 * V~V * W~V * K~E * K~S
 
         # Determine the days we are calculating losses over
-        reporting_days = self.reporting_period.get_reporting_days()
+        reporting_days = self.reporting_chunk.get_number_of_days()
 
         # Calculate the vapor space volume
         with log_block(logger, 'Vapor Space Volume'):

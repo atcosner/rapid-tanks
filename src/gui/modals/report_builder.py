@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 
-from src.reports.simple_report import SimpleReport
+from src.reports.emission_report import EmissionReport
 from src.reports.util import ReportOutputType
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
@@ -65,7 +65,7 @@ class ReportBuilder(Dialog):
         # TODO: Check for at least one tank
 
         # TODO: Other types of reports
-        report = SimpleReport(
+        report = EmissionReport(
             facility_id=self.facility_id,
             tanks=self.tank_selection_box.get_selected_tanks(),
             reporting_period=self.reporting_period_box.get_selected_details(),

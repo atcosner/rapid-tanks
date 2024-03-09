@@ -4,7 +4,6 @@ from typing import NamedTuple
 from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
-from src.components.tank import Tank
 from src.database import DB_ENGINE
 from src.database.definitions.tank import FixedRoofTank
 from src.gui.widgets.util.data_entry_rows import TextLineDataRow, TextEditDataRow
@@ -52,7 +51,7 @@ class TankInfoFrame(EditableFrame):
         # Edit Buttons
         main_layout.addLayout(self.edit_button_layout)
 
-    def load(self, tank: Tank | TankInfo) -> None:
+    def load(self, tank: FixedRoofTank | TankInfo) -> None:
         self.tank_name.set(tank.name)
         self.tank_description.set(tank.description)
 
