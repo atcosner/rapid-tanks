@@ -35,9 +35,9 @@ def upgrade() -> None:
 
     # Populate the 3 types of insulation
     with Session(bind=op.get_bind()) as session:
-        session.add(TankInsulationType(name=TankInsulationType.NONE))
-        session.add(TankInsulationType(name=TankInsulationType.PARTIAL))
-        session.add(TankInsulationType(name=TankInsulationType.FULL))
+        session.add(TankInsulationType(name=InsulationType.NONE))
+        session.add(TankInsulationType(name=InsulationType.PARTIAL))
+        session.add(TankInsulationType(name=InsulationType.FULL))
         session.commit()
 
 

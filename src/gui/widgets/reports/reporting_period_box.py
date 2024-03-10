@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QWidget, QGroupBox, QRadioButton, QGridLayout, QComboBox, QHBoxLayout, QLabel,
 )
 
-from src.constants.time import ReportingTimeFrame, ReportingPeriod
+from src.reports.components.time import ReportingTimeFrame, ReportingPeriod
 from src.gui.widgets.util.constants import MONTH_NAMES
 from src.gui.widgets.util.date_edit import DatePicker
 
@@ -90,6 +90,6 @@ class ReportingPeriodBox(QGroupBox):
         else:
             return ReportingPeriod(
                 time_frame=ReportingTimeFrame.CUSTOM,
-                custom_start_date=self.custom_start_date.date(),
-                custom_end_date=self.custom_end_date.date(),
+                custom_start_date=self.custom_start_date.date().toPyDate(),
+                custom_end_date=self.custom_end_date.date().toPyDate(),
             )

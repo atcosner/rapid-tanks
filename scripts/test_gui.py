@@ -1,3 +1,5 @@
+import argparse
+import logging
 import sys
 
 from PyQt5.QtWidgets import QApplication
@@ -7,12 +9,14 @@ from src.util.logging import configure_root_logger
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--verbose', action='store_true', help='Report debug info to stdout/stderr')
+    args = parser.parse_args()
+
+    configure_root_logger(logging.DEBUG if args.verbose else logging.INFO)
+
+    # Create and show the GUI
     qt_app = QApplication([])
-
-    # from src.gui.modals.mixture_browser import MixtureBrowser
-    # browser = MixtureBrowser(None, select_mode=False)
-    # browser.show()
-
     tanks_main_window = MainWindow()
     tanks_main_window.show()
 
@@ -20,5 +24,4 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    configure_root_logger()
     sys.exit(main())

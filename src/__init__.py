@@ -10,3 +10,5 @@ decimal.getcontext().prec = 12
 
 # Create the unit registry for everything in this package
 unit_registry = pint.UnitRegistry(non_int_type=decimal.Decimal)
+
+unit_registry.define('psi = 51.7 * mm Hg')

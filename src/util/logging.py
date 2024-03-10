@@ -15,20 +15,20 @@ class NamedLoggerAdapter(logging.LoggerAdapter):
 
 
 @contextmanager
-def log_block(log: logging.Logger, name: str):
+def log_block(log_func: callable, name: str):
     half_width = (LOG_WIDTH - len(name) - 2) // 2
-    log.info(f'{"-" * half_width} {name} {"-" * half_width}')
+    log_func(f'{"-" * half_width} {name} {"-" * half_width}')
     try:
         yield
     finally:
-        log.info('-' * LOG_WIDTH)
-        log.info('')
+        log_func('-' * LOG_WIDTH)
+        log_func('')
 
 
-def configure_root_logger() -> None:
+def configure_root_logger(min_level: int) -> None:
     logging.basicConfig(
         format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
-        level=logging.DEBUG,
+        level=min_level,
     )
 
 

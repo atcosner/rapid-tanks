@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
+from pint import Quantity
 
 
 class ReportOutputType(Enum):
@@ -11,8 +12,8 @@ class ReportOutputType(Enum):
 @dataclass
 class MaterialEmission:
     material_id: int
-    emission_value: str
-    emission_unit: str
+    material_name: str
+    emissions: Quantity
 
 
 @dataclass

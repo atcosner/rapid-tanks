@@ -5,12 +5,8 @@ from functools import lru_cache
 from pint import Quantity
 
 from src.database.definitions.tank import FixedRoofTank
-from src.util.enums import MixtureMakeupType
 from src.util.errors import MissingData
 from src.util.quantities import PI
-
-from .mixture import MixtureShim, MaterialShim
-from ..constants.time import ReportingPeriodChunk
 
 logger = logging.getLogger(__name__)
 
@@ -36,30 +32,6 @@ class FixedRoofTankShim:
     def __hash__(self) -> int:
         # Use the tank's id as our hash
         return self.tank.id
-
-    def get_mixture(self, reporting_chunk: ReportingPeriodChunk) -> MixtureShim | None:
-        mixture = None
-
-        # Go through the service records to find matches
-        for record in self.tank.service_records:
-            # Check if this service record overlaps with our reporting period
-            if (reporting_chunk.start_date <= record.end_date) and (record.start_date <= reporting_chunk.end_date):
-                mixture = MixtureShim(
-                    name=record.mixture.name,
-                    makeup_type=MixtureMakeupType(record.mixture.makeup_type_id),
-                    materials=[],
-                )
-                for material in record.mixture.components:
-                    mixture.materials.append(
-                        MaterialShim(
-                            material=material.material,
-                            makeup_value=Decimal(material.value),
-                        )
-                    )
-
-                break
-
-        return mixture
 
     @lru_cache()
     def calculate_vapor_space_outage(self) -> Quantity:

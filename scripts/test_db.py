@@ -1,3 +1,4 @@
+import calendar
 from datetime import date
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -20,7 +21,7 @@ with Session(DB_ENGINE) as session:
     white_paint = session.scalar(select(PaintColor).where(PaintColor.name == 'White'))
     average_condition = session.scalar(select(PaintCondition).where(PaintCondition.name == 'Average'))
     cone_roof = session.scalar(select(FixedRoofType).where(FixedRoofType.name == 'Cone'))
-    uninsulated = session.scalar(select(TankInsulationType).where(TankInsulationType.name == TankInsulationType.NONE))
+    uninsulated = session.scalar(select(TankInsulationType).where(TankInsulationType.name == InsulationType.NONE))
 
     benzene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Benzene'))
     toluene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Toluene'))
@@ -54,7 +55,7 @@ with Session(DB_ENGINE) as session:
     for idx, name in enumerate(MONTH_NAMES):
         record = ServiceRecord(
             start_date=date(year=2024, month=idx + 1, day=1),
-            end_date=date(year=2024, month=idx + 1, day=2),
+            end_date=date(year=2024, month=idx + 1, day=calendar.monthrange(2024, idx + 1)[1]),
             throughput='704.17',
         )
         record.mixture = sc1_mixture

@@ -3,7 +3,10 @@ from datetime import date
 from decimal import Decimal
 from pint import UnitRegistry, Quantity
 
+from src import unit_registry
+
 PI = Decimal('3.141592653589793')
+R = Decimal('10.731') * ((unit_registry.psi * unit_registry.ft**3) / (unit_registry.lb * unit_registry.mol * unit_registry.degR))
 
 
 @dataclass
