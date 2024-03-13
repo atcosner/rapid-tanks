@@ -1,3 +1,4 @@
+from decimal import Decimal
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from types import SimpleNamespace
@@ -8,6 +9,7 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QVBoxLayout
 from src.database import DB_ENGINE
 from src.database.definitions.paint import PaintColor, PaintCondition
 from src.database.definitions.tank import FixedRoofTank, FixedRoofType, TankInsulationType
+from src.gui.widgets.util.data_entry.autofill_data_row import AutofillDataRow
 from src.gui.widgets.util.data_entry.combo_box_data_row import ComboBoxDataRow, ComboBoxDataType
 from src.gui.widgets.util.data_entry.numeric_data_row import NumericDataRow
 from src.gui.widgets.util.data_entry_rows import CheckBoxDataRow
@@ -35,9 +37,14 @@ class VerticalPhysicalFrame(EditableFrame):
         self.roof_color = self.register_control(ComboBoxDataRow('Roof Color', ComboBoxDataType.PAINT_COLORS, start_read_only))
         self.roof_condition = self.register_control(ComboBoxDataRow('Roof Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only))
         self.roof_type = self.register_control(ComboBoxDataRow('Roof Type', ComboBoxDataType.ROOF_TYPES, start_read_only))
-        self.roof_height = self.register_control(NumericDataRow('Roof Height', 'ft', start_read_only, allow_autofill=True))
-        self.roof_radius = self.register_control(NumericDataRow('Radius', 'ft', start_read_only, allow_autofill=True))
-        self.roof_slope = self.register_control(NumericDataRow('Slope', 'ft/ft', start_read_only, default='0.0625'))
+
+        # Cone Roof
+        self.cone_roof_height = self.register_control(AutofillDataRow('Roof Height', 'ft', start_read_only))
+        self.cone_roof_slope = self.register_control(AutofillDataRow('Roof Slope', 'ft/ft', start_read_only, default='0.0625'))
+
+        # Dome Roof
+        self.dome_roof_height = self.register_control(AutofillDataRow('Roof Height', 'ft', start_read_only))
+        self.dome_roof_radius = self.register_control(AutofillDataRow('Roof Radius', 'ft', start_read_only))
 
         # Breather Vent Settings
         self.vacuum_setting = self.register_control(
@@ -68,6 +75,11 @@ class VerticalPhysicalFrame(EditableFrame):
         # Set up the dynamic nature of the roof type
         self.roof_type.selectionChanged.connect(self.handle_roof_type_change)
         self.handle_roof_type_change(self.roof_type.get_selected_text())
+
+        # Set up the autofill signals
+        self.shell_diameter.valueChanged.connect(self.handle_autofill_update)
+        self.cone_roof_slope.valueChanged.connect(self.handle_autofill_update)
+        self.dome_roof_radius.valueChanged.connect(self.handle_autofill_update)
 
         if start_read_only:
             super().handle_end_editing()
@@ -121,9 +133,10 @@ class VerticalPhysicalFrame(EditableFrame):
         roof_layout.addWidget(self.roof_color)
         roof_layout.addWidget(self.roof_condition)
         roof_layout.addWidget(self.roof_type)
-        roof_layout.addWidget(self.roof_height)
-        roof_layout.addWidget(self.roof_radius)
-        roof_layout.addWidget(self.roof_slope)
+        roof_layout.addWidget(self.cone_roof_height)
+        roof_layout.addWidget(self.cone_roof_slope)
+        roof_layout.addWidget(self.dome_roof_height)
+        roof_layout.addWidget(self.dome_roof_radius)
         roof_layout.addStretch()
 
         # Breather Vent Settings
@@ -138,14 +151,43 @@ class VerticalPhysicalFrame(EditableFrame):
         # Edit controls
         main_layout.addLayout(self.edit_button_layout, 0, 2)
 
+    @pyqtSlot()
+    def handle_autofill_update(self) -> None:
+        shell_diameter = self.shell_diameter.get_decimal()
+        roof_slope = self.cone_roof_slope.get_decimal()
+
+        # Dome Roof Radius (tied to Shell Diameter)
+        if shell_diameter is not None:
+            # Equation 1-19 (Additional Notes)
+            self.dome_roof_radius.handle_autofill_set(shell_diameter / 2)
+
+        # Cone Roof Height (tied to Shell Diameter and Roof Slope)
+        if shell_diameter is not None and roof_slope is not None:
+            # Equation 1-18
+            self.cone_roof_height.handle_autofill_set((shell_diameter / 2) * roof_slope)
+
+        # Dome Roof Height (tied to Shell Diameter and Roof Radius)
+        roof_radius = self.dome_roof_radius.get_decimal()
+        if shell_diameter is not None and roof_radius is not None:
+            # Equation 1-20
+            self.dome_roof_height.handle_autofill_set(
+                roof_radius - (roof_radius**2 - (shell_diameter / 2)**2)**Decimal('0.5')
+            )
+
     @pyqtSlot(str)
     def handle_roof_type_change(self, new_type: str) -> None:
         if new_type == 'Dome':
-            self.roof_slope.hide()
-            self.roof_radius.show()
+            self.cone_roof_height.hide()
+            self.cone_roof_slope.hide()
+
+            self.dome_roof_height.show()
+            self.dome_roof_radius.show()
         elif new_type == 'Cone':
-            self.roof_slope.show()
-            self.roof_radius.hide()
+            self.cone_roof_height.show()
+            self.cone_roof_slope.show()
+
+            self.dome_roof_height.hide()
+            self.dome_roof_radius.hide()
         else:
             raise RuntimeError(f'Unexpected roof type: "{new_type}"')
 
@@ -168,9 +210,12 @@ class VerticalPhysicalFrame(EditableFrame):
         self.roof_color.set_from_db(tank.roof_paint_color.id)
         self.roof_condition.set_from_db(tank.roof_paint_condition.id)
         self.roof_type.set_from_db(tank.roof_type.id)
-        self.roof_height.set(tank.roof_height)
-        self.roof_radius.set(tank.roof_radius)
-        self.roof_slope.set(tank.roof_slope)
+
+        self.cone_roof_height.set(tank.roof_height)
+        self.cone_roof_slope.set(tank.roof_slope)
+
+        self.dome_roof_height.set(tank.roof_height)
+        self.dome_roof_radius.set(tank.roof_radius)
 
         self.vacuum_setting.set(tank.vent_vacuum_setting)
         self.pressure_setting.set(tank.vent_breather_setting)
@@ -214,9 +259,14 @@ class VerticalPhysicalFrame(EditableFrame):
         tank.roof_paint_color = session.scalar(select(PaintColor).where(PaintColor.id == self.roof_color.get_selected_db_id()))
         tank.roof_paint_condition = session.scalar(select(PaintCondition).where(PaintCondition.id == self.roof_condition.get_selected_db_id()))
         tank.roof_type = session.scalar(select(FixedRoofType).where(FixedRoofType.id == self.roof_type.get_selected_db_id()))
-        tank.roof_height = self.roof_height.get()
-        tank.roof_radius = self.roof_radius.get()
-        tank.roof_slope = self.roof_slope.get()
+
+        tank.roof_radius = self.dome_roof_radius.get()
+        tank.roof_slope = self.cone_roof_slope.get()
+
+        if self.roof_type.get_selected_text() == 'Dome':
+            tank.roof_height = self.dome_roof_height.get()
+        else:
+            tank.roof_height = self.cone_roof_height.get()
 
         tank.vent_vacuum_setting = self.vacuum_setting.get()
         tank.vent_breather_setting = self.pressure_setting.get()
