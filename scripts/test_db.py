@@ -35,8 +35,9 @@ with Session(DB_ENGINE) as session:
     sc1_mixture.components.append(PetrochemicalAssociation(value='258', material=toluene))
     sc1_mixture.components.append(PetrochemicalAssociation(value='101', material=cyclohexane))
 
+    # SC #1 Tank
     sc1_tank = FixedRoofTank(
-        name='Tank 1',
+        name='VFRT #1',
         shell_height='12',
         shell_diameter='6',
         roof_radius='3',
@@ -61,6 +62,29 @@ with Session(DB_ENGINE) as session:
         record.mixture = sc1_mixture
         sc1_tank.service_records.append(record)
 
+    # SC #2 Tank
+    sc2_tank = FixedRoofTank(
+        name='HFRT #1',
+        shell_height='12',
+        shell_diameter='6',
+        maximum_liquid_height='11.5',
+        average_liquid_height='8',
+        working_volume='1480',
+        net_throughput='8450',
+        is_vertical=False,
+    )
+    sc2_tank.shell_paint_color = white_paint
+    sc2_tank.shell_paint_condition = average_condition
+
+    for idx, name in enumerate(MONTH_NAMES):
+        record = ServiceRecord(
+            start_date=date(year=2024, month=idx + 1, day=1),
+            end_date=date(year=2024, month=idx + 1, day=calendar.monthrange(2024, idx + 1)[1]),
+            throughput='704.17',
+        )
+        record.mixture = sc1_mixture
+        sc2_tank.service_records.append(record)
+
     sc1_facility = Facility(
         name='Sample Calculation #1',
         description='',
@@ -68,6 +92,7 @@ with Session(DB_ENGINE) as session:
     )
     sc1_facility.site = meteorological_site
     sc1_facility.fixed_roof_tanks.append(sc1_tank)
+    sc1_facility.fixed_roof_tanks.append(sc2_tank)
 
     session.add(sc1_facility)
     session.commit()

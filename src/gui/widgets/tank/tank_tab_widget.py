@@ -6,8 +6,8 @@ from PyQt5.QtWidgets import QWidget, QTabWidget
 
 from src.database import DB_ENGINE
 from src.database.definitions.tank import FixedRoofTank
-from src.gui.widgets.tank.fixed_roof.vertical_physical_frame import VerticalPhysicalFrame
 from src.gui.widgets.tank.tank_info_frame import TankInfoFrame
+from src.gui.widgets.tank.tank_physical_frame import TankPhysicalFrame
 from src.gui.widgets.tank.tank_usage_frame import TankUsageFrame
 
 logger = logging.getLogger(__name__)
@@ -21,9 +21,8 @@ class TankTabWidget(QTabWidget):
     ) -> None:
         super().__init__(parent)
 
-        # Widgets for each tab
         self.tank_info = TankInfoFrame(self, start_read_only=read_only)
-        self.physical_properties = VerticalPhysicalFrame(self, start_read_only=read_only)
+        self.tank_physical = TankPhysicalFrame(self, start_read_only=read_only)
         self.tank_usage = TankUsageFrame(self, start_read_only=read_only)
 
         self.current_tank_id: int | None = None
@@ -32,15 +31,16 @@ class TankTabWidget(QTabWidget):
 
     def _initial_setup(self) -> None:
         self.addTab(self.tank_info, 'Identification')
-        self.addTab(self.physical_properties, 'Physical Properties')
+        self.addTab(self.tank_physical, 'Physical Properties')
         self.addTab(self.tank_usage, 'Usage')
 
         # Start each widget disabled until we load a tank
         self.tank_info.setDisabled(True)
-        self.physical_properties.setDisabled(True)
+        self.tank_physical.setDisabled(True)
         self.tank_usage.setDisabled(True)
 
     def is_dirty(self) -> bool:
+        # TODO: Include the active physical widget
         return self.tank_info.is_dirty() or self.tank_usage.is_dirty()
 
     @pyqtSlot(int)
@@ -52,14 +52,12 @@ class TankTabWidget(QTabWidget):
             # TODO: Other types of tanks
             tank = session.get(FixedRoofTank, tank_id)
             self.tank_info.load(tank)
-            self.physical_properties.load(tank)
+            self.tank_physical.load(tank)
             self.tank_usage.load(tank)
-
-            # TODO: Load the usage frame
 
         # Enable the tabs
         self.tank_info.setDisabled(False)
-        self.physical_properties.setDisabled(False)
+        self.tank_physical.setDisabled(False)
         self.tank_usage.setDisabled(False)
 
     @pyqtSlot(int)
@@ -71,5 +69,5 @@ class TankTabWidget(QTabWidget):
         self.current_tank_id = None
 
         self.tank_info.unload()
-        self.physical_properties.unload()
+        self.tank_physical.unload()
         self.tank_usage.unload()

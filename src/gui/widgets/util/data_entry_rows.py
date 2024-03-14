@@ -20,6 +20,9 @@ class CheckBoxDataRow(QWidget):
 
         main_layout.setContentsMargins(*DEFAULT_MARGINS)
 
+    def set_read_only(self, read_only: bool) -> None:
+        self.check_box.setDisabled(read_only)
+
     def set(self, value: bool) -> None:
         self.check_box.setChecked(value)
 
