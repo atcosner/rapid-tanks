@@ -70,6 +70,6 @@ class ReportBuilder(Dialog):
             tanks=self.tank_selection_box.get_selected_tanks(),
             reporting_period=self.reporting_period_box.get_selected_details(),
         )
-        report.calculate(ReportOutputType.PDF)
+        report.calculate(ReportOutputType.LOG)
 
         # self.close()

@@ -67,7 +67,7 @@ class FixedRoofEmissions:
         # AP 42 Chapter 7 Equation 1-27, 1-28, and 1-29
 
         # This is based on which type of insulation the tank has
-        if self.tank.insulation.name == InsulationType.NONE:
+        if self.tank.insulation is None or self.tank.insulation.name == InsulationType.NONE:
             # Do not make assumptions and use equation 1-28, just use equation 1-27
             term1 = self.average_ambient_temperature.to('degR').magnitude \
                     * (Decimal('0.5') - (Decimal('0.8') / (Decimal('4.4') * (self.tank.shell_height / self.tank.shell_diameter) + Decimal('3.8'))))
@@ -124,7 +124,7 @@ class FixedRoofEmissions:
         solar_i = self.reporting_chunk.site.average_daily_insolation
 
         # This is based on which type of insulation the tank has
-        if self.tank.insulation.name == InsulationType.NONE:
+        if self.tank.insulation is None or self.tank.insulation.name == InsulationType.NONE:
             # Do not make assumptions and use equation 1-33, just use equation 1-32
 
             # T_V = (numerator_1 + numerator_2 + numerator_3 + numerator_4) / denominator
@@ -210,7 +210,7 @@ class FixedRoofEmissions:
         solar_i = self.reporting_chunk.site.average_daily_insolation
 
         # This is based on which type of insulation the tank has
-        if self.tank.insulation.name == InsulationType.NONE:
+        if self.tank.insulation is None or self.tank.insulation.name == InsulationType.NONE:
             # Do not make assumptions and use equation 1-7, just use equation 1-6
 
             # Term 1
@@ -414,7 +414,11 @@ class FixedRoofEmissions:
 
     def calculate_total_emissions(self) -> TankEmission:
         # Calculate standing losses
-        standing_losses = self._calculate_standing_losses()
+        if self.tank.is_underground and not self.tank.is_vertical:
+            # No standing losses for underground vertical tanks (7.1-21, Note on 1-15)
+            standing_losses = Decimal(0) * unit_registry.lb
+        else:
+            standing_losses = self._calculate_standing_losses()
         logger.info(f'Standing losses: {standing_losses}')
 
         # Calculate working losses
@@ -436,4 +440,8 @@ class FixedRoofEmissions:
                     emissions=component.vapor_weight_fraction * total_losses,
                 )
             )
-        return TankEmission(material_emissions)
+        return TankEmission(
+            tank_id=self.tank.id,
+            tank_name=self.tank.name,
+            material_emissions=material_emissions,
+        )

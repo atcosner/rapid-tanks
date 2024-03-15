@@ -55,6 +55,7 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
     turnovers_per_year: Mapped[str] = mapped_column(default='0')
     net_throughput: Mapped[PintQuantity] = mapped_column(PintQuantity('gal/yr'), default='0.0')
     is_heated: Mapped[bool] = mapped_column(default=False)
+    is_underground: Mapped[bool] = mapped_column(default=False)
 
     # Relationships
 

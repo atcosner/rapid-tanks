@@ -75,6 +75,9 @@ with Session(DB_ENGINE) as session:
     )
     sc2_tank.shell_paint_color = white_paint
     sc2_tank.shell_paint_condition = average_condition
+    sc2_tank.roof_paint_color = white_paint
+    sc2_tank.roof_paint_condition = average_condition
+    sc2_tank.insulation = uninsulated
 
     for idx, name in enumerate(MONTH_NAMES):
         record = ServiceRecord(

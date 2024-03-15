@@ -10,6 +10,7 @@ from src.database.definitions.tank import FixedRoofTank
 from .calculations.fixed_roof import FixedRoofEmissions
 from .components.meteorological import MeteorologicalChunk
 from .components.mixture import MixtureShim
+from .outputs.log import LogOutput
 from .util import ReportOutputType
 from ..util.enums import TankType
 
@@ -81,17 +82,8 @@ class EmissionReport:
                 )
                 all_emissions.append(tank_emissions.calculate_total_emissions())
 
-        # Total the emissions per material
-        emissions_per_material = {}
-        for tank_emissions in all_emissions:
-            for material_emissions in tank_emissions.material_emissions:
-                key = (material_emissions.material_id, material_emissions.material_name)
-                if key in emissions_per_material:
-                    emissions_per_material[key] += material_emissions.emissions
-                else:
-                    emissions_per_material[key] = material_emissions.emissions
-
-        for (_, name), emissions in emissions_per_material.items():
-            logger.info(f'{name}: {emissions}')
+        # Report based on the output type
+        if output_type is ReportOutputType.LOG:
+            LogOutput.report(all_emissions)
 
         self.session.close()

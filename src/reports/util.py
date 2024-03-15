@@ -18,4 +18,6 @@ class MaterialEmission:
 
 @dataclass
 class TankEmission:
+    tank_id: int
+    tank_name: str
     material_emissions: list[MaterialEmission]
