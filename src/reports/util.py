@@ -4,7 +4,7 @@ from pint import Quantity
 
 
 class ReportOutputType(Enum):
-    LOG = auto()  # TODO: Remove once we can generate PDF reports
+    LOG = auto()
     PDF = auto()
     EXCEL = auto()
 
@@ -17,7 +17,15 @@ class MaterialEmission:
 
 
 @dataclass
+class MixtureEmission:
+    mixture_id: int
+    mixture_name: str
+    material_emissions: list[MaterialEmission]
+
+
+@dataclass
 class TankEmission:
     tank_id: int
     tank_name: str
-    material_emissions: list[MaterialEmission]
+    standing_losses: list[MixtureEmission]
+    working_losses: list[MixtureEmission]
