@@ -27,5 +27,5 @@ class MixtureEmission:
 class TankEmission:
     tank_id: int
     tank_name: str
-    standing_losses: list[MixtureEmission]
-    working_losses: list[MixtureEmission]
+    standing_losses: MixtureEmission
+    working_losses: MixtureEmission

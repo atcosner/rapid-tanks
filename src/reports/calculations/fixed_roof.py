@@ -10,7 +10,7 @@ from src.util.logging import log_block
 from src.util.errors import CalculationError
 from src.util.quantities import R
 
-from ..util import TankEmission, MaterialEmission
+from ..util import TankEmission, MaterialEmission, MixtureEmission
 from ...util.enums import InsulationType
 
 logger = logging.getLogger(__name__)
@@ -431,17 +431,35 @@ class FixedRoofEmissions:
         logger.info(f'Total losses: {total_losses}')
 
         # Calculate the emissions per part of the mixture
-        material_emissions = []
+        standing_emissions = []
+        working_emissions = []
         for component in self.reporting_chunk.mixture.components:
-            material_emissions.append(
+            standing_emissions.append(
                 MaterialEmission(
                     material_id=component.material.id,
                     material_name=component.material.name,
-                    emissions=component.vapor_weight_fraction * total_losses,
+                    emissions=component.vapor_weight_fraction * standing_losses,
                 )
             )
+            working_emissions.append(
+                MaterialEmission(
+                    material_id=component.material.id,
+                    material_name=component.material.name,
+                    emissions=component.vapor_weight_fraction * working_losses,
+                )
+            )
+
         return TankEmission(
             tank_id=self.tank.id,
             tank_name=self.tank.name,
-            material_emissions=material_emissions,
+            standing_losses=MixtureEmission(
+                mixture_id=self.reporting_chunk.mixture.db_id,
+                mixture_name=self.reporting_chunk.mixture.name,
+                material_emissions=standing_emissions,
+            ),
+            working_losses=MixtureEmission(
+                mixture_id=self.reporting_chunk.mixture.db_id,
+                mixture_name=self.reporting_chunk.mixture.name,
+                material_emissions=working_emissions,
+            ),
         )

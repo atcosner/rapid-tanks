@@ -45,6 +45,7 @@ class MaterialShim:
 @dataclass
 class MixtureShim:
     name: str
+    db_id: int
     makeup_type: MixtureMakeupType
     components: list[MaterialShim]
 
@@ -65,6 +66,7 @@ class MixtureShim:
 
         obj = cls(
             name=mixture.name,
+            db_id=mixture.id,
             makeup_type=MixtureMakeupType(mixture.makeup_type_id),
             components=materials,
         )
