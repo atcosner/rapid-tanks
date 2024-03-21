@@ -47,7 +47,7 @@ class PetrochemicalInfoFrame(QFrame):
         # Molecular Weight
         self.molecular_weight = NumericDataRow(
             'Molecular Weight',
-            'g/mol',
+            'lb/mol',
             read_only=True,
             allow_negative=False,
             default=None,
