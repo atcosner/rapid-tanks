@@ -77,8 +77,8 @@ class MixtureShim:
         match self.makeup_type:
             case MixtureMakeupType.WEIGHT:
                 for component in self.components:
-                    makeup__g = component.makeup_value * unit_registry.lb
-                    component.moles = makeup__g.to('g') / component.material.molecular_weight
+                    makeup__lb = component.makeup_value * unit_registry.lb
+                    component.moles = makeup__lb / component.material.molecular_weight
                 self.total_moles = sum([component.moles for component in self.components])
                 for component in self.components:
                     component.mole_fraction = component.moles / self.total_moles
@@ -113,7 +113,7 @@ class MixtureShim:
             mixture_vapor_pressure = self.calculate_vapor_pressure(temperature)
 
         # Calculate percents of partial pressures over the mixture vapor pressure
-        total_vapor_molecular_weight = Decimal('0') * unit_registry.g / unit_registry.mole
+        total_vapor_molecular_weight = Decimal('0') * unit_registry.lb / unit_registry.mole
         for component in self.components:
             # Vapor percent
             vapor_percent = component.partial_pressure / mixture_vapor_pressure

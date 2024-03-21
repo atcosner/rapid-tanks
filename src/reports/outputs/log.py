@@ -25,7 +25,7 @@ class LogOutput:
                     mixture_key = (mixture.mixture_id, mixture.mixture_name)
                     emissions_by_mixture[mixture_key] += material.emissions
 
-                    tank_key = (tank_emissions.tank_id, tank_emissions.tank_id)
+                    tank_key = (tank_emissions.tank_id, tank_emissions.tank_name)
                     emissions_by_tank[tank_key] += material.emissions
 
         # Log the results

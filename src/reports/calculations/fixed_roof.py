@@ -180,11 +180,9 @@ class FixedRoofEmissions:
         logger.debug(f'Mixture vapor pressure: {self.mixture_vapor_pressure}')
 
         # Calculate the mixture vapor molecular weight
-        temp1 = self.reporting_chunk.mixture.calculate_vapor_molecular_weight(
+        self.mixture_molecular_weight = self.reporting_chunk.mixture.calculate_vapor_molecular_weight(
             self.average_daily_liquid_surface_temperature
         )
-        # TODO: This should be grams / mole but in the samples its lb / lb*mole
-        self.mixture_molecular_weight = temp1.magnitude * unit_registry.lb / (unit_registry.lb * unit_registry.mol)
         logger.debug(f'Mixture vapor molecular weight: {self.mixture_molecular_weight}')
 
         # Calculate the average vapor temperature

@@ -5,10 +5,9 @@ Revises:
 Create Date: 2024-02-04 11:48:58.350572
 
 """
-from typing import Sequence
-
 from alembic import op
 from sqlalchemy.orm.session import Session
+from typing import Sequence
 
 from src.database.definitions import OrmBase
 from src.database.definitions.paint import PaintColor, PaintCondition, SolarAbsorptance
