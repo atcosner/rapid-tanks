@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout, QPushButton, QHBoxLayo
 
 from src.util.enums import MixtureMakeupType
 from src.database import DB_ENGINE
-from src.database.definitions.mixture import PetrochemicalMixture
+from src.database.definitions.mixture import Mixture
 from src.gui.widgets.mixture.mixture_list import MixtureList
 from src.gui.widgets.util.search_bar import SearchBar
 
@@ -65,8 +65,8 @@ class MixtureSelectionFrame(QFrame):
     def create_mixture(self) -> None:
         with Session(DB_ENGINE) as session:
             session.add(
-                PetrochemicalMixture(
-                    name=f'New Mixture ({session.query(PetrochemicalMixture.id).count()})',
+                Mixture(
+                    name=f'New Mixture ({session.query(Mixture.id).count()})',
                     makeup_type_id=MixtureMakeupType.WEIGHT.value,
                 )
             )

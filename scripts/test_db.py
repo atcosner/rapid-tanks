@@ -8,7 +8,7 @@ from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.database.definitions.material import Petrochemical
 from src.database.definitions.meteorological import MeteorologicalSite
-from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
+from src.database.definitions.mixture import Mixture, MixtureAssociation
 from src.database.definitions.paint import PaintColor, PaintCondition
 from src.database.definitions.service_record import ServiceRecord
 from src.database.definitions.tank import FixedRoofTank, FixedRoofType, TankInsulationType
@@ -27,13 +27,13 @@ with Session(DB_ENGINE) as session:
     toluene = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Toluene'))
     cyclohexane = session.scalar(select(Petrochemical).where(Petrochemical.name == 'Cyclohexane'))
 
-    sc1_mixture = PetrochemicalMixture(
+    sc1_mixture = Mixture(
         name='SC #1 Mixture',
         makeup_type_id=MixtureMakeupType.WEIGHT,
     )
-    sc1_mixture.components.append(PetrochemicalAssociation(value='2812', material=benzene))
-    sc1_mixture.components.append(PetrochemicalAssociation(value='258', material=toluene))
-    sc1_mixture.components.append(PetrochemicalAssociation(value='101', material=cyclohexane))
+    sc1_mixture.components.append(MixtureAssociation(value='2812', petrochemical=benzene, petroleum_liquid=None))
+    sc1_mixture.components.append(MixtureAssociation(value='258', petrochemical=toluene, petroleum_liquid=None))
+    sc1_mixture.components.append(MixtureAssociation(value='101', petrochemical=cyclohexane, petroleum_liquid=None))
 
     # SC #1 Tank
     sc1_tank = FixedRoofTank(

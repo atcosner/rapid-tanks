@@ -6,7 +6,7 @@ from PyQt5.Qt import pyqtSlot, QPoint, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QMenu, QLineEdit
 
 from src.util.enums import MixtureMakeupType
-from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
+from src.database.definitions.mixture import Mixture, MixtureAssociation
 from src.gui.widgets.util.validators import PositiveDoubleValidator
 
 from .material_property_model import MaterialPropertyModel
@@ -37,7 +37,7 @@ class MixtureComponentsTable(QTableWidget):
 
         self.resizeColumnsToContents()
 
-    def load(self, mixture: PetrochemicalMixture) -> None:
+    def load(self, mixture: Mixture) -> None:
         self.setRowCount(0)
 
         for component in mixture.components:
@@ -47,7 +47,7 @@ class MixtureComponentsTable(QTableWidget):
         self.resizeColumnsToContents()
         self.handle_makeup_value_change()
 
-    def add_material_row(self, component: PetrochemicalAssociation | None) -> None:
+    def add_material_row(self, component: MixtureAssociation | None) -> None:
         row_count = self.rowCount()
         self.setRowCount(row_count + 1)
 

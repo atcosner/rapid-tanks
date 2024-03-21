@@ -5,7 +5,7 @@ from pint import Quantity
 
 from src import unit_registry
 from src.database.definitions.material import Petrochemical
-from src.database.definitions.mixture import PetrochemicalMixture
+from src.database.definitions.mixture import Mixture
 from src.util.enums import MixtureMakeupType
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class MixtureShim:
     vapor_pressure: dict[Quantity, Quantity] = field(default_factory=dict)
 
     @classmethod
-    def from_mixture(cls, mixture: PetrochemicalMixture):
+    def from_mixture(cls, mixture: Mixture):
         materials = []
         for component in mixture.components:
             materials.append(

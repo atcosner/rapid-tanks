@@ -6,7 +6,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QAbstractItemModel, QModelIndex
 
 from src.database import DB_ENGINE
-from src.database.definitions.mixture import PetrochemicalMixture
+from src.database.definitions.mixture import Mixture
 
 
 class MixtureModel(QAbstractItemModel):
@@ -22,7 +22,7 @@ class MixtureModel(QAbstractItemModel):
         self.values = [(None, '')]
 
         with Session(DB_ENGINE) as session:
-            results = session.execute(select(PetrochemicalMixture.id, PetrochemicalMixture.name)).all()
+            results = session.execute(select(Mixture.id, Mixture.name)).all()
             self.values.extend([(id, name) for id, name in results])
 
         self.layoutChanged.emit()

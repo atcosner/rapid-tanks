@@ -6,7 +6,7 @@ from PyQt5.Qt import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QListWidget, QListWidgetItem
 
 from src.database import DB_ENGINE
-from src.database.definitions.mixture import PetrochemicalMixture
+from src.database.definitions.mixture import Mixture
 
 
 class MixtureListItem(QListWidgetItem):
@@ -32,7 +32,7 @@ class MixtureList(QListWidget):
         self.clear()
 
         with Session(DB_ENGINE) as session:
-            for name, id in session.execute(select(PetrochemicalMixture.name, PetrochemicalMixture.id)).all():
+            for name, id in session.execute(select(Mixture.name, Mixture.id)).all():
                 self.addItem(MixtureListItem(name, id))
 
     @pyqtSlot(str)
@@ -65,7 +65,7 @@ class MixtureList(QListWidget):
 
         # Delete from the DB
         with Session(DB_ENGINE) as session:
-            session.delete(session.get(PetrochemicalMixture, current_item.get_id()))
+            session.delete(session.get(Mixture, current_item.get_id()))
             session.commit()
 
         # Remove the current item

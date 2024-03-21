@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QLabel
 
 from src.database import DB_ENGINE
 from src.database.definitions.material import Petrochemical
-from src.database.definitions.mixture import PetrochemicalMixture, PetrochemicalAssociation
+from src.database.definitions.mixture import Mixture, MixtureAssociation
 from src.gui import RESOURCE_DIR
 from src.gui.widgets.mixture.table.mixture_components_table import MixtureComponentsTable
 from src.gui.widgets.mixture.mixture_makeup_type_box import MixtureMakeupTypeBox
@@ -103,7 +103,7 @@ class MixtureInfoFrame(EditableFrame):
 
         # TODO: Should we not use the DB to reload?
         with Session(DB_ENGINE) as session:
-            mixture = session.get(PetrochemicalMixture, self.current_mixture_id)
+            mixture = session.get(Mixture, self.current_mixture_id)
             self.mixture_components_table.load(mixture)
 
     def update_mixture(self) -> None:
@@ -111,14 +111,14 @@ class MixtureInfoFrame(EditableFrame):
         previous_materials = self.previous_values[2:]
 
         with Session(DB_ENGINE) as session:
-            mixture = session.get(PetrochemicalMixture, self.current_mixture_id)
+            mixture = session.get(Mixture, self.current_mixture_id)
             mixture.name = self.mixture_name.text()
             mixture.makeup_type_id = self.mixture_makeup_type.get_current_makeup().value
 
             components = []
             for material_id, value in self.mixture_components_table.get_current_values():
                 material = session.get(Petrochemical, material_id)
-                components.append(PetrochemicalAssociation(value=value, material=material))
+                components.append(MixtureAssociation(value=value, material=material))
             mixture.components = components
 
             session.commit()
@@ -144,7 +144,7 @@ class MixtureInfoFrame(EditableFrame):
         self.current_mixture_id = mixture_id
 
         with Session(DB_ENGINE) as session:
-            mixture = session.get(PetrochemicalMixture, mixture_id)
+            mixture = session.get(Mixture, mixture_id)
             self.mixture_name.setText(mixture.name)
             self.mixture_makeup_type.set_makeup(mixture.makeup_type_id)
             self.mixture_components_table.load(mixture)
