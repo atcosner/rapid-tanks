@@ -1,6 +1,11 @@
 from enum import IntEnum, Enum, auto, StrEnum
 
 
+class MaterialType(Enum):
+    PETROCHEMICAL = auto()
+    PETROLEUM_LIQUID = auto()
+
+
 class MixtureMakeupType(IntEnum):
     WEIGHT = 1
     VOLUME = 2

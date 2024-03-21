@@ -6,7 +6,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QAbstractItemModel, QModelIndex
 
 from src.database import DB_ENGINE
-from src.database.definitions.material import Petrochemical
+from src.database.definitions.material import Petrochemical, PetroleumLiquid
 
 
 class MaterialPropertyModel(QAbstractItemModel):
@@ -22,7 +22,9 @@ class MaterialPropertyModel(QAbstractItemModel):
 
         with Session(DB_ENGINE) as session:
             results = session.execute(select(Petrochemical.id, Petrochemical.name, Petrochemical.cas_number)).all()
-            self.values = [(id, f'{name} [{cas}]') for id, name, cas in results]
+            self.values.extend([(id, f'{name} [{cas}]') for id, name, cas in results])
+            results = session.execute(select(PetroleumLiquid.id, PetroleumLiquid.name,)).all()
+            self.values.extend([(id, name) for id, name in results])
 
         self.layoutChanged.emit()
 
