@@ -7,13 +7,14 @@ from PyQt5.QtCore import QAbstractItemModel, QModelIndex
 
 from src.database import DB_ENGINE
 from src.database.definitions.material import Petrochemical, PetroleumLiquid
+from src.util.enums import MaterialType
 
 
 class MaterialPropertyModel(QAbstractItemModel):
     def __init__(self) -> None:
         super().__init__(None)
 
-        self.values: list[tuple[int, str]] = []
+        self.values: list[tuple[tuple[MaterialType, int], str]] = []
 
         self._load()
 
@@ -22,9 +23,9 @@ class MaterialPropertyModel(QAbstractItemModel):
 
         with Session(DB_ENGINE) as session:
             results = session.execute(select(Petrochemical.id, Petrochemical.name, Petrochemical.cas_number)).all()
-            self.values.extend([(id, f'{name} [{cas}]') for id, name, cas in results])
+            self.values.extend([((MaterialType.PETROCHEMICAL, id), f'{name} [{cas}]') for id, name, cas in results])
             results = session.execute(select(PetroleumLiquid.id, PetroleumLiquid.name,)).all()
-            self.values.extend([(id, name) for id, name in results])
+            self.values.extend([((MaterialType.PETROLEUM_LIQUID, id), name) for id, name in results])
 
         self.layoutChanged.emit()
 

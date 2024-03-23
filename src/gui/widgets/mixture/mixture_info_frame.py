@@ -6,15 +6,15 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QLabel, QPushButton
 
 from src.database import DB_ENGINE
-from src.database.definitions.material import Petrochemical
+from src.database.definitions.material import Petrochemical, PetroleumLiquid
 from src.database.definitions.mixture import Mixture, MixtureAssociation
 from src.gui import RESOURCE_DIR
-from src.gui.widgets.mixture.table.mixture_components_table import MixtureComponentsTable
 from src.gui.widgets.mixture.mixture_makeup_type_box import MixtureMakeupTypeBox
-from src.util.enums import MixtureMakeupType
+from src.gui.widgets.mixture.table.mixture_components_table import MixtureComponentsTable
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.labels import SubSectionHeader
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
+from src.util.enums import MixtureMakeupType, MaterialType
 
 logger = logging.getLogger(__name__)
 
@@ -107,18 +107,19 @@ class MixtureInfoFrame(EditableFrame):
             self.mixture_components_table.load(mixture)
 
     def update_mixture(self) -> None:
-        current_materials = self.get_current_values()[2:]
-        previous_materials = self.previous_values[2:]
-
         with Session(DB_ENGINE) as session:
             mixture = session.get(Mixture, self.current_mixture_id)
             mixture.name = self.mixture_name.text()
             mixture.makeup_type_id = self.mixture_makeup_type.get_current_makeup().value
 
             components = []
-            for material_id, value in self.mixture_components_table.get_current_values():
-                material = session.get(Petrochemical, material_id)
-                components.append(MixtureAssociation(value=value, material=material))
+            for (material_type, material_id), value in self.mixture_components_table.get_current_values():
+                if material_type == MaterialType.PETROCHEMICAL:
+                    material = session.get(Petrochemical, material_id)
+                    components.append(MixtureAssociation(value=value, petrochemical=material, petroleum_liquid=None))
+                else:
+                    material = session.get(PetroleumLiquid, material_id)
+                    components.append(MixtureAssociation(value=value, petrochemical=None, petroleum_liquid=material))
             mixture.components = components
 
             session.commit()

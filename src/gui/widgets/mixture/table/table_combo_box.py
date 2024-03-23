@@ -1,7 +1,10 @@
+from typing import Any
+
 from PyQt5.QtCore import QAbstractItemModel
 from PyQt5.QtWidgets import QComboBox, QWidget
 
 from src.gui.widgets.util.combo_boxes import MixtureComboBoxCompleter
+from src.util.enums import MaterialType
 
 
 class TableComboBox(QComboBox):
@@ -20,9 +23,16 @@ class TableComboBox(QComboBox):
         self.completer_widget = MixtureComboBoxCompleter(parent, data_model)
         self.setCompleter(self.completer_widget)
 
-    def set_from_db(self, db_id: int) -> None:
-        result = self.findData(db_id)
+    # The builtin findData does not seem to work with tuples?
+    def find_data(self, data: Any) -> int:
+        for index in range(self.count()):
+            if self.itemData(index) == data:
+                return index
+        return -1
+
+    def set_from_db(self, material_type: MaterialType, db_id: int) -> None:
+        result = self.find_data((material_type, db_id))
         if result == -1:
-            raise RuntimeError(f'Could not find element with DB id: {db_id}')
+            raise RuntimeError(f'Could not find {material_type.name} with DB id: {db_id}')
         else:
             self.setCurrentIndex(result)

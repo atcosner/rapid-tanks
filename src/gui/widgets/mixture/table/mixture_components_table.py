@@ -5,9 +5,9 @@ from PyQt5 import QtCore
 from PyQt5.Qt import pyqtSlot, QPoint, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QMenu, QLineEdit
 
-from src.util.enums import MixtureMakeupType
 from src.database.definitions.mixture import Mixture, MixtureAssociation
 from src.gui.widgets.util.validators import PositiveDoubleValidator
+from src.util.enums import MixtureMakeupType, MaterialType
 
 from .material_property_model import MaterialPropertyModel
 from .table_combo_box import TableComboBox
@@ -62,7 +62,10 @@ class MixtureComponentsTable(QTableWidget):
 
         # Set data if we have a material
         if component is not None:
-            material_combo_box.set_from_db(component.material.id)
+            if component.petrochemical is not None:
+                material_combo_box.set_from_db(MaterialType.PETROCHEMICAL, component.petrochemical_id)
+            else:
+                material_combo_box.set_from_db(MaterialType.PETROLEUM_LIQUID, component.petroleum_liquid_id)
             makeup_value_edit.setText(component.value)
 
     @pyqtSlot(QPoint)
@@ -87,7 +90,6 @@ class MixtureComponentsTable(QTableWidget):
     @pyqtSlot()
     def handle_add_material(self) -> None:
         self.add_material_row(component=None)
-
         self.resizeColumnsToContents()
 
     @pyqtSlot()
@@ -112,7 +114,7 @@ class MixtureComponentsTable(QTableWidget):
 
         self.updateTotal.emit(total)
 
-    def get_current_values(self) -> list[tuple[int, str]]:
+    def get_current_values(self) -> list[tuple[tuple[MaterialType, int], str]]:
         values = []
 
         for row_idx in range(self.rowCount()):

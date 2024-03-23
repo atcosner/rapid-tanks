@@ -15,10 +15,14 @@ def main() -> int:
 
     configure_root_logger(logging.DEBUG if args.verbose else logging.INFO)
 
-    # Create and show the GUI
     qt_app = QApplication([])
-    tanks_main_window = MainWindow()
-    tanks_main_window.show()
+
+    from src.gui.modals.mixture_browser import MixtureBrowser
+    test1 = MixtureBrowser(None, False)
+    test1.show()
+
+    # tanks_main_window = MainWindow()
+    # tanks_main_window.show()
 
     return qt_app.exec()
 
