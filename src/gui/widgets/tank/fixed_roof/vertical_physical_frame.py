@@ -26,8 +26,8 @@ class VerticalPhysicalFrame(EditableFrame):
         # Dimensions
         self.shell_height = self.register_control(NumericDataRow('Shell Height', 'ft', start_read_only))
         self.shell_diameter = self.register_control(NumericDataRow('Shell Diameter', 'ft', start_read_only))
-        self.max_liquid_height = self.register_control(NumericDataRow('Maximum Liquid Height', 'ft', start_read_only))
-        self.avg_liquid_height = self.register_control(NumericDataRow('Average Liquid Height', 'ft', start_read_only))
+        self.max_liquid_height = self.register_control(AutofillDataRow('Maximum Liquid Height', 'ft', start_read_only))
+        self.min_liquid_height = self.register_control(NumericDataRow('Minimum Liquid Height', 'ft', start_read_only, default='1.0'))
 
         # Shell Characteristics
         self.shell_color = self.register_control(ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, start_read_only))
@@ -66,7 +66,6 @@ class VerticalPhysicalFrame(EditableFrame):
         )
 
         # Misc
-        self.working_volume = self.register_control(NumericDataRow('Working Volume', 'gal', start_read_only))
         self.turnovers_per_year = self.register_control(NumericDataRow('Turnovers Per Year', 'dimensionless', start_read_only))
         self.net_throughput = self.register_control(NumericDataRow('Net Throughput', 'gal/yr', start_read_only))
         self.is_heated = self.register_control(CheckBoxDataRow('Is Heated?', start_read_only))
@@ -77,6 +76,7 @@ class VerticalPhysicalFrame(EditableFrame):
         self.handle_roof_type_change(self.roof_type.get_selected_text())
 
         # Set up the autofill signals
+        self.shell_height.valueChanged.connect(self.handle_autofill_update)
         self.shell_diameter.valueChanged.connect(self.handle_autofill_update)
         self.cone_roof_slope.valueChanged.connect(self.handle_autofill_update)
         self.dome_roof_radius.valueChanged.connect(self.handle_autofill_update)
@@ -107,8 +107,7 @@ class VerticalPhysicalFrame(EditableFrame):
         dimensions_layout.addWidget(self.shell_height)
         dimensions_layout.addWidget(self.shell_diameter)
         dimensions_layout.addWidget(self.max_liquid_height)
-        dimensions_layout.addWidget(self.avg_liquid_height)
-        dimensions_layout.addWidget(self.working_volume)
+        dimensions_layout.addWidget(self.min_liquid_height)
         dimensions_layout.addWidget(self.turnovers_per_year)
         dimensions_layout.addWidget(self.net_throughput)
         dimensions_layout.addWidget(self.is_heated)
@@ -153,6 +152,7 @@ class VerticalPhysicalFrame(EditableFrame):
 
     @pyqtSlot()
     def handle_autofill_update(self) -> None:
+        shell_height = self.shell_height.get_decimal()
         shell_diameter = self.shell_diameter.get_decimal()
         roof_slope = self.cone_roof_slope.get_decimal()
 
@@ -173,6 +173,11 @@ class VerticalPhysicalFrame(EditableFrame):
             self.dome_roof_height.handle_autofill_set(
                 roof_radius - (roof_radius**2 - (shell_diameter / 2)**2)**Decimal('0.5')
             )
+
+        # Maximum Liquid Height (tied to Shell Height)
+        if shell_height is not None and shell_height > Decimal('1.0'):
+            # Note under Equation 1-37
+            self.max_liquid_height.handle_autofill_set(shell_height - 1)
 
     @pyqtSlot(str)
     def handle_roof_type_change(self, new_type: str) -> None:
@@ -197,8 +202,7 @@ class VerticalPhysicalFrame(EditableFrame):
         self.shell_height.set(tank.shell_height)
         self.shell_diameter.set(tank.shell_diameter)
         self.max_liquid_height.set(tank.maximum_liquid_height)
-        self.avg_liquid_height.set(tank.average_liquid_height)
-        self.working_volume.set(tank.working_volume)
+        self.min_liquid_height.set(tank.minimum_liquid_height)
         self.turnovers_per_year.set(tank.turnovers_per_year)
         self.net_throughput.set(tank.net_throughput)
         self.is_heated.set(tank.is_heated)
@@ -244,9 +248,8 @@ class VerticalPhysicalFrame(EditableFrame):
         tank.shell_height = self.shell_height.get()
         tank.shell_diameter = self.shell_diameter.get()
         tank.maximum_liquid_height = self.max_liquid_height.get()
-        tank.average_liquid_height = self.avg_liquid_height.get()
+        tank.minimum_liquid_height = self.min_liquid_height.get()
 
-        tank.working_volume = self.working_volume.get()
         tank.turnovers_per_year = self.turnovers_per_year.get()
         tank.net_throughput = self.net_throughput.get()
 

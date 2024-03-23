@@ -2,7 +2,7 @@ import logging
 import sys
 from contextlib import contextmanager
 from types import TracebackType
-from typing import Type
+from typing import Type, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +15,9 @@ class NamedLoggerAdapter(logging.LoggerAdapter):
 
 
 @contextmanager
-def log_block(log_func: callable, name: str):
-    half_width = (LOG_WIDTH - len(name) - 2) // 2
-    log_func(f'{"-" * half_width} {name} {"-" * half_width}')
+def log_block(log_func: Callable, block_name: str) -> None:
+    half_width = (LOG_WIDTH - len(block_name) - 2) // 2
+    log_func(f'{"-" * half_width} {block_name} {"-" * half_width}')
     try:
         yield
     finally:
@@ -32,7 +32,11 @@ def configure_root_logger(min_level: int) -> None:
     )
 
 
-def log_uncaught_exception(exc_type, exc_value: Type[Exception], exc_traceback: TracebackType) -> None:
+def log_uncaught_exception(
+        exc_type: Type[BaseException],
+        exc_value: BaseException,
+        exc_traceback: TracebackType,
+) -> None:
     # Log the exception
     logger.critical('Uncaught exception', exc_info=(exc_type, exc_value, exc_traceback))
 

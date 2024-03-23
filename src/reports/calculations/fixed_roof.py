@@ -8,7 +8,7 @@ from src.reports.components.tank import FixedRoofTankShim
 from src.reports.components.time import ReportingChunk
 from src.util.logging import log_block
 from src.util.errors import CalculationError
-from src.util.quantities import R
+from src.util.quantities import R, PI
 
 from ..util import TankEmission, MaterialEmission, MixtureEmission
 from ...util.enums import InsulationType
@@ -42,6 +42,7 @@ class FixedRoofEmissions:
     average_vapor_temperature: Quantity | None = None
     average_daily_vapor_temperature_range: Quantity | None = None
     average_daily_vapor_pressure_range: Quantity | None = None
+    sum_of_increases_in_liquid_level: Quantity | None = None
 
     def _calculate_average_daily_ambient_temperature_range(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-11
@@ -109,7 +110,6 @@ class FixedRoofEmissions:
             return self.liquid_bulk_temperature.to('degR')
 
         else:
-            # TODO What?
             raise CalculationError(f'Unknown insulation: {self.tank.insulation}')
 
     def _calculate_average_vapor_temperature(self) -> Quantity:
@@ -240,9 +240,12 @@ class FixedRoofEmissions:
             raise CalculationError(f'Unknown insulation: {self.tank.insulation.name}')
 
     def _average_daily_vapor_pressure_range(self) -> Quantity:
-        # TODO average daily vapor pressure range is 0 for fully insulated tanks
         # AP 42 Chapter 7 Equation 1-9
         # ∆P_V = P_VX - P_VN
+
+        # Note on Equation 1-9: Fully insulated tanks have no pressure variations due to temperature
+        if self.tank.insulation.name == InsulationType.FULL:
+            return Decimal('0.0') * unit_registry.psi
 
         # Calculate T_LX and T_LN
         t_lx_degR = self.average_daily_liquid_surface_temperature + (
@@ -265,6 +268,12 @@ class FixedRoofEmissions:
 
         return max_vapor_pressure - min_vapor_pressure
 
+    def _calculate_breather_vent_pressure_setting_range(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-10
+        # ∆P_B = P_BP - P_BV
+
+        return self.tank.vent_breather_setting - self.tank.vent_vacuum_setting
+
     def _calculate_vapor_space_expansion_factor(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-5
         # K_E = ∆T_V/T_LA + (∆P_V − ∆P_B)/(P_A − P_VA)
@@ -278,8 +287,7 @@ class FixedRoofEmissions:
         logger.debug(f'Average vapor pressure range: {self.average_daily_vapor_pressure_range}')
 
         # Calculate the breather vent pressure (∆P_B)
-        # TODO: Actually calculate this
-        self.average_breather_pressure_range = unit_registry.Quantity(Decimal('0.06'), 'psi')
+        self.average_breather_pressure_range = self._calculate_breather_vent_pressure_setting_range()
         logger.debug(f'Average breather pressure range: {self.average_breather_pressure_range}')
 
         # Complete the equation
@@ -346,22 +354,39 @@ class FixedRoofEmissions:
 
         return l_s * unit_registry.lb / unit_registry.year
 
+    def _calculate_sum_of_increases_in_liquid_level(self) -> Quantity:
+        # AP 42 Chapter 7 Equation 1-37
+        # sum(H_QI) = (5.614 * Q) / [(PI / 4) * D**2]
+
+        # TODO: This equation is an approximation, what to do if we have the actual value
+
+        conversion_factor = Decimal('5.614') * (unit_registry.ft**3) / unit_registry.oil_bbl
+        term1 = conversion_factor * self.reporting_chunk.throughput.to('oil_bbl/year')
+        term2 = (PI / 4) * self.tank.shell_diameter**2
+        return term1 / term2
+
     def _calculate_net_working_loss_throughput(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-38
+        # V_Q = sum(H_QI) * (PI / 4) * D**2
 
-        # TODO: Handle if we know the net increase in liquid level
-
-        # Use Equation 1-39 to estimate this from tank throughput if we dont
-        # TODO: This needs to be aware of the date range we are calculating emissions for
-        conversion_factor = Decimal('5.614') * (unit_registry.ft**3) / unit_registry.oil_bbl
-        return conversion_factor * self.reporting_chunk.throughput.to('oil_bbl/year')
+        # Ignore the approximation equation 1-39 since we handle an approximation in equation 1-37 instead
+        return self.sum_of_increases_in_liquid_level * (PI / 4) * self.tank.shell_diameter**2
 
     def _calculate_working_loss_turnover_factor(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-35
 
-        # TODO: Handle > 36 turnovers in the date range
-        # For turnovers <= 36, this is 1
-        return unit_registry.Quantity(Decimal(1), 'dimensionless')
+        # K_N = 1 (for turnovers <= 36 per year)
+        if self.tank.turnovers_per_year <= 36:
+            return unit_registry.Quantity(Decimal(1), 'dimensionless')
+
+        # > 36 turnovers per year uses the following equation
+        # K_N = (180 + N) / (6 * N)
+        # N = sum(H_QI) / (H_LX - H_LN)
+
+        term1 = self.tank.maximum_liquid_height - self.tank.minimum_liquid_height
+        n = self.sum_of_increases_in_liquid_level / term1
+        k_n = (180 + n) / (6 * n)
+        return unit_registry.Quantity(k_n, 'dimensionless')
 
     def _calculate_working_loss_product_factor(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-35
@@ -371,14 +396,41 @@ class FixedRoofEmissions:
     def _calculate_vent_setting_correction_factor(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-40 and 1-41
 
-        # TODO: Calculate this using the equation for non-standard breather vent settings
+        if (
+                self.tank.vent_breather_setting > (Decimal('0.03') * unit_registry.psi)
+                or self.tank.vent_vacuum_setting < (Decimal('-0.03') * unit_registry.psi)
+        ):
+            # Calculate Equation 1-40
+            # K_N * [(P_BP + P_A) / (P_I + P_A)] > 1.0
 
-        # If the breather vent is set between +- 0.03 psig, K_B = 1
-        return unit_registry.Quantity(Decimal(1), 'dimensionless')
+            # TODO: P_I is the gauge pressure reading under normal conditions (0 = Tank at P_A)
+            vapor_gauge_pressure = Decimal('0') * unit_registry.psi
+
+            term1 = self.tank.vent_breather_setting + self.reporting_chunk.site.atmospheric_pressure
+            term2 = vapor_gauge_pressure + self.reporting_chunk.site.atmospheric_pressure
+            equation_1_40 = self.working_loss_turnover_factor * (term1 / term2)
+
+            # Calculate Equation 1-41
+            # K_B = = [((P_I + P_A) / K_N) - P_VA] / [P_BP + P_A - P_VA]
+            term1 = ((vapor_gauge_pressure + self.reporting_chunk.site.atmospheric_pressure) / self.working_loss_turnover_factor) - self.mixture_vapor_pressure
+            term2 = self.tank.vent_breather_setting + self.reporting_chunk.site.atmospheric_pressure - self.mixture_vapor_pressure
+            equation_1_41 = term1 / term2
+
+            # Check if Equation 1-41 should be used
+            if equation_1_40 > Decimal('1.0'):
+                return equation_1_41
+            else:
+                # TODO: What do we do if equation 1-40 is not true?
+                return unit_registry.Quantity(Decimal(1), 'dimensionless')
+        else:
+            # If the breather vent is set between +- 0.03 psig, K_B = 1
+            return unit_registry.Quantity(Decimal(1), 'dimensionless')
 
     def _calculate_working_losses(self) -> Quantity:
         # AP 42 Chapter 7 Equation 1-35
         # L_W = V_Q ∗ K_N ∗ K_P ∗ W_V ∗ K_B
+
+        self.sum_of_increases_in_liquid_level = self._calculate_sum_of_increases_in_liquid_level()
 
         # Calculate the net working loss throughput (V_Q)
         with log_block(logger.debug, 'Net Working Loss Throughput'):

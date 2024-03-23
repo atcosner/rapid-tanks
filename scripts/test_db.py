@@ -1,5 +1,6 @@
 import calendar
 from datetime import date
+from decimal import Decimal
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -42,8 +43,7 @@ with Session(DB_ENGINE) as session:
         shell_diameter='6',
         roof_radius='3',
         maximum_liquid_height='11.5',
-        average_liquid_height='8',
-        working_volume='1480',
+        minimum_liquid_height='4.5',
         net_throughput='8450',
     )
     sc1_tank.shell_paint_color = white_paint
@@ -53,11 +53,12 @@ with Session(DB_ENGINE) as session:
     sc1_tank.roof_type = cone_roof
     sc1_tank.insulation = uninsulated
 
+    month_throughput = Decimal(sc1_tank.net_throughput) / 12
     for idx, name in enumerate(MONTH_NAMES):
         record = ServiceRecord(
             start_date=date(year=2024, month=idx + 1, day=1),
             end_date=date(year=2024, month=idx + 1, day=calendar.monthrange(2024, idx + 1)[1]),
-            throughput='704.17',
+            throughput=str(month_throughput.quantize(Decimal('1.00'))),
         )
         record.mixture = sc1_mixture
         sc1_tank.service_records.append(record)
@@ -68,8 +69,7 @@ with Session(DB_ENGINE) as session:
         shell_height='12',
         shell_diameter='6',
         maximum_liquid_height='11.5',
-        average_liquid_height='8',
-        working_volume='1480',
+        minimum_liquid_height='4.5',
         net_throughput='8450',
         is_vertical=False,
     )
@@ -79,11 +79,12 @@ with Session(DB_ENGINE) as session:
     sc2_tank.roof_paint_condition = average_condition
     sc2_tank.insulation = uninsulated
 
+    month_throughput = Decimal(sc1_tank.net_throughput) / 12
     for idx, name in enumerate(MONTH_NAMES):
         record = ServiceRecord(
             start_date=date(year=2024, month=idx + 1, day=1),
             end_date=date(year=2024, month=idx + 1, day=calendar.monthrange(2024, idx + 1)[1]),
-            throughput='704.17',
+            throughput=str(month_throughput.quantize(Decimal('1.00'))),
         )
         record.mixture = sc1_mixture
         sc2_tank.service_records.append(record)

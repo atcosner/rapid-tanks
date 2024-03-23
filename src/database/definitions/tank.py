@@ -50,8 +50,7 @@ class FixedRoofTank(MappedAsDataclass, OrmBase):
     vent_breather_setting: Mapped[PintQuantity] = mapped_column(PintQuantity('psi'), default='0.03')  # Gauge PSI
 
     maximum_liquid_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
-    average_liquid_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
-    working_volume: Mapped[PintQuantity] = mapped_column(PintQuantity('gal'), default='0.0')
+    minimum_liquid_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'), default='0.0')
     turnovers_per_year: Mapped[str] = mapped_column(default='0')
     net_throughput: Mapped[PintQuantity] = mapped_column(PintQuantity('gal/yr'), default='0.0')
     is_heated: Mapped[bool] = mapped_column(default=False)
