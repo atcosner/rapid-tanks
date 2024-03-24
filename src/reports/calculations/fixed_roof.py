@@ -248,21 +248,21 @@ class FixedRoofEmissions:
             return Decimal('0.0') * unit_registry.psi
 
         # Calculate T_LX and T_LN
-        t_lx_degR = self.average_daily_liquid_surface_temperature + (
+        t_lx__degr = self.average_daily_liquid_surface_temperature + (
                 Decimal('0.25')
                 * self.average_ambient_temperature_range
         )
-        t_ln_degR = self.average_daily_liquid_surface_temperature - (
+        t_ln__degr = self.average_daily_liquid_surface_temperature - (
                 Decimal('0.25')
                 * self.average_ambient_temperature_range
         )
 
-        t_lx_degF = t_lx_degR.to('degF')
-        t_ln_degF = t_ln_degR.to('degF')
+        t_lx__degf = t_lx__degr.to('degF')
+        t_ln__degf = t_ln__degr.to('degF')
 
         # Calculate the vapor pressure at the different temperatures
-        max_vapor_pressure = self.reporting_chunk.mixture.calculate_vapor_pressure(t_lx_degF)
-        min_vapor_pressure = self.reporting_chunk.mixture.calculate_vapor_pressure(t_ln_degF)
+        max_vapor_pressure = self.reporting_chunk.mixture.calculate_vapor_pressure(t_lx__degf)
+        min_vapor_pressure = self.reporting_chunk.mixture.calculate_vapor_pressure(t_ln__degf)
         logger.debug(f'Max vapor pressure: {max_vapor_pressure}')
         logger.debug(f'Min vapor pressure: {min_vapor_pressure}')
 
@@ -376,7 +376,7 @@ class FixedRoofEmissions:
         # AP 42 Chapter 7 Equation 1-35
 
         # K_N = 1 (for turnovers <= 36 per year)
-        if self.tank.turnovers_per_year <= 36:
+        if int(self.tank.turnovers_per_year) <= 36:
             return unit_registry.Quantity(Decimal(1), 'dimensionless')
 
         # > 36 turnovers per year uses the following equation

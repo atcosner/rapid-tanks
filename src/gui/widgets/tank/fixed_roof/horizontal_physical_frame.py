@@ -16,6 +16,7 @@ from src.gui.widgets.util.data_entry_rows import CheckBoxDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.labels import SubSectionHeader
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields
+from src.util.quantities import PI
 
 
 class HorizontalPhysicalFrame(EditableFrame):
@@ -26,36 +27,31 @@ class HorizontalPhysicalFrame(EditableFrame):
         # Dimensions
         self.shell_length = self.register_control(NumericDataRow('Shell Length', 'ft', start_read_only))
         self.shell_diameter = self.register_control(NumericDataRow('Shell Diameter', 'ft', start_read_only))
+        self.max_liquid_height = self.register_control(AutofillDataRow('Maximum Liquid Height', 'ft', start_read_only))
+        self.min_liquid_height = self.register_control(NumericDataRow('Minimum Liquid Height', 'ft', start_read_only, default='0.0'))
 
         # Shell Characteristics
         self.shell_color = self.register_control(ComboBoxDataRow('Shell Color', ComboBoxDataType.PAINT_COLORS, start_read_only))
-        self.shell_condition = self.register_control(ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only))
+        self.shell_condition = self.register_control(
+            ComboBoxDataRow('Shell Condition', ComboBoxDataType.PAINT_CONDITIONS, start_read_only)
+        )
 
         # Breather Vent Settings
         self.vacuum_setting = self.register_control(
-            NumericDataRow(
-                'Vacuum Setting',
-                'psig',
-                start_read_only,
-                allow_negative=True,
-                default='-0.3',
-            )
+            NumericDataRow('Vacuum Setting', 'psig', start_read_only, allow_negative=True, default='-0.3')
         )
         self.pressure_setting = self.register_control(
-            NumericDataRow(
-                'Pressure Setting',
-                'psig',
-                start_read_only,
-                default='0.3',
-            )
+            NumericDataRow('Pressure Setting', 'psig', start_read_only, default='0.3')
         )
 
         # Misc
-        self.working_volume = self.register_control(NumericDataRow('Working Volume', 'gal', start_read_only))
-        self.turnovers_per_year = self.register_control(NumericDataRow('Turnovers Per Year', 'dimensionless', start_read_only))
+        self.turnovers_per_year = self.register_control(NumericDataRow('Annual Turnovers', 'dimensionless', start_read_only))
         self.net_throughput = self.register_control(NumericDataRow('Net Throughput', 'gal/yr', start_read_only))
         self.is_heated = self.register_control(CheckBoxDataRow('Is Heated?', start_read_only))
         self.is_underground = self.register_control(CheckBoxDataRow('Is Underground?', start_read_only))
+
+        # Set up the autofill signals
+        self.shell_diameter.valueChanged.connect(self.handle_autofill_update)
 
         if start_read_only:
             super().handle_end_editing()
@@ -82,13 +78,20 @@ class HorizontalPhysicalFrame(EditableFrame):
         dimensions_layout.addWidget(SubSectionHeader('Dimensions'))
         dimensions_layout.addWidget(self.shell_length)
         dimensions_layout.addWidget(self.shell_diameter)
-        dimensions_layout.addWidget(self.working_volume)
-        dimensions_layout.addWidget(self.turnovers_per_year)
-        dimensions_layout.addWidget(self.net_throughput)
-        dimensions_layout.addWidget(self.is_heated)
-        dimensions_layout.addWidget(self.is_underground)
         dimensions_layout.addStretch()
         self.setLayout(dimensions_layout)
+
+        # Misc Characteristics
+        misc_layout = QVBoxLayout()
+        main_layout.addLayout(misc_layout, 0, 1)
+
+        misc_layout.addWidget(SubSectionHeader('Other'))
+        misc_layout.addWidget(self.max_liquid_height)
+        misc_layout.addWidget(self.min_liquid_height)
+        misc_layout.addWidget(self.turnovers_per_year)
+        misc_layout.addWidget(self.net_throughput)
+        misc_layout.addWidget(self.is_heated)
+        misc_layout.addWidget(self.is_underground)
 
         # Shell Characteristics
         shell_layout = QVBoxLayout()
@@ -111,16 +114,28 @@ class HorizontalPhysicalFrame(EditableFrame):
         # Edit controls
         main_layout.addLayout(self.edit_button_layout, 0, 2)
 
+    @pyqtSlot()
+    def handle_autofill_update(self) -> None:
+        shell_diameter = self.shell_diameter.get_decimal()
+
+        # Maximum Liquid Height (tied to Shell Diameter)
+        if shell_diameter is not None:
+            # Note under Equation 1-37
+            max_liquid_height = ((PI / 4) * shell_diameter).quantize(Decimal('1.00'))
+            self.max_liquid_height.handle_autofill_set(max_liquid_height)
+
     def load(self, tank: FixedRoofTank) -> None:
         self.current_tank_id = tank.id
 
-        self.shell_length.set(tank.shell_height)  # TODO: Convert before store in the DB?
+        self.shell_length.set(tank.shell_height)  # Leave this unconverted, handle it in the report
         self.shell_diameter.set(tank.shell_diameter)
-        self.working_volume.set(tank.working_volume)
+
+        self.max_liquid_height.set(tank.maximum_liquid_height)
+        self.min_liquid_height.set(tank.minimum_liquid_height)
         self.turnovers_per_year.set(tank.turnovers_per_year)
         self.net_throughput.set(tank.net_throughput)
         self.is_heated.set(tank.is_heated)
-        # self.is_underground
+        self.is_underground.set(tank.is_underground)
 
         self.shell_color.set_from_db(tank.shell_paint_color.id)
         self.shell_condition.set_from_db(tank.shell_paint_condition.id)
@@ -147,12 +162,14 @@ class HorizontalPhysicalFrame(EditableFrame):
 
         tank.shell_height = self.shell_length.get()
         tank.shell_diameter = self.shell_diameter.get()
-        tank.working_volume = self.working_volume.get()
+
+        tank.maximum_liquid_height = self.max_liquid_height.get()
+        tank.minimum_liquid_height = self.min_liquid_height.get()
         tank.turnovers_per_year = self.turnovers_per_year.get()
         tank.net_throughput = self.net_throughput.get()
 
         tank.is_heated = self.is_heated.get()
-        # is_underground
+        tank.is_underground = self.is_underground.get()
 
         tank.shell_paint_color = session.scalar(select(PaintColor).where(PaintColor.id == self.shell_color.get_selected_db_id()))
         tank.shell_paint_condition = session.scalar(select(PaintCondition).where(PaintCondition.id == self.shell_condition.get_selected_db_id()))

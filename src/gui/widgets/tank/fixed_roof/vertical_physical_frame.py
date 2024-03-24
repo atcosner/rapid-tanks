@@ -66,7 +66,7 @@ class VerticalPhysicalFrame(EditableFrame):
         )
 
         # Misc
-        self.turnovers_per_year = self.register_control(NumericDataRow('Turnovers Per Year', 'dimensionless', start_read_only))
+        self.turnovers_per_year = self.register_control(NumericDataRow('Annual Turnovers', 'dimensionless', start_read_only))
         self.net_throughput = self.register_control(NumericDataRow('Net Throughput', 'gal/yr', start_read_only))
         self.is_heated = self.register_control(CheckBoxDataRow('Is Heated?', start_read_only))
         self.insulation_type = self.register_control(ComboBoxDataRow('Insulation Type', ComboBoxDataType.INSULATION_TYPE, start_read_only))

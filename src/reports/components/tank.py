@@ -60,34 +60,19 @@ class FixedRoofTankShim:
             # Calculate the roof outage based on the roof type
             if self.tank.roof_type.name == 'Cone':
                 logger.debug('Calculating vapor space outage for a cone roof')
-                if self.tank.roof_height > Decimal('0.0'):
-                    # TODO: Can we not use 0 as an unpopulated result?
-                    roof_height = self.tank.roof_height
-                else:
-                    roof_height = self.tank.roof_slope * (self.shell_diameter / 2)
-                roof_outage = roof_height / 3
+                roof_outage = self.tank.roof_height / 3
             elif self.tank.roof_type.name == 'Dome':
                 logger.debug('Calculating vapor space outage for a dome roof')
-                if self.tank.roof_radius > Decimal('0.0'):
-                    # TODO: Can we not use 0 as an unpopulated result?
-                    tank_shell_radius = (self.shell_diameter / 2)
-                    roof_height = self.tank.roof_radius - (self.tank.roof_radius**2 - tank_shell_radius**2)**0.5
-                    roof_outage = roof_height * (Decimal('0.5') + Decimal('0.167') * (roof_height/tank_shell_radius)**2)
-                else:
-                    # Use the tank shell radius instead
-                    roof_outage = Decimal('0.137') * (self.shell_diameter / 2)
+                tank_shell_radius = (self.shell_diameter / 2)
+                roof_height = self.tank.roof_radius - (self.tank.roof_radius**2 - tank_shell_radius**2)**0.5
+                roof_outage = roof_height * (Decimal('0.5') + Decimal('0.167') * (roof_height/tank_shell_radius)**2)
             else:
                 raise MissingData(f'Unknown roof type: {self.tank.roof_type}')
 
             logger.debug(f'Roof outage: {roof_outage}')
 
-            if self.tank.average_liquid_height == Decimal('0.0'):
-                # If we don't know the liquid height, assume 1/2 of tank height (Equation 1-16)
-                liquid_height = (self.shell_height / 2)
-            else:
-                liquid_height = self.tank.average_liquid_height
-
-            vapor_space_outage = self.shell_height - liquid_height + roof_outage
+            average_liquid_height = (self.tank.maximum_liquid_height + self.tank.minimum_liquid_height) / 2
+            vapor_space_outage = self.shell_height - average_liquid_height + roof_outage
             logger.debug(f'Vapor space outage: {vapor_space_outage}')
             return vapor_space_outage
         else:

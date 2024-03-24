@@ -20,7 +20,7 @@ class NumericDataRow(QWidget):
             read_only: bool,
             allow_negative: bool = False,
             default: str | None = '0.0',
-            precision: int = 6,
+            precision: int = 3,
     ) -> None:
         super().__init__(None)
         self.unit = unit

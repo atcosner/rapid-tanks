@@ -4,16 +4,17 @@ from decimal import Decimal
 from pint import Quantity
 
 from src import unit_registry
-from src.database.definitions.material import Petrochemical
+from src.database.definitions.material import Petrochemical, PetroleumLiquid
 from src.database.definitions.mixture import Mixture
-from src.util.enums import MixtureMakeupType
+from src.util.enums import MixtureMakeupType, MaterialType
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class MaterialShim:
-    material: Petrochemical
+    material_type: MaterialType
+    material: Petrochemical | PetroleumLiquid
     makeup_value: Decimal
 
     # Calculated values
@@ -57,12 +58,20 @@ class MixtureShim:
     def from_mixture(cls, mixture: Mixture):
         materials = []
         for component in mixture.components:
-            materials.append(
-                MaterialShim(
-                    material=component.material,
+            if component.petrochemical is not None:
+                shim = MaterialShim(
+                    material_type=MaterialType.PETROCHEMICAL,
+                    material=component.petrochemical,
                     makeup_value=Decimal(component.value),
                 )
-            )
+            else:
+                shim = MaterialShim(
+                    material_type=MaterialType.PETROLEUM_LIQUID,
+                    material=component.petroleum_liquid,
+                    makeup_value=Decimal(component.value),
+                )
+
+            materials.append(shim)
 
         obj = cls(
             name=mixture.name,
