@@ -1,4 +1,3 @@
-import logging
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclass
 
@@ -6,8 +5,6 @@ from . import OrmBase
 from .paint import PaintColor, PaintCondition, SolarAbsorptance
 from .service_record import ServiceRecord
 from .util import PintQuantity
-
-logger = logging.getLogger(__name__)
 
 
 class TankInsulationType(MappedAsDataclass, OrmBase):

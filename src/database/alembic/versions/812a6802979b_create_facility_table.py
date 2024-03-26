@@ -9,7 +9,7 @@ from typing import Sequence
 from alembic import op
 
 from src.database.definitions import OrmBase
-import src.database.definitions.tank  # Import this so Facility knows about the fixed roof tank
+import src.database.definitions.fixed_roof_tank  # Import this so Facility knows about the fixed roof tank
 from src.database.definitions.facility import Facility
 
 

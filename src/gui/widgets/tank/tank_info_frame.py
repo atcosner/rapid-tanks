@@ -5,7 +5,7 @@ from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
 from src.database import DB_ENGINE
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.fixed_roof_tank import FixedRoofTank
 from src.gui.widgets.util.data_entry_rows import TextLineDataRow, TextEditDataRow
 from src.gui.widgets.util.editable_frame import EditableFrame
 from src.gui.widgets.util.message_boxes import confirm_dirty_cancel, warn_mandatory_fields

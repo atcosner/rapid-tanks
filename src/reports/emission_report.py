@@ -5,7 +5,7 @@ from src.reports.components.tank import FixedRoofTankShim
 from src.reports.components.time import ReportingPeriod, ReportingChunk
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.fixed_roof_tank import FixedRoofTank
 
 from .calculations.fixed_roof import FixedRoofEmissions
 from .components.meteorological import MeteorologicalChunk

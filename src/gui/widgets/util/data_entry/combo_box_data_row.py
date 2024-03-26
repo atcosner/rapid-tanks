@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel
 
 from . import DEFAULT_MARGINS
 from src.database import DB_ENGINE
-from src.database.definitions.tank import FixedRoofType, TankInsulationType
+from src.database.definitions.fixed_roof_tank import FixedRoofType, TankInsulationType
 from src.database.definitions.paint import PaintColor, PaintCondition
 
 

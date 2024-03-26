@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.fixed_roof_tank import FixedRoofTank
 from src.gui.widgets.tank.fixed_roof.horizontal_physical_frame import HorizontalPhysicalFrame
 from src.gui.widgets.tank.fixed_roof.vertical_physical_frame import VerticalPhysicalFrame
 from src.util.enums import TankType

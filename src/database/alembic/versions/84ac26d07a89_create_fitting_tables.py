@@ -10,7 +10,7 @@ from sqlalchemy.orm.session import Session
 from typing import Sequence
 
 from src.database.definitions import OrmBase
-from src.database.definitions.fittings import Fitting, FittingSubType
+from src.database.definitions.fittings import Fitting, FittingSubType, FittingType
 
 
 # revision identifiers, used by Alembic.
@@ -20,7 +20,7 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 FITTINGS = [
-    Fitting(
+    FittingType(
         name='Access Hatch',
         typical_count=1,
         sub_types=[
@@ -29,7 +29,7 @@ FITTINGS = [
             FittingSubType(name='Unbolted cover, gasketed', k_fa='31', k_fb='5.2', m='1.3'),
         ],
     ),
-    Fitting(
+    FittingType(
         name='Fixed Roof Support Column Well',
         typical_count=None,
         sub_types=[
@@ -44,7 +44,10 @@ FITTINGS = [
 
 
 def upgrade() -> None:
-    OrmBase.metadata.create_all(bind=op.get_bind(), tables=[Fitting.__table__, FittingSubType.__table__])
+    OrmBase.metadata.create_all(
+        bind=op.get_bind(),
+        tables=[Fitting.__table__, FittingType.__table__, FittingSubType.__table__],
+    )
 
     # Add in the fittings from table 7.1-12
     with Session(bind=op.get_bind()) as session:
@@ -53,4 +56,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    OrmBase.metadata.drop_all(bind=op.get_bind(), tables=[Fitting.__table__, FittingSubType.__table__])
+    OrmBase.metadata.drop_all(
+        bind=op.get_bind(),
+        tables=[Fitting.__table__, FittingType.__table__, FittingSubType.__table__],
+    )

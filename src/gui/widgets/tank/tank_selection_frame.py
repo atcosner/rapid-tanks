@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QToolButton, QMenu, QFrame, QP
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.database.definitions.paint import PaintColor, PaintCondition
-from src.database.definitions.tank import FixedRoofTank, FixedRoofType
+from src.database.definitions.fixed_roof_tank import FixedRoofTank, FixedRoofType
 from src.gui.widgets.tank.tank_tree import TankTree
 from src.gui.widgets.util.search_bar import SearchBar
 

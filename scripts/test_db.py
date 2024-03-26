@@ -12,7 +12,7 @@ from src.database.definitions.meteorological import MeteorologicalSite
 from src.database.definitions.mixture import Mixture, MixtureAssociation
 from src.database.definitions.paint import PaintColor, PaintCondition
 from src.database.definitions.service_record import ServiceRecord
-from src.database.definitions.tank import FixedRoofTank, FixedRoofType, TankInsulationType
+from src.database.definitions.fixed_roof_tank import FixedRoofTank, FixedRoofType, TankInsulationType
 from src.gui.widgets.util.constants import MONTH_NAMES
 
 

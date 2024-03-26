@@ -5,7 +5,7 @@ from functools import lru_cache
 from pint import Quantity
 
 from src import unit_registry
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.fixed_roof_tank import FixedRoofTank
 from src.util.errors import MissingData
 from src.util.quantities import PI
 

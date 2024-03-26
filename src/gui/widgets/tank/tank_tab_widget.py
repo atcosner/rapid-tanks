@@ -5,7 +5,7 @@ from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QTabWidget
 
 from src.database import DB_ENGINE
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.fixed_roof_tank import FixedRoofTank
 from src.gui.widgets.tank.tank_info_frame import TankInfoFrame
 from src.gui.widgets.tank.tank_physical_frame import TankPhysicalFrame
 from src.gui.widgets.tank.tank_usage_frame import TankUsageFrame

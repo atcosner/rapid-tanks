@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QVBoxLayout
 
 from src.database import DB_ENGINE
 from src.database.definitions.paint import PaintColor, PaintCondition
-from src.database.definitions.tank import FixedRoofTank, FixedRoofType, TankInsulationType
+from src.database.definitions.fixed_roof_tank import FixedRoofTank, FixedRoofType, TankInsulationType
 from src.gui.widgets.util.data_entry.autofill_data_row import AutofillDataRow
 from src.gui.widgets.util.data_entry.combo_box_data_row import ComboBoxDataRow, ComboBoxDataType
 from src.gui.widgets.util.data_entry.numeric_data_row import NumericDataRow

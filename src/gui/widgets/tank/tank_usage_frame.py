@@ -7,7 +7,7 @@ from PyQt5.Qt import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGridLayout, QLabel
 
 from src.database import DB_ENGINE
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.fixed_roof_tank import FixedRoofTank
 from src.database.definitions.service_record import ServiceRecord
 from src.gui.widgets.util.constants import MONTH_NAMES
 from src.gui.widgets.util.data_entry.monthly_usage_data_row import MonthlyUsageDataRow

@@ -11,7 +11,7 @@ from sqlalchemy.orm.session import Session
 
 from src.util.enums import InsulationType
 from src.database.definitions import OrmBase
-from src.database.definitions.tank import FixedRoofTank, FixedRoofType, TankInsulationType
+from src.database.definitions.fixed_roof_tank import FixedRoofTank, FixedRoofType, TankInsulationType
 
 
 # revision identifiers, used by Alembic.

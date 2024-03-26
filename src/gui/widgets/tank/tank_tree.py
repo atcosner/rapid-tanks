@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QWidget, QTreeWidget, QTreeWidgetItem
 from src.util.enums import TankType
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
-from src.database.definitions.tank import FixedRoofTank
+from src.database.definitions.fixed_roof_tank import FixedRoofTank
 
 
 class TankItem(QTreeWidgetItem):
