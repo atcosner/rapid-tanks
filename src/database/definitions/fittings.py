@@ -5,39 +5,35 @@ from . import OrmBase
 from .util import PintQuantity
 
 
-class FittingSubType(MappedAsDataclass, OrmBase):
-    __tablename__ = "fitting_sub_type"
+class FittingSecondaryType(MappedAsDataclass, OrmBase):
+    __tablename__ = "fitting_secondary_type"
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
-    fitting_type_id = mapped_column(ForeignKey("fitting_type.id"))
-
     k_fa: Mapped[PintQuantity] = mapped_column(PintQuantity('mol/yr'))
     k_fb: Mapped[PintQuantity] = mapped_column(PintQuantity('dimensionless'), nullable=True)  # mole/[(mph)^M * yr]
     m: Mapped[PintQuantity] = mapped_column(PintQuantity('dimensionless'), nullable=True)
-    internal_default: Mapped[bool] = mapped_column(default=False)
-    external_default: Mapped[bool] = mapped_column(default=False)
 
-    parent_type: Mapped["FittingType"] = relationship(init=False, back_populates="sub_types")
-
-
-class FittingType(MappedAsDataclass, OrmBase):
-    __tablename__ = "fitting_type"
-
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    name: Mapped[str]
-    typical_count: Mapped[int] = mapped_column(nullable=True)
-
-    sub_types: Mapped[list[FittingSubType]] = relationship(back_populates="parent_type")
+    primary_type_id = mapped_column(ForeignKey("fitting_primary_type.id"))
+    primary_type: Mapped["FittingPrimaryType"] = relationship(init=False, back_populates="secondary_types")
 
 
-class Fitting(MappedAsDataclass, OrmBase):
-    __tablename__ = "fitting"
+class FittingPrimaryType(MappedAsDataclass, OrmBase):
+    __tablename__ = "fitting_primary_type"
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
-    fitting_type_id = mapped_column(ForeignKey("fitting_type.id"))
-    fitting_sub_type_id = mapped_column(ForeignKey("fitting_sub_type.id"))
 
-    fitting_type: Mapped[FittingType] = relationship()
-    fitting_sub_type: Mapped[FittingSubType] = relationship()
+    secondary_types: Mapped[list[FittingSecondaryType]] = relationship(back_populates="primary_type")
+
+
+# class FittingAssociation(MappedAsDataclass, OrmBase):
+#     __tablename__ = "fitting_association"
+#
+#     id: Mapped[int] = mapped_column(init=False, primary_key=True)
+#     name: Mapped[str]
+#
+#     primary_type_id = mapped_column(ForeignKey("fitting_primary_type.id"))
+#     secondary_type_id = mapped_column(ForeignKey("fitting_secondary_type.id"))
+#     primary_type: Mapped[FittingPrimaryType] = relationship(viewonly=True)
+#     secondary_type: Mapped[FittingSecondaryType] = relationship(viewonly=True)

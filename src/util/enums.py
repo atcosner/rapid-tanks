@@ -23,3 +23,8 @@ class InsulationType(StrEnum):
     NONE = 'None'
     PARTIAL = 'Partial'  # TODO: Per AP 42 Chapter 7, this means the shell is insulated. Can it ever be only the roof?
     FULL = 'Full'
+
+
+class TankConstructionType(IntEnum):
+    WELDED = 1
+    RIVETED = 2
