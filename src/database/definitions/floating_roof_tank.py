@@ -2,12 +2,14 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclass
 
 from . import OrmBase
+from .fittings import FittingAssociation
 from .paint import PaintColor, PaintCondition, SolarAbsorptance
+from .seals import SealSecondaryType
 from .util import PintQuantity
 
 
-class FloatingRoofTank(MappedAsDataclass, OrmBase):
-    __tablename__ = "floating_roof_tank"
+class InternalFloatingRoofTank(MappedAsDataclass, OrmBase):
+    __tablename__ = "internal_floating_roof_tank"
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
@@ -21,7 +23,7 @@ class FloatingRoofTank(MappedAsDataclass, OrmBase):
 
     # Relationships
     facility_id = mapped_column(ForeignKey("facility.id"))
-    facility: Mapped["Facility"] = relationship(init=False, back_populates="floating_roof_tanks")
+    facility: Mapped["Facility"] = relationship(init=False, back_populates="internal_floating_roof_tanks")
 
     shell_paint_color_id = mapped_column(ForeignKey("paint_color.id"))
     shell_paint_color: Mapped[PaintColor] = relationship(init=False, foreign_keys=shell_paint_color_id)
@@ -32,8 +34,8 @@ class FloatingRoofTank(MappedAsDataclass, OrmBase):
     shell_solar_absorptance: Mapped[SolarAbsorptance] = relationship(
         init=False,
         foreign_keys=[shell_paint_color_id, shell_paint_condition_id],
-        primaryjoin="and_(FloatingRoofTank.shell_paint_color_id==SolarAbsorptance.color_id,"
-                    "FloatingRoofTank.shell_paint_condition_id==SolarAbsorptance.condition_id)",
+        primaryjoin="and_(InternalFloatingRoofTank.shell_paint_color_id==SolarAbsorptance.color_id,"
+                    "InternalFloatingRoofTank.shell_paint_condition_id==SolarAbsorptance.condition_id)",
         viewonly=True,
     )
 
@@ -46,7 +48,12 @@ class FloatingRoofTank(MappedAsDataclass, OrmBase):
     roof_solar_absorptance: Mapped[SolarAbsorptance] = relationship(
         init=False,
         foreign_keys=[roof_paint_color_id, roof_paint_condition_id],
-        primaryjoin="and_(FloatingRoofTank.roof_paint_color_id==SolarAbsorptance.color_id,"
-                    "FloatingRoofTank.roof_paint_condition_id==SolarAbsorptance.condition_id)",
+        primaryjoin="and_(InternalFloatingRoofTank.roof_paint_color_id==SolarAbsorptance.color_id,"
+                    "InternalFloatingRoofTank.roof_paint_condition_id==SolarAbsorptance.condition_id)",
         viewonly=True,
     )
+
+    seal_id = mapped_column(ForeignKey("seal_secondary_type.id"))
+    seal: Mapped[SealSecondaryType] = relationship(init=False, viewonly=True)
+
+    fittings: Mapped[list[FittingAssociation]] = relationship(init=False, viewonly=True)

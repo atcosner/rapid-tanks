@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 
 from . import OrmBase
 from .fixed_roof_tank import FixedRoofTank
-from .floating_roof_tank import FloatingRoofTank
+from .floating_roof_tank import InternalFloatingRoofTank
 from .meteorological import MeteorologicalSite
 
 
@@ -18,4 +18,4 @@ class Facility(MappedAsDataclass, OrmBase):
 
     site: Mapped[MeteorologicalSite] = relationship(init=False)
     fixed_roof_tanks: Mapped[list[FixedRoofTank]] = relationship(init=False, back_populates="facility")
-    floating_roof_tanks: Mapped[list[FloatingRoofTank]] = relationship(init=False, back_populates="facility")
+    internal_floating_roof_tanks: Mapped[list[InternalFloatingRoofTank]] = relationship(init=False, back_populates="facility")

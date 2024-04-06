@@ -27,13 +27,11 @@ class FittingPrimaryType(MappedAsDataclass, OrmBase):
     secondary_types: Mapped[list[FittingSecondaryType]] = relationship(back_populates="primary_type")
 
 
-# class FittingAssociation(MappedAsDataclass, OrmBase):
-#     __tablename__ = "fitting_association"
-#
-#     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-#     name: Mapped[str]
-#
-#     primary_type_id = mapped_column(ForeignKey("fitting_primary_type.id"))
-#     secondary_type_id = mapped_column(ForeignKey("fitting_secondary_type.id"))
-#     primary_type: Mapped[FittingPrimaryType] = relationship(viewonly=True)
-#     secondary_type: Mapped[FittingSecondaryType] = relationship(viewonly=True)
+class FittingAssociation(MappedAsDataclass, OrmBase):
+    __tablename__ = "fitting_association"
+
+    tank_id: Mapped[int] = mapped_column(ForeignKey("internal_floating_roof_tank.id"), primary_key=True)
+    fitting_id: Mapped[int] = mapped_column(ForeignKey("fitting_secondary_type.id"), primary_key=True)
+
+    fitting: Mapped["FittingSecondaryType"] = relationship()
+    tank: Mapped["InternalFloatingRoofTank"] = relationship(back_populates="fittings")

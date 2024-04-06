@@ -10,7 +10,7 @@ from sqlalchemy.orm.session import Session
 from typing import Sequence
 
 from src.database.definitions import OrmBase
-from src.database.definitions.fittings import FittingPrimaryType, FittingSecondaryType
+from src.database.definitions.fittings import FittingPrimaryType, FittingSecondaryType, FittingAssociation
 
 
 # revision identifiers, used by Alembic.
@@ -44,7 +44,7 @@ FITTINGS = [
 def upgrade() -> None:
     OrmBase.metadata.create_all(
         bind=op.get_bind(),
-        tables=[FittingPrimaryType.__table__, FittingSecondaryType.__table__],
+        tables=[FittingPrimaryType.__table__, FittingSecondaryType.__table__, FittingAssociation.__table__],
     )
 
     # Add in the fittings from table 7.1-12
@@ -56,5 +56,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     OrmBase.metadata.drop_all(
         bind=op.get_bind(),
-        tables=[FittingPrimaryType.__table__, FittingSecondaryType.__table__],
+        tables=[FittingPrimaryType.__table__, FittingSecondaryType.__table__, FittingAssociation.__table__],
     )
