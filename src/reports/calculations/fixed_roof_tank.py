@@ -4,7 +4,7 @@ from decimal import Decimal
 from pint import Quantity
 
 from src import unit_registry
-from src.reports.components.tank import FixedRoofTankShim
+from src.reports.components.tanks.fixed_roof import FixedRoofTankShim
 from src.reports.components.time import ReportingChunk
 from src.util.logging import log_block
 from src.util.errors import CalculationError

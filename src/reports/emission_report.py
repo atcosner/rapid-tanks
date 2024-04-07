@@ -1,13 +1,16 @@
 import logging
 from sqlalchemy.orm import Session
 
-from src.reports.components.tank import FixedRoofTankShim
+from src.reports.components.tanks.fixed_roof import FixedRoofTankShim
+from src.reports.components.tanks.internal_floating_roof import InternalFloatingRoofTankShim
 from src.reports.components.time import ReportingPeriod, ReportingChunk
 from src.database import DB_ENGINE
 from src.database.definitions.facility import Facility
 from src.database.definitions.fixed_roof_tank import FixedRoofTank
+from src.database.definitions.floating_roof_tank import InternalFloatingRoofTank
 
-from .calculations.fixed_roof import FixedRoofEmissions
+from .calculations.fixed_roof_tank import FixedRoofEmissions
+from .calculations.internal_floating_roof_tank import InternalFloatingRoofEmissions
 from .components.meteorological import MeteorologicalChunk
 from .components.mixture import MixtureShim
 from .outputs.log import LogOutput
@@ -26,7 +29,7 @@ class EmissionReport:
     ) -> None:
         self.reporting_period = reporting_period
         self.fixed_roof_tanks = []
-        self.floating_roof_tanks = []
+        self.internal_floating_roof_tanks = []
 
         # Lookup the relevant tanks and facility
         self.session = Session(DB_ENGINE)
@@ -36,10 +39,14 @@ class EmissionReport:
         for tank_type, tank_id in tanks:
             if tank_type in [TankType.HORIZONTAL_FIXED_ROOF, TankType.VERTICAL_FIXED_ROOF]:
                 tank = self.session.get(FixedRoofTank, tank_id)
-                assert tank is not None, f'No tank with id: {tank_id}'
+                assert tank is not None, f'No FRT with id: {tank_id}'
                 self.fixed_roof_tanks.append(tank)
+            elif tank_type == TankType.INTERNAL_FLOATING_ROOF:
+                tank = self.session.get(InternalFloatingRoofTank, tank_id)
+                assert tank is not None, f'No IFRT with id: {tank_id}'
+                self.internal_floating_roof_tanks.append(tank)
 
-    def build_reporting_chunks(self, tank: FixedRoofTank) -> list[ReportingChunk]:
+    def build_reporting_chunks(self, tank: FixedRoofTank | InternalFloatingRoofTank) -> list[ReportingChunk]:
         report_start, report_end = self.reporting_period.get_date_range()
         chunks = []
 
@@ -78,6 +85,18 @@ class EmissionReport:
                 tank_emissions = FixedRoofEmissions(
                     facility_name=self.facility.name,
                     tank=FixedRoofTankShim(fixed_tank),
+                    reporting_chunk=chunk,
+                )
+                all_emissions.append(tank_emissions.calculate_total_emissions())
+
+        for ifrt in self.internal_floating_roof_tanks:
+            logger.info(f'{self.facility.name}: Tank {ifrt.name}')
+            for chunk in self.build_reporting_chunks(ifrt):
+                logger.info(f'chunk; start: {chunk.start_date}, end: {chunk.end_date}, mixture: {chunk.mixture.name}')
+
+                tank_emissions = InternalFloatingRoofEmissions(
+                    facility_name=self.facility.name,
+                    tank=InternalFloatingRoofTankShim(ifrt),
                     reporting_chunk=chunk,
                 )
                 all_emissions.append(tank_emissions.calculate_total_emissions())

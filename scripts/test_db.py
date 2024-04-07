@@ -11,7 +11,7 @@ from src.database.definitions.material import Petrochemical
 from src.database.definitions.meteorological import MeteorologicalSite
 from src.database.definitions.mixture import Mixture, MixtureAssociation
 from src.database.definitions.paint import PaintColor, PaintCondition
-from src.database.definitions.service_record import ServiceRecord
+from src.database.definitions.service_record import FrtServiceRecord
 from src.database.definitions.fixed_roof_tank import FixedRoofTank, FixedRoofType, TankInsulationType
 from src.gui.widgets.util.constants import MONTH_NAMES
 
@@ -55,7 +55,7 @@ with Session(DB_ENGINE) as session:
 
     month_throughput = Decimal(sc1_tank.net_throughput) / 12
     for idx, name in enumerate(MONTH_NAMES):
-        record = ServiceRecord(
+        record = FrtServiceRecord(
             start_date=date(year=2024, month=idx + 1, day=1),
             end_date=date(year=2024, month=idx + 1, day=calendar.monthrange(2024, idx + 1)[1]),
             throughput=str(month_throughput.quantize(Decimal('1.00'))),
@@ -81,7 +81,7 @@ with Session(DB_ENGINE) as session:
 
     month_throughput = Decimal(sc1_tank.net_throughput) / 12
     for idx, name in enumerate(MONTH_NAMES):
-        record = ServiceRecord(
+        record = FrtServiceRecord(
             start_date=date(year=2024, month=idx + 1, day=1),
             end_date=date(year=2024, month=idx + 1, day=calendar.monthrange(2024, idx + 1)[1]),
             throughput=str(month_throughput.quantize(Decimal('1.00'))),

@@ -15,8 +15,9 @@ class MixtureMakeupType(IntEnum):
 class TankType(Enum):
     HORIZONTAL_FIXED_ROOF = auto()
     VERTICAL_FIXED_ROOF = auto()
-    EXTERNAL_FLOATING_ROOF = auto()
     INTERNAL_FLOATING_ROOF = auto()
+    EXTERNAL_FLOATING_ROOF = auto()
+    DOMED_EXTERNAL_FLOATING_ROOF = auto()
 
 
 class InsulationType(StrEnum):

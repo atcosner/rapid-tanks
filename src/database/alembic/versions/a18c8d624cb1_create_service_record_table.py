@@ -9,7 +9,7 @@ from alembic import op
 from typing import Sequence
 
 from src.database.definitions import OrmBase
-from src.database.definitions.service_record import ServiceRecord
+from src.database.definitions.service_record import FrtServiceRecord, IfrtServiceRecord
 
 
 # revision identifiers, used by Alembic.
@@ -20,8 +20,14 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    OrmBase.metadata.create_all(bind=op.get_bind(), tables=[ServiceRecord.__table__])
+    OrmBase.metadata.create_all(
+        bind=op.get_bind(),
+        tables=[FrtServiceRecord.__table__, IfrtServiceRecord.__table__],
+    )
 
 
 def downgrade() -> None:
-    OrmBase.metadata.drop_all(bind=op.get_bind(), tables=[ServiceRecord.__table__])
+    OrmBase.metadata.drop_all(
+        bind=op.get_bind(),
+        tables=[FrtServiceRecord.__table__, IfrtServiceRecord.__table__],
+    )

@@ -5,6 +5,7 @@ from . import OrmBase
 from .fittings import IfrtFittingAssociation
 from .paint import PaintColor, PaintCondition, SolarAbsorptance
 from .seals import SealSecondaryType
+from .service_record import IfrtServiceRecord
 from .util import PintQuantity
 
 
@@ -57,3 +58,9 @@ class InternalFloatingRoofTank(MappedAsDataclass, OrmBase):
     seal: Mapped[SealSecondaryType] = relationship(init=False, viewonly=True)
 
     fittings: Mapped[list[IfrtFittingAssociation]] = relationship(init=False, viewonly=True)
+
+    service_records: Mapped[list[IfrtServiceRecord]] = relationship(
+        init=False,
+        back_populates="tank",
+        cascade="all, delete-orphan",
+    )
