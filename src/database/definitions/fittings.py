@@ -27,8 +27,8 @@ class FittingPrimaryType(MappedAsDataclass, OrmBase):
     secondary_types: Mapped[list[FittingSecondaryType]] = relationship(back_populates="primary_type")
 
 
-class FittingAssociation(MappedAsDataclass, OrmBase):
-    __tablename__ = "fitting_association"
+class IfrtFittingAssociation(MappedAsDataclass, OrmBase):
+    __tablename__ = "ifrt_fitting_association"
 
     tank_id: Mapped[int] = mapped_column(ForeignKey("internal_floating_roof_tank.id"), primary_key=True)
     fitting_id: Mapped[int] = mapped_column(ForeignKey("fitting_secondary_type.id"), primary_key=True)

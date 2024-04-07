@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclass
 
 from . import OrmBase
-from .fittings import FittingAssociation
+from .fittings import IfrtFittingAssociation
 from .paint import PaintColor, PaintCondition, SolarAbsorptance
 from .seals import SealSecondaryType
 from .util import PintQuantity
@@ -56,4 +56,4 @@ class InternalFloatingRoofTank(MappedAsDataclass, OrmBase):
     seal_id = mapped_column(ForeignKey("seal_secondary_type.id"))
     seal: Mapped[SealSecondaryType] = relationship(init=False, viewonly=True)
 
-    fittings: Mapped[list[FittingAssociation]] = relationship(init=False, viewonly=True)
+    fittings: Mapped[list[IfrtFittingAssociation]] = relationship(init=False, viewonly=True)
