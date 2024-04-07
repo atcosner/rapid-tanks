@@ -24,7 +24,7 @@ FITTINGS = [
         name='Access Hatch',
         secondary_types=[
             FittingSecondaryType(name='Bolted cover, gasketed', k_fa='1.6', k_fb='0', m='0'),
-            FittingSecondaryType(name='Unbolted cover, ungaskeed', k_fa='36', k_fb='5.9', m='1.2'),
+            FittingSecondaryType(name='Unbolted cover, ungasketed', k_fa='36', k_fb='5.9', m='1.2'),
             FittingSecondaryType(name='Unbolted cover, gasketed', k_fa='31', k_fb='5.2', m='1.3'),
         ],
     ),

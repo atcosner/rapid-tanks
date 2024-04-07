@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclas
 from . import OrmBase
 from .fittings import IfrtFittingAssociation
 from .paint import PaintColor, PaintCondition, SolarAbsorptance
-from .seals import SealSecondaryType
+from .seal import SealSecondaryType
 from .service_record import IfrtServiceRecord
 from .util import PintQuantity
 
@@ -14,12 +14,13 @@ class InternalFloatingRoofTank(MappedAsDataclass, OrmBase):
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
-    description: Mapped[str] = mapped_column()
+    description: Mapped[str]
 
     # Properties
     shell_height: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'))
     shell_diameter: Mapped[PintQuantity] = mapped_column(PintQuantity('ft'))
 
+    autofill_support_column_count: Mapped[bool]
     support_column_count: Mapped[int]
 
     # Relationships
@@ -55,9 +56,9 @@ class InternalFloatingRoofTank(MappedAsDataclass, OrmBase):
     )
 
     seal_id = mapped_column(ForeignKey("seal_secondary_type.id"))
-    seal: Mapped[SealSecondaryType] = relationship(init=False, viewonly=True)
+    seal: Mapped[SealSecondaryType] = relationship(init=False)
 
-    fittings: Mapped[list[IfrtFittingAssociation]] = relationship(init=False, viewonly=True)
+    fittings: Mapped[list[IfrtFittingAssociation]] = relationship(init=False)
 
     service_records: Mapped[list[IfrtServiceRecord]] = relationship(
         init=False,

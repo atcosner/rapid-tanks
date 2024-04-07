@@ -30,8 +30,9 @@ class FittingPrimaryType(MappedAsDataclass, OrmBase):
 class IfrtFittingAssociation(MappedAsDataclass, OrmBase):
     __tablename__ = "ifrt_fitting_association"
 
-    tank_id: Mapped[int] = mapped_column(ForeignKey("internal_floating_roof_tank.id"), primary_key=True)
-    fitting_id: Mapped[int] = mapped_column(ForeignKey("fitting_secondary_type.id"), primary_key=True)
+    quantity: Mapped[int]
+    tank_id: Mapped[int] = mapped_column(ForeignKey("internal_floating_roof_tank.id"), primary_key=True, init=False)
+    fitting_id: Mapped[int] = mapped_column(ForeignKey("fitting_secondary_type.id"), primary_key=True, init=False)
 
     fitting: Mapped["FittingSecondaryType"] = relationship()
-    tank: Mapped["InternalFloatingRoofTank"] = relationship(back_populates="fittings")
+    tank: Mapped["InternalFloatingRoofTank"] = relationship(init=False, back_populates="fittings")
